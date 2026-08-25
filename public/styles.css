@@ -1,9 +1,132 @@
 :root{
-  --cell-min: 92px;
+  --cell-min:92px;
 }
+
+
+/* =========================================
+   GENERAL
+========================================= */
+
+body{
+  background:#fafafa;
+}
+
+
+.setup-container{
+  max-width:900px;
+  margin:0 auto;
+}
+
+
+/* =========================================
+   CHALLENGE HEADER TOOLBAR
+========================================= */
+
+.challenge-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+
+  padding:8px 0 12px;
+}
+
+
+.challenge-summary{
+  min-width:0;
+  flex-shrink:1;
+}
+
+
+.challenge-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
+
+  flex-wrap:wrap;
+}
+
+
+.calendar-toolbar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+
+/* Smaller screens */
+@media (max-width:900px){
+
+  .challenge-toolbar{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .challenge-actions{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+}
+
+
+/* =========================================
+   SETUP TASKS
+========================================= */
+
+.setup-task-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  border:
+    1px solid
+    rgba(0,0,0,.08);
+
+  border-radius:10px;
+
+  padding:10px;
+
+  background:white;
+}
+
+
+.setup-task-number{
+  width:32px;
+
+  flex-shrink:0;
+
+  font-weight:700;
+
+  text-align:center;
+
+  color:#6c757d;
+}
+
+
+.setup-task-input{
+  flex:1;
+
+  min-width:0;
+}
+
+
+.setup-task-actions{
+  display:flex;
+  gap:5px;
+  flex-shrink:0;
+}
+
+
+/* =========================================
+   CALENDAR
+========================================= */
 
 .calendar-grid{
   display:grid;
+
   grid-template-columns:
     repeat(
       7,
@@ -12,14 +135,23 @@
         1fr
       )
     );
+
   gap:8px;
 }
 
+
 @media (max-width:768px){
+
   :root{
     --cell-min:72px;
   }
+
+  .calendar-grid{
+    overflow-x:auto;
+  }
+
 }
+
 
 .day-cell{
   border:
@@ -41,10 +173,7 @@
   background:white;
 }
 
-/*
- * Only active challenge days
- * get a hover effect.
- */
+
 .day-cell:not(.outside-challenge):hover{
   transform:
     translateY(-1px);
@@ -54,59 +183,73 @@
     rgba(0,0,0,.06);
 }
 
-/*
- * Dates from previous/next
- * calendar month.
- */
+
 .day-cell.muted{
   opacity:.35;
 }
 
-/*
- * Dates outside the challenge period.
- *
- * These are deliberately visually
- * disabled and cannot be clicked
- * because app.js does not attach
- * a click handler to them.
- */
-.day-cell.outside-challenge{
-  background:
-    #f5f6f8;
 
-  color:
-    #a8adb5;
+/* Dates outside challenge duration */
+.day-cell.outside-challenge{
+  background:#f3f4f6;
+
+  color:#adb5bd;
 
   opacity:.55;
 
-  cursor:
-    default;
+  cursor:default;
 
   border-color:
-    rgba(0,0,0,.05);
+    rgba(0,0,0,.04);
 }
 
+
 .day-cell.outside-challenge .day-sub{
-  color:
-    #a8adb5 !important;
+  color:#adb5bd !important;
 }
+
 
 .day-top{
   display:flex;
 
   align-items:center;
 
-  justify-content:
-    space-between;
+  justify-content:space-between;
 
   gap:10px;
 }
+
 
 .day-num{
   font-weight:700;
 
   font-size:18px;
 }
+
+
+.day-sub{
+  font-size:12px;
+
+  opacity:.75;
+
+  margin-top:6px;
+
+  line-height:1.2;
+}
+
+
+.day-cell.today-challenge{
+  outline:
+    2px solid
+    rgba(13,110,253,.35);
+
+  outline-offset:2px;
+}
+
+
+/* =========================================
+   COMPLETION RING
+========================================= */
 
 .ring{
   width:34px;
@@ -128,10 +271,16 @@
     rgba(13,110,253,.25);
 }
 
+
 .ring[data-pct="100"]{
   border-color:
     rgba(25,135,84,.8);
 }
+
+
+/* =========================================
+   WEEKDAY HEADER
+========================================= */
 
 .weekday-header{
   font-size:12px;
@@ -140,8 +289,7 @@
 
   letter-spacing:.02em;
 
-  text-transform:
-    uppercase;
+  text-transform:uppercase;
 
   opacity:.65;
 
@@ -149,46 +297,27 @@
     6px 10px;
 }
 
-/*
- * Calendar subtitle.
- */
-.day-sub{
-  font-size:12px;
 
-  opacity:.75;
+/* =========================================
+   PROGRESS
+========================================= */
 
-  margin-top:6px;
-
-  line-height:1.2;
-}
-
-/*
- * Highlight today's challenge day.
- */
-.day-cell.today-challenge{
-  outline:
-    2px solid
-    rgba(13,110,253,.35);
-
-  outline-offset:2px;
-}
-
-/*
- * Overall challenge progress bar.
- */
 .sdt-progress{
   height:22px;
 
   border-radius:999px;
 }
 
+
 .sdt-progress .progress-bar{
   font-weight:700;
 }
 
-/*
- * Strikes UI.
- */
+
+/* =========================================
+   STRIKES
+========================================= */
+
 .strike-row{
   border:
     1px solid
@@ -198,14 +327,39 @@
 
   padding:
     10px 12px;
+
+  background:white;
 }
+
 
 .strike-title{
   font-weight:600;
 }
 
+
 .strike-meta{
   font-size:12px;
 
   opacity:.75;
+}
+
+
+/* =========================================
+   DAY CHECKLIST
+========================================= */
+
+.day-task-row{
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+  padding:10px;
+
+  border:
+    1px solid
+    rgba(0,0,0,.08);
+
+  border-radius:10px;
 }
