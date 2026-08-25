@@ -20,6 +20,11 @@ async function completeExpiredChallenges(pool) {
 }
 
 
+/*
+ * GET /api/challenges/current
+ *
+ * Returns the current active challenge.
+ */
 router.get('/current', async (req, res, next) => {
 
   try {
@@ -125,6 +130,12 @@ router.get('/current', async (req, res, next) => {
 });
 
 
+/*
+ * POST /api/challenges/start
+ *
+ * Creates a new challenge and all of its tasks
+ * inside one database transaction.
+ */
 router.post('/start', express.json(), async (req, res, next) => {
 
   try {
@@ -261,6 +272,7 @@ router.post('/start', express.json(), async (req, res, next) => {
 
     const tasks =
       incomingTasks
+
         .map(task => {
 
           if (typeof task === 'string') {
@@ -274,6 +286,7 @@ router.post('/start', express.json(), async (req, res, next) => {
           ).trim();
 
         })
+
         .filter(Boolean);
 
 
@@ -342,10 +355,15 @@ router.post('/start', express.json(), async (req, res, next) => {
     );
 
 
+    /*
+     * Only one active challenge is allowed.
+     */
     const existing =
       await pool.request().query(`
         SELECT TOP 1 challengeId
+
         FROM dbo.Challenges
+
         WHERE status = N'ACTIVE';
       `);
 
@@ -495,6 +513,103 @@ router.post('/start', express.json(), async (req, res, next) => {
       throw inner;
 
     }
+
+  }
+  catch (e) {
+
+    next(e);
+
+  }
+
+});
+
+
+/*
+ * POST /api/challenges/current/end
+ *
+ * Manually ends the active challenge.
+ *
+ * IMPORTANT:
+ * - Does NOT delete anything.
+ * - Does NOT reset anything.
+ * - Tasks remain in the database.
+ * - DayStatus history remains in the database.
+ * - Only status changes ACTIVE -> COMPLETED.
+ */
+router.post('/current/end', async (req, res, next) => {
+
+  try {
+
+    const pool =
+      await getPool();
+
+
+    const currentResult =
+      await pool.request().query(`
+        SELECT TOP 1
+          challengeId,
+          name
+
+        FROM dbo.Challenges
+
+        WHERE status = N'ACTIVE'
+
+        ORDER BY challengeId DESC;
+      `);
+
+
+    if (
+      currentResult.recordset.length === 0
+    ) {
+
+      const err =
+        new Error(
+          'There is no active challenge to end.'
+        );
+
+      err.statusCode = 404;
+
+      throw err;
+
+    }
+
+
+    const currentChallenge =
+      currentResult.recordset[0];
+
+
+    await pool.request()
+
+      .input(
+        'challengeId',
+        sql.Int,
+        currentChallenge.challengeId
+      )
+
+      .query(`
+        UPDATE dbo.Challenges
+
+        SET status = N'COMPLETED'
+
+        WHERE challengeId = @challengeId
+          AND status = N'ACTIVE';
+      `);
+
+
+    res.json({
+
+      ok: true,
+
+      challengeId:
+        currentChallenge.challengeId,
+
+      name:
+        currentChallenge.name,
+
+      status:
+        'COMPLETED'
+
+    });
 
   }
   catch (e) {

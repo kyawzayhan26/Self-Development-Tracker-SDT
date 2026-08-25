@@ -56,7 +56,7 @@
 
 
 
-  <!-- LOADING SCREEN -->
+  <!-- LOADING -->
 
   <div
     id="loadingScreen"
@@ -76,9 +76,9 @@
 
 
 
-  <!-- ===================================== -->
-  <!-- CHALLENGE SETUP SCREEN -->
-  <!-- ===================================== -->
+  <!-- ================================= -->
+  <!-- SETUP SCREEN -->
+  <!-- ================================= -->
 
   <div
     id="setupScreen"
@@ -105,7 +105,7 @@
 
 
 
-      <!-- CHALLENGE SETTINGS -->
+      <!-- SETTINGS -->
 
       <div class="card shadow-sm mb-4">
 
@@ -254,7 +254,6 @@
           </div>
 
 
-
           <div
             id="setupTasksList"
             class="vstack gap-2"
@@ -272,8 +271,6 @@
       </div>
 
 
-
-      <!-- START -->
 
       <div
         class="d-flex justify-content-end"
@@ -296,9 +293,9 @@
 
 
 
-  <!-- ===================================== -->
-  <!-- ACTIVE CHALLENGE DASHBOARD -->
-  <!-- ===================================== -->
+  <!-- ================================= -->
+  <!-- ACTIVE CHALLENGE -->
+  <!-- ================================= -->
 
   <div
     id="dashboardScreen"
@@ -337,10 +334,27 @@
 
 
       <div
-        id="activeChallengeMeta"
-        class="text-secondary"
+        class="d-flex flex-column align-items-md-end gap-2"
       >
-        —
+
+        <div
+          id="activeChallengeMeta"
+          class="text-secondary"
+        >
+          —
+        </div>
+
+
+        <button
+          id="endChallengeBtn"
+          type="button"
+          class="btn btn-outline-danger btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#endChallengeModal"
+        >
+          End Challenge
+        </button>
+
       </div>
 
 
@@ -397,7 +411,6 @@
           class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-2"
         >
 
-
           <div>
 
             <div class="text-secondary small">
@@ -420,7 +433,6 @@
           >
             —
           </div>
-
 
         </div>
 
@@ -514,9 +526,9 @@
 
 
 
-<!-- ===================================== -->
-<!-- DAY DETAILS -->
-<!-- ===================================== -->
+<!-- ================================= -->
+<!-- DAY DETAILS MODAL -->
+<!-- ================================= -->
 
 <div
   class="modal fade"
@@ -559,7 +571,6 @@
       </div>
 
 
-
       <div class="modal-body">
 
         <div
@@ -568,7 +579,6 @@
         ></div>
 
       </div>
-
 
 
       <div class="modal-footer">
@@ -592,6 +602,88 @@
           class="btn btn-primary"
         >
           Save
+        </button>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- ================================= -->
+<!-- END CHALLENGE CONFIRMATION -->
+<!-- ================================= -->
+
+<div
+  class="modal fade"
+  id="endChallengeModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+
+  <div
+    class="modal-dialog modal-dialog-centered"
+  >
+
+    <div class="modal-content">
+
+
+      <div class="modal-header">
+
+        <h5 class="modal-title">
+          End Current Challenge?
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <p>
+          This will end the current challenge immediately.
+        </p>
+
+        <p class="mb-0 text-secondary">
+          Your challenge, tasks, completed days,
+          strikes and progress will remain stored.
+          Nothing will be deleted or reset.
+        </p>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <div
+          id="endChallengeStatus"
+          class="me-auto small text-danger"
+        ></div>
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="confirmEndChallengeBtn"
+          type="button"
+          class="btn btn-danger"
+        >
+          End Challenge
         </button>
 
       </div>
