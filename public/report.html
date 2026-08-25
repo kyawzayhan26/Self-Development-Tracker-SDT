@@ -1,0 +1,530 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>
+    SDT Progress Report
+  </title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <link
+    href="/report.css"
+    rel="stylesheet"
+  >
+
+</head>
+
+
+<body>
+
+
+<div
+  id="reportLoading"
+  class="container py-5 text-center"
+>
+
+  <div
+    class="spinner-border text-primary"
+    role="status"
+  ></div>
+
+  <div class="mt-3 text-secondary">
+    Generating progress report...
+  </div>
+
+</div>
+
+
+
+<div
+  id="reportError"
+  class="container py-5 d-none"
+>
+
+  <div
+    class="alert alert-danger"
+    id="reportErrorMessage"
+  ></div>
+
+</div>
+
+
+
+<main
+  id="reportContent"
+  class="report-page d-none"
+>
+
+
+  <!-- REPORT HEADER -->
+
+  <div class="report-header">
+
+
+    <div>
+
+      <div class="report-brand">
+        SDT
+      </div>
+
+      <div class="report-type">
+        Challenge Progress Report
+      </div>
+
+    </div>
+
+
+    <div class="report-actions no-print">
+
+      <button
+        id="backBtn"
+        type="button"
+        class="btn btn-outline-secondary"
+      >
+        Back to SDT
+      </button>
+
+      <button
+        id="printBtn"
+        type="button"
+        class="btn btn-primary"
+      >
+        Print Report
+      </button>
+
+    </div>
+
+
+  </div>
+
+
+
+  <!-- CHALLENGE DETAILS -->
+
+  <section class="report-section">
+
+
+    <div class="report-title-row">
+
+      <div>
+
+        <div class="report-label">
+          Active Challenge
+        </div>
+
+        <h1
+          id="reportChallengeName"
+          class="report-title"
+        >
+          —
+        </h1>
+
+        <div
+          id="reportChallengeDates"
+          class="report-muted"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div
+        id="reportGeneratedAt"
+        class="report-muted text-end"
+      >
+        —
+      </div>
+
+    </div>
+
+
+  </section>
+
+
+
+  <!-- KPI SUMMARY -->
+
+  <section class="report-section">
+
+    <h2 class="section-title">
+      Progress Overview
+    </h2>
+
+
+    <div class="metric-grid">
+
+
+      <div class="metric-card">
+
+        <div class="metric-label">
+          Current Day
+        </div>
+
+        <div
+          id="metricCurrentDay"
+          class="metric-value"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <div class="metric-label">
+          Recorded Days
+        </div>
+
+        <div
+          id="metricRecordedDays"
+          class="metric-value"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <div class="metric-label">
+          Perfect Days
+        </div>
+
+        <div
+          id="metricPerfectDays"
+          class="metric-value"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <div class="metric-label">
+          Avg. Recorded Completion
+        </div>
+
+        <div
+          id="metricAverageCompletion"
+          class="metric-value"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <div class="metric-label">
+          Completed Tasks
+        </div>
+
+        <div
+          id="metricCompletedTasks"
+          class="metric-value"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <div class="metric-label">
+          Missed Tasks
+        </div>
+
+        <div
+          id="metricMissedTasks"
+          class="metric-value"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <div class="metric-label">
+          Unrecorded Days
+        </div>
+
+        <div
+          id="metricUnrecordedDays"
+          class="metric-value"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <div class="metric-label">
+          Strikes Used
+        </div>
+
+        <div
+          id="metricStrikesUsed"
+          class="metric-value"
+        >
+          —
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </section>
+
+
+
+  <!-- PROGRESS -->
+
+  <section class="report-section">
+
+    <h2 class="section-title">
+      Challenge Completion
+    </h2>
+
+
+    <div class="progress-report-bar">
+
+      <div
+        id="reportProgressBar"
+        class="progress-report-fill"
+        style="width:0%"
+      ></div>
+
+    </div>
+
+
+    <div
+      id="reportProgressText"
+      class="report-muted mt-2"
+    >
+      —
+    </div>
+
+  </section>
+
+
+
+  <!-- STRONG / WEAK -->
+
+  <section class="report-section">
+
+    <h2 class="section-title">
+      Performance Highlights
+    </h2>
+
+
+    <div class="highlight-grid">
+
+
+      <div class="highlight-card">
+
+        <div class="report-label">
+          Strongest Rule
+        </div>
+
+        <div
+          id="strongestRuleName"
+          class="highlight-title"
+        >
+          —
+        </div>
+
+        <div
+          id="strongestRuleMeta"
+          class="report-muted"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="highlight-card">
+
+        <div class="report-label">
+          Weakest Rule
+        </div>
+
+        <div
+          id="weakestRuleName"
+          class="highlight-title"
+        >
+          —
+        </div>
+
+        <div
+          id="weakestRuleMeta"
+          class="report-muted"
+        >
+          —
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </section>
+
+
+
+  <!-- RULE TABLE -->
+
+  <section class="report-section">
+
+    <h2 class="section-title">
+      Rule Performance
+    </h2>
+
+
+    <div class="table-responsive">
+
+      <table class="table report-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Rule / Task
+            </th>
+
+            <th class="text-end">
+              Completed
+            </th>
+
+            <th class="text-end">
+              Missed
+            </th>
+
+            <th class="text-end">
+              Completion
+            </th>
+
+            <th class="text-end">
+              Strikes
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody
+          id="ruleTableBody"
+        ></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- DAILY TABLE -->
+
+  <section class="report-section">
+
+    <h2 class="section-title">
+      Daily Performance
+    </h2>
+
+
+    <div class="table-responsive">
+
+      <table class="table report-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Day
+            </th>
+
+            <th>
+              Date
+            </th>
+
+            <th>
+              Status
+            </th>
+
+            <th class="text-end">
+              Completed
+            </th>
+
+            <th class="text-end">
+              Completion
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody
+          id="dailyTableBody"
+        ></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+
+  <footer class="report-footer">
+
+    <div>
+      SDT — Self Development Tracker
+    </div>
+
+    <div>
+      Unrecorded days are not counted as failed days.
+    </div>
+
+  </footer>
+
+
+</main>
+
+
+
+<script src="/report.js"></script>
+
+
+</body>
+
+</html>

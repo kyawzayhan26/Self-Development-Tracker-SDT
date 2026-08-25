@@ -1,0 +1,425 @@
+:root{
+  --report-border:#e3e6ea;
+  --report-muted:#6c757d;
+  --report-background:#f6f7f9;
+}
+
+
+body{
+  margin:0;
+
+  background:
+    var(--report-background);
+
+  color:#212529;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+
+.report-page{
+  max-width:1150px;
+
+  margin:32px auto;
+
+  padding:40px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--report-border);
+
+  border-radius:14px;
+
+  box-shadow:
+    0 8px 30px
+    rgba(0,0,0,.05);
+}
+
+
+.report-header{
+  display:flex;
+
+  align-items:center;
+
+  justify-content:
+    space-between;
+
+  gap:20px;
+
+  padding-bottom:24px;
+
+  margin-bottom:28px;
+
+  border-bottom:
+    2px solid
+    #212529;
+}
+
+
+.report-brand{
+  font-size:28px;
+
+  font-weight:800;
+
+  letter-spacing:-.03em;
+}
+
+
+.report-type{
+  margin-top:2px;
+
+  color:
+    var(--report-muted);
+}
+
+
+.report-actions{
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+}
+
+
+.report-section{
+  margin-bottom:34px;
+}
+
+
+.report-title-row{
+  display:flex;
+
+  justify-content:
+    space-between;
+
+  align-items:flex-end;
+
+  gap:20px;
+
+  flex-wrap:wrap;
+}
+
+
+.report-label{
+  font-size:12px;
+
+  font-weight:700;
+
+  text-transform:uppercase;
+
+  letter-spacing:.06em;
+
+  color:
+    var(--report-muted);
+}
+
+
+.report-title{
+  margin:3px 0 5px;
+
+  font-size:32px;
+
+  font-weight:750;
+}
+
+
+.report-muted{
+  color:
+    var(--report-muted);
+
+  font-size:14px;
+}
+
+
+.section-title{
+  margin-bottom:16px;
+
+  font-size:19px;
+
+  font-weight:700;
+}
+
+
+.metric-grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0,1fr)
+    );
+
+  gap:12px;
+}
+
+
+.metric-card{
+  padding:16px;
+
+  border:
+    1px solid
+    var(--report-border);
+
+  border-radius:10px;
+
+  background:#fff;
+}
+
+
+.metric-label{
+  color:
+    var(--report-muted);
+
+  font-size:12px;
+
+  margin-bottom:5px;
+}
+
+
+.metric-value{
+  font-size:24px;
+
+  font-weight:750;
+}
+
+
+.progress-report-bar{
+  height:18px;
+
+  overflow:hidden;
+
+  background:#e9ecef;
+
+  border-radius:999px;
+}
+
+
+.progress-report-fill{
+  height:100%;
+
+  background:#0d6efd;
+
+  border-radius:999px;
+
+  transition:
+    width .25s ease;
+}
+
+
+.highlight-grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0,1fr)
+    );
+
+  gap:14px;
+}
+
+
+.highlight-card{
+  padding:18px;
+
+  border:
+    1px solid
+    var(--report-border);
+
+  border-radius:10px;
+}
+
+
+.highlight-title{
+  margin:
+    5px 0;
+
+  font-size:18px;
+
+  font-weight:700;
+}
+
+
+.report-table{
+  font-size:14px;
+
+  vertical-align:middle;
+}
+
+
+.report-table thead th{
+  white-space:nowrap;
+
+  color:#495057;
+
+  border-bottom-width:2px;
+}
+
+
+.unrecorded-row{
+  color:#8a8f95;
+
+  background:#f8f9fa;
+}
+
+
+.report-footer{
+  display:flex;
+
+  justify-content:
+    space-between;
+
+  gap:20px;
+
+  flex-wrap:wrap;
+
+  padding-top:20px;
+
+  margin-top:20px;
+
+  border-top:
+    1px solid
+    var(--report-border);
+
+  color:
+    var(--report-muted);
+
+  font-size:12px;
+}
+
+
+@media (max-width:850px){
+
+  .report-page{
+    margin:0;
+
+    padding:24px;
+
+    border:0;
+
+    border-radius:0;
+  }
+
+
+  .metric-grid{
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0,1fr)
+      );
+  }
+
+
+  .highlight-grid{
+    grid-template-columns:
+      1fr;
+  }
+
+}
+
+
+@media (max-width:500px){
+
+  .metric-grid{
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .report-header{
+    align-items:flex-start;
+
+    flex-direction:column;
+  }
+
+}
+
+
+/* =========================================
+   PRINT
+========================================= */
+
+@media print{
+
+  @page{
+    size:A4;
+
+    margin:12mm;
+  }
+
+
+  body{
+    background:white;
+
+    font-size:11pt;
+  }
+
+
+  .no-print{
+    display:none !important;
+  }
+
+
+  .report-page{
+    max-width:none;
+
+    margin:0;
+
+    padding:0;
+
+    border:0;
+
+    border-radius:0;
+
+    box-shadow:none;
+  }
+
+
+  .report-section{
+    break-inside:
+      avoid;
+  }
+
+
+  .metric-card,
+  .highlight-card{
+    break-inside:
+      avoid;
+  }
+
+
+  table{
+    break-inside:auto;
+  }
+
+
+  tr{
+    break-inside:
+      avoid;
+
+    break-after:auto;
+  }
+
+
+  thead{
+    display:
+      table-header-group;
+  }
+
+
+  .report-header{
+    margin-bottom:18px;
+  }
+
+
+  .report-footer{
+    margin-top:16px;
+  }
+
+}

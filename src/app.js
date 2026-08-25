@@ -10,6 +10,9 @@ const daysRoutes =
 const challengesRoutes =
   require('./routes/challenges.routes');
 
+const reportsRoutes =
+  require('./routes/reports.routes');
+
 const {
   errorHandler
 } = require('./middleware/errorHandler');
@@ -46,6 +49,15 @@ app.use(
 app.use(
   '/api/challenges',
   challengesRoutes
+);
+
+
+/*
+ * Reports API
+ */
+app.use(
+  '/api/reports',
+  reportsRoutes
 );
 
 

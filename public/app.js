@@ -99,10 +99,11 @@ const activeChallengeMeta =
   );
 
 
-const endChallengeBtn =
+const progressReportBtn =
   document.getElementById(
-    'endChallengeBtn'
+    'progressReportBtn'
   );
+
 
 const confirmEndChallengeBtn =
   document.getElementById(
@@ -189,6 +190,7 @@ const dayModal =
     dayModalEl
   );
 
+
 const dayModalDate =
   document.getElementById(
     'dayModalDate'
@@ -255,7 +257,6 @@ async function apiPost(
     await fetch(
       url,
       {
-
         method:'POST',
 
         headers:{
@@ -265,7 +266,6 @@ async function apiPost(
 
         body:
           JSON.stringify(body)
-
       }
     );
 
@@ -294,7 +294,6 @@ async function apiPut(
     await fetch(
       url,
       {
-
         method:'PUT',
 
         headers:{
@@ -304,7 +303,6 @@ async function apiPut(
 
         body:
           JSON.stringify(body)
-
       }
     );
 
@@ -437,7 +435,6 @@ function challengeDayNumber(
     return null;
   }
 
-
   const date =
     parseDate(value);
 
@@ -480,9 +477,6 @@ function tomorrowDateKey(){
 
 function initializeSetup(){
 
-  /*
-   * Clear previous challenge configuration.
-   */
   challengeNameInput.value =
     '';
 
@@ -578,12 +572,12 @@ function moveSetupTask(
 
   if (
     target < 0 ||
-    target >= setupTasks.length
+    target >=
+      setupTasks.length
   ){
 
     return;
   }
-
 
   const temp =
     setupTasks[index];
@@ -775,7 +769,6 @@ function renderSetupTasks(){
 
       setupTasksList
         .appendChild(row);
-
     }
   );
 }
@@ -809,15 +802,12 @@ async function startChallenge(){
 
   clearSetupError();
 
-
   const tasks =
     setupTasks
-
       .map(
         task =>
           task.trim()
       )
-
       .filter(Boolean);
 
 
@@ -845,7 +835,6 @@ async function startChallenge(){
       ),
 
     tasks
-
   };
 
 
@@ -906,8 +895,24 @@ async function startChallenge(){
 
     startChallengeBtn.textContent =
       'Start Challenge';
-
   }
+}
+
+
+/* =========================================
+   REPORT
+========================================= */
+
+function openProgressReport(){
+
+  if (!challenge){
+    return;
+  }
+
+  window.open(
+    '/report.html',
+    '_blank'
+  );
 }
 
 
@@ -939,27 +944,13 @@ async function endCurrentChallenge(){
     );
 
 
-    /*
-     * Close confirmation modal first.
-     */
     endChallengeModal.hide();
 
-
-    /*
-     * Remove active challenge state.
-     */
     challenge = null;
 
     openDateKey = null;
     openTasks = [];
 
-
-    /*
-     * Reload application.
-     *
-     * GET /api/challenges/current will now return
-     * challenge:null, which displays the setup screen.
-     */
     await loadApplication();
 
   }
@@ -976,7 +967,6 @@ async function endCurrentChallenge(){
 
     confirmEndChallengeBtn.textContent =
       'End Challenge';
-
   }
 }
 
@@ -1666,7 +1656,6 @@ saveBtn.addEventListener(
       await apiPut(
         `/api/day/${openDateKey}`,
         {
-
           tasks:
             openTasks.map(
               task => ({
@@ -1681,7 +1670,6 @@ saveBtn.addEventListener(
 
               })
             )
-
         }
       );
 
@@ -1716,7 +1704,6 @@ saveBtn.addEventListener(
       saveBtn.disabled =
         false;
     }
-
   }
 );
 
@@ -1793,7 +1780,6 @@ todayBtn
 
         await openDay(key);
       }
-
     }
   );
 
@@ -1816,6 +1802,13 @@ startChallengeBtn
   );
 
 
+progressReportBtn
+  .addEventListener(
+    'click',
+    openProgressReport
+  );
+
+
 confirmEndChallengeBtn
   .addEventListener(
     'click',
@@ -1830,7 +1823,6 @@ endChallengeModalEl
 
       endChallengeStatus.textContent =
         '';
-
     }
   );
 
@@ -1900,7 +1892,6 @@ async function loadApplication(){
       `Failed to load SDT: ` +
       `${error.message}` +
       `</div>`;
-
   }
 }
 
