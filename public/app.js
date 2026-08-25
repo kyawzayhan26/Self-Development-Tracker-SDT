@@ -1,326 +1,2107 @@
-/**
+/*
  * SDT Frontend
- * - Renders month calendar
- * - Click day -> fetch checklist -> tick -> save
- * - Shows "Day X/75" labels and overall progress bar
- * - Shows strikes used/left per task
+ *
+ * Modes:
+ *
+ * 1. Setup
+ *    Configure challenge + rules
+ *
+ * 2. Dashboard
+ *    Challenge settings locked
  */
+
+
+let challenge = null;
 
 let current = new Date();
 current.setHours(0,0,0,0);
 
-// Challenge settings (edit later)
-const CHALLENGE_START = '2026-08-26'; // Day 1 is tomorrow (Jan 2, 2026)
-const CHALLENGE_DAYS = 30;
-const STRIKES_ALLOWED = 3;
-
-const monthLabel = document.getElementById('monthLabel');
-const calendarGrid = document.getElementById('calendarGrid');
-
-const prevMonthBtn = document.getElementById('prevMonth');
-const nextMonthBtn = document.getElementById('nextMonth');
-const todayBtn = document.getElementById('todayBtn');
-
-const overallText = document.getElementById('overallText');
-const overallMeta = document.getElementById('overallMeta');
-const overallBar = document.getElementById('overallBar');
-
-const strikesMeta = document.getElementById('strikesMeta');
-const strikesList = document.getElementById('strikesList');
-
-const dayModalEl = document.getElementById('dayModal');
-const dayModal = new bootstrap.Modal(dayModalEl);
-const dayModalDate = document.getElementById('dayModalDate');
-const tasksList = document.getElementById('tasksList');
-const saveBtn = document.getElementById('saveBtn');
-const saveStatus = document.getElementById('saveStatus');
-
 let openDateKey = null;
 let openTasks = [];
 
-const weekdayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+let setupTasks = [];
 
-function pad2(n){ return String(n).padStart(2,'0'); }
-function dateKey(d){
-  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-}
-function monthKey(d){
-  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
-}
-function firstDayMondayIndex(d){
-  // JS: Sunday=0..Saturday=6
-  // Convert to Monday=0..Sunday=6
-  const js = d.getDay();
-  return (js + 6) % 7;
-}
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const loadingScreen =
+  document.getElementById(
+    'loadingScreen'
+  );
+
+const setupScreen =
+  document.getElementById(
+    'setupScreen'
+  );
+
+const dashboardScreen =
+  document.getElementById(
+    'dashboardScreen'
+  );
+
+
+const challengeNameInput =
+  document.getElementById(
+    'challengeName'
+  );
+
+const challengeStartInput =
+  document.getElementById(
+    'challengeStartDate'
+  );
+
+const challengeDurationInput =
+  document.getElementById(
+    'challengeDuration'
+  );
+
+const challengeStrikesInput =
+  document.getElementById(
+    'challengeStrikes'
+  );
+
+const setupTasksList =
+  document.getElementById(
+    'setupTasksList'
+  );
+
+const setupValidation =
+  document.getElementById(
+    'setupValidation'
+  );
+
+const addTaskBtn =
+  document.getElementById(
+    'addTaskBtn'
+  );
+
+const startChallengeBtn =
+  document.getElementById(
+    'startChallengeBtn'
+  );
+
+
+const activeChallengeName =
+  document.getElementById(
+    'activeChallengeName'
+  );
+
+const activeChallengeDates =
+  document.getElementById(
+    'activeChallengeDates'
+  );
+
+const activeChallengeMeta =
+  document.getElementById(
+    'activeChallengeMeta'
+  );
+
+
+const monthLabel =
+  document.getElementById(
+    'monthLabel'
+  );
+
+const calendarGrid =
+  document.getElementById(
+    'calendarGrid'
+  );
+
+
+const prevMonthBtn =
+  document.getElementById(
+    'prevMonth'
+  );
+
+const nextMonthBtn =
+  document.getElementById(
+    'nextMonth'
+  );
+
+const todayBtn =
+  document.getElementById(
+    'todayBtn'
+  );
+
+
+const overallText =
+  document.getElementById(
+    'overallText'
+  );
+
+const overallMeta =
+  document.getElementById(
+    'overallMeta'
+  );
+
+const overallBar =
+  document.getElementById(
+    'overallBar'
+  );
+
+
+const strikesMeta =
+  document.getElementById(
+    'strikesMeta'
+  );
+
+const strikesList =
+  document.getElementById(
+    'strikesList'
+  );
+
+
+const dayModalEl =
+  document.getElementById(
+    'dayModal'
+  );
+
+const dayModal =
+  new bootstrap.Modal(
+    dayModalEl
+  );
+
+
+const dayModalDate =
+  document.getElementById(
+    'dayModalDate'
+  );
+
+const tasksList =
+  document.getElementById(
+    'tasksList'
+  );
+
+const saveBtn =
+  document.getElementById(
+    'saveBtn'
+  );
+
+const saveStatus =
+  document.getElementById(
+    'saveStatus'
+  );
+
+
+const weekdayNames =
+  [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun'
+  ];
+
+
+
+/* =========================================
+   API
+========================================= */
 
 async function apiGet(url){
-  const r = await fetch(url);
-  const j = await r.json();
-  if (!j.ok) throw new Error(j.error || 'Request failed');
-  return j;
-}
-async function apiPut(url, body){
-  const r = await fetch(url, {
-    method:'PUT',
-    headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify(body)
-  });
-  const j = await r.json();
-  if (!j.ok) throw new Error(j.error || 'Save failed');
-  return j;
-}
 
-function setMonthLabel(d){
-  const fmt = new Intl.DateTimeFormat(undefined, { month:'long', year:'numeric' });
-  monthLabel.textContent = fmt.format(d);
-}
+  const response =
+    await fetch(url);
 
-function renderWeekdayHeader(){
-  for (const name of weekdayNames){
-    const el = document.createElement('div');
-    el.className = 'weekday-header';
-    el.textContent = name;
-    calendarGrid.appendChild(el);
+
+  const data =
+    await response.json();
+
+
+  if (!data.ok){
+
+    throw new Error(
+      data.error ||
+      'Request failed'
+    );
+
   }
+
+
+  return data;
+
 }
 
-function ringEl(doneCount, totalCount){
-  const pct = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
-  const el = document.createElement('div');
-  el.className = 'ring';
-  el.dataset.pct = String(pct);
-  el.title = `${doneCount}/${totalCount} completed`;
-  el.textContent = `${pct}%`;
-  return el;
+
+async function apiPost(
+  url,
+  body
+){
+
+  const response =
+    await fetch(
+      url,
+      {
+
+        method:'POST',
+
+        headers:{
+          'Content-Type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify(
+            body
+          )
+
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if (!data.ok){
+
+    throw new Error(
+      data.error ||
+      'Request failed'
+    );
+
+  }
+
+
+  return data;
+
 }
 
-function dayNumberFromStart(dateKeyStr){
-  // returns 1..CHALLENGE_DAYS, or null if outside range
-  const start = new Date(CHALLENGE_START + 'T00:00:00');
-  const d = new Date(dateKeyStr + 'T00:00:00');
-  const diffDays = Math.round((d - start) / (1000 * 60 * 60 * 24));
-  const n = diffDays + 1;
-  if (n < 1 || n > CHALLENGE_DAYS) return null;
-  return n;
+
+async function apiPut(
+  url,
+  body
+){
+
+  const response =
+    await fetch(
+      url,
+      {
+
+        method:'PUT',
+
+        headers:{
+          'Content-Type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify(
+            body
+          )
+
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if (!data.ok){
+
+    throw new Error(
+      data.error ||
+      'Save failed'
+    );
+
+  }
+
+
+  return data;
+
 }
 
-function prettyDateFromKey(dateKeyStr){
-  const d = new Date(dateKeyStr + 'T00:00:00');
-  const fmt = new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric', year:'numeric' });
-  return fmt.format(d);
+
+
+/* =========================================
+   DATE HELPERS
+========================================= */
+
+function pad2(value){
+
+  return String(value)
+    .padStart(
+      2,
+      '0'
+    );
+
 }
+
+
+function dateKey(date){
+
+  return (
+    `${date.getFullYear()}-` +
+    `${pad2(
+      date.getMonth() + 1
+    )}-` +
+    `${pad2(
+      date.getDate()
+    )}`
+  );
+
+}
+
+
+function monthKey(date){
+
+  return (
+    `${date.getFullYear()}-` +
+    `${pad2(
+      date.getMonth() + 1
+    )}`
+  );
+
+}
+
+
+function parseDate(value){
+
+  return new Date(
+    value +
+    'T00:00:00'
+  );
+
+}
+
+
+function prettyDate(value){
+
+  const date =
+    parseDate(value);
+
+
+  return new Intl
+    .DateTimeFormat(
+      undefined,
+      {
+
+        month:'short',
+        day:'numeric',
+        year:'numeric'
+
+      }
+    )
+    .format(date);
+
+}
+
+
+function firstDayMondayIndex(date){
+
+  return (
+    date.getDay() + 6
+  ) % 7;
+
+}
+
+
+function challengeEndDate(){
+
+  return parseDate(
+    challenge.endDate
+  );
+
+}
+
+
+function isChallengeDate(
+  dateKeyValue
+){
+
+  const date =
+    parseDate(
+      dateKeyValue
+    );
+
+  const start =
+    parseDate(
+      challenge.startDate
+    );
+
+  const end =
+    challengeEndDate();
+
+
+  return (
+    date >= start &&
+    date <= end
+  );
+
+}
+
+
+function challengeDayNumber(
+  dateKeyValue
+){
+
+  if (
+    !isChallengeDate(
+      dateKeyValue
+    )
+  ){
+
+    return null;
+
+  }
+
+
+  const date =
+    parseDate(
+      dateKeyValue
+    );
+
+  const start =
+    parseDate(
+      challenge.startDate
+    );
+
+
+  const milliseconds =
+    date - start;
+
+
+  return (
+    Math.round(
+      milliseconds /
+      86400000
+    ) + 1
+  );
+
+}
+
+
+
+/* =========================================
+   SETUP SCREEN
+========================================= */
+
+function tomorrowDateKey(){
+
+  const date =
+    new Date();
+
+
+  date.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
+  date.setDate(
+    date.getDate() + 1
+  );
+
+
+  return dateKey(date);
+
+}
+
+
+function initializeSetup(){
+
+  challengeStartInput.value =
+    tomorrowDateKey();
+
+
+  setupTasks = [
+    ''
+  ];
+
+
+  renderSetupTasks();
+
+}
+
+
+function showSetup(){
+
+  loadingScreen
+    .classList
+    .add('d-none');
+
+
+  dashboardScreen
+    .classList
+    .add('d-none');
+
+
+  setupScreen
+    .classList
+    .remove('d-none');
+
+
+  initializeSetup();
+
+}
+
+
+function addSetupTask(){
+
+  setupTasks.push(
+    ''
+  );
+
+
+  renderSetupTasks();
+
+
+  setTimeout(
+    () => {
+
+      const inputs =
+        setupTasksList
+          .querySelectorAll(
+            '.setup-task-input'
+          );
+
+
+      inputs[
+        inputs.length - 1
+      ]?.focus();
+
+    },
+    0
+  );
+
+}
+
+
+function removeSetupTask(index){
+
+  setupTasks.splice(
+    index,
+    1
+  );
+
+
+  if (
+    setupTasks.length === 0
+  ){
+
+    setupTasks.push(
+      ''
+    );
+
+  }
+
+
+  renderSetupTasks();
+
+}
+
+
+function moveSetupTask(
+  index,
+  direction
+){
+
+  const target =
+    index + direction;
+
+
+  if (
+    target < 0 ||
+    target >=
+      setupTasks.length
+  ){
+
+    return;
+
+  }
+
+
+  const temp =
+    setupTasks[index];
+
+
+  setupTasks[index] =
+    setupTasks[target];
+
+
+  setupTasks[target] =
+    temp;
+
+
+  renderSetupTasks();
+
+}
+
+
+function renderSetupTasks(){
+
+  setupTasksList.innerHTML =
+    '';
+
+
+  setupTasks.forEach(
+    (
+      task,
+      index
+    ) => {
+
+
+      const row =
+        document.createElement(
+          'div'
+        );
+
+
+      row.className =
+        'setup-task-row';
+
+
+      const number =
+        document.createElement(
+          'div'
+        );
+
+
+      number.className =
+        'setup-task-number';
+
+
+      number.textContent =
+        index + 1;
+
+
+      const input =
+        document.createElement(
+          'input'
+        );
+
+
+      input.type =
+        'text';
+
+
+      input.maxLength =
+        200;
+
+
+      input.className =
+        'form-control setup-task-input';
+
+
+      input.placeholder =
+        'Example: Walk 10,000 steps';
+
+
+      input.value =
+        task;
+
+
+      input.addEventListener(
+        'input',
+        () => {
+
+          setupTasks[index] =
+            input.value;
+
+        }
+      );
+
+
+      input.addEventListener(
+        'keydown',
+        event => {
+
+          if (
+            event.key ===
+            'Enter'
+          ){
+
+            event.preventDefault();
+
+            addSetupTask();
+
+          }
+
+        }
+      );
+
+
+      const actions =
+        document.createElement(
+          'div'
+        );
+
+
+      actions.className =
+        'setup-task-actions';
+
+
+      const up =
+        document.createElement(
+          'button'
+        );
+
+
+      up.type =
+        'button';
+
+
+      up.className =
+        'btn btn-outline-secondary btn-sm';
+
+
+      up.textContent =
+        '↑';
+
+
+      up.disabled =
+        index === 0;
+
+
+      up.addEventListener(
+        'click',
+        () =>
+          moveSetupTask(
+            index,
+            -1
+          )
+      );
+
+
+      const down =
+        document.createElement(
+          'button'
+        );
+
+
+      down.type =
+        'button';
+
+
+      down.className =
+        'btn btn-outline-secondary btn-sm';
+
+
+      down.textContent =
+        '↓';
+
+
+      down.disabled =
+        index ===
+        setupTasks.length - 1;
+
+
+      down.addEventListener(
+        'click',
+        () =>
+          moveSetupTask(
+            index,
+            1
+          )
+      );
+
+
+      const remove =
+        document.createElement(
+          'button'
+        );
+
+
+      remove.type =
+        'button';
+
+
+      remove.className =
+        'btn btn-outline-danger btn-sm';
+
+
+      remove.textContent =
+        'Remove';
+
+
+      remove.addEventListener(
+        'click',
+        () =>
+          removeSetupTask(
+            index
+          )
+      );
+
+
+      actions.appendChild(
+        up
+      );
+
+      actions.appendChild(
+        down
+      );
+
+      actions.appendChild(
+        remove
+      );
+
+
+      row.appendChild(
+        number
+      );
+
+      row.appendChild(
+        input
+      );
+
+      row.appendChild(
+        actions
+      );
+
+
+      setupTasksList.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
+
+
+function showSetupError(
+  message
+){
+
+  setupValidation.textContent =
+    message;
+
+
+  setupValidation
+    .classList
+    .remove(
+      'd-none'
+    );
+
+}
+
+
+function clearSetupError(){
+
+  setupValidation
+    .classList
+    .add(
+      'd-none'
+    );
+
+}
+
+
+async function startChallenge(){
+
+  clearSetupError();
+
+
+  const tasks =
+    setupTasks
+
+      .map(
+        task =>
+          task.trim()
+      )
+
+      .filter(Boolean);
+
+
+  const payload = {
+
+    name:
+      challengeNameInput
+        .value
+        .trim(),
+
+    startDate:
+      challengeStartInput
+        .value,
+
+    durationDays:
+      Number(
+        challengeDurationInput
+          .value
+      ),
+
+    strikesAllowed:
+      Number(
+        challengeStrikesInput
+          .value
+      ),
+
+    tasks
+
+  };
+
+
+  if (!payload.name){
+
+    return showSetupError(
+      'Enter a challenge name.'
+    );
+
+  }
+
+
+  if (!payload.startDate){
+
+    return showSetupError(
+      'Choose a start date.'
+    );
+
+  }
+
+
+  if (
+    tasks.length === 0
+  ){
+
+    return showSetupError(
+      'Add at least one rule or task.'
+    );
+
+  }
+
+
+  startChallengeBtn.disabled =
+    true;
+
+
+  startChallengeBtn.textContent =
+    'Starting...';
+
+
+  try {
+
+    await apiPost(
+      '/api/challenges/start',
+      payload
+    );
+
+
+    await loadApplication();
+
+  }
+  catch (error) {
+
+    showSetupError(
+      error.message
+    );
+
+  }
+  finally {
+
+    startChallengeBtn.disabled =
+      false;
+
+
+    startChallengeBtn.textContent =
+      'Start Challenge';
+
+  }
+
+}
+
+
+
+/* =========================================
+   DASHBOARD
+========================================= */
+
+function showDashboard(){
+
+  loadingScreen
+    .classList
+    .add(
+      'd-none'
+    );
+
+
+  setupScreen
+    .classList
+    .add(
+      'd-none'
+    );
+
+
+  dashboardScreen
+    .classList
+    .remove(
+      'd-none'
+    );
+
+
+  activeChallengeName
+    .textContent =
+      challenge.name;
+
+
+  activeChallengeDates
+    .textContent =
+
+      `${prettyDate(
+        challenge.startDate
+      )} – ` +
+
+      `${prettyDate(
+        challenge.endDate
+      )}`;
+
+
+  activeChallengeMeta
+    .textContent =
+
+      `${challenge.durationDays} days · ` +
+
+      `${challenge.tasks.length} rules · ` +
+
+      `${challenge.strikesAllowed} strikes per rule`;
+
+
+  const today =
+    new Date();
+
+
+  today.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
+  const start =
+    parseDate(
+      challenge.startDate
+    );
+
+
+  const end =
+    parseDate(
+      challenge.endDate
+    );
+
+
+  let targetMonth;
+
+
+  if (today < start){
+
+    targetMonth =
+      start;
+
+  }
+  else if (
+    today > end
+  ){
+
+    targetMonth =
+      end;
+
+  }
+  else {
+
+    targetMonth =
+      today;
+
+  }
+
+
+  current =
+    new Date(
+      targetMonth.getFullYear(),
+      targetMonth.getMonth(),
+      1
+    );
+
+}
+
+
+
+/* =========================================
+   PROGRESS
+========================================= */
 
 async function loadOverallProgress(){
-  try{
-    const j = await apiGet(`/api/progress/overall-progress?start=${CHALLENGE_START}&days=${CHALLENGE_DAYS}`);
-    overallText.textContent = `${j.pct}% complete`;
-    overallMeta.textContent = `${j.completedDays}/${j.days} days completed`;
-    overallBar.style.width = `${j.pct}%`;
-    overallBar.textContent = `${j.pct}%`;
-    overallBar.setAttribute('aria-valuenow', String(j.pct));
-  }catch(e){
-    overallText.textContent = '—';
-    overallMeta.textContent = 'Failed to load';
-    overallBar.style.width = '0%';
-    overallBar.textContent = '';
-    overallBar.setAttribute('aria-valuenow', '0');
-  }
+
+  const data =
+    await apiGet(
+      '/api/progress/overall-progress'
+    );
+
+
+  overallText.textContent =
+    `${data.pct}% complete`;
+
+
+  overallMeta.textContent =
+    `${data.completedDays}/${data.days} days completed`;
+
+
+  overallBar.style.width =
+    `${data.pct}%`;
+
+
+  overallBar.textContent =
+    `${data.pct}%`;
+
+
+  overallBar.setAttribute(
+    'aria-valuenow',
+    String(
+      data.pct
+    )
+  );
+
 }
 
-function renderStrikes(tasks, recordedDays){
-  strikesList.innerHTML = '';
 
-  for (const t of tasks){
-    const row = document.createElement('div');
-    row.className = 'strike-row';
 
-    const top = document.createElement('div');
-    top.className = 'd-flex justify-content-between align-items-start gap-3';
-
-    const title = document.createElement('div');
-    title.className = 'strike-title';
-    title.textContent = t.name;
-
-    const badge = document.createElement('div');
-    const left = t.strikesLeft;
-    const used = t.strikesUsed;
-
-    badge.className = `badge ${left === 0 ? 'text-bg-danger' : (left === 1 ? 'text-bg-warning' : 'text-bg-success')}`;
-    badge.textContent = `${left} strikes left`;
-
-    top.appendChild(title);
-    top.appendChild(badge);
-
-    const meta = document.createElement('div');
-    meta.className = 'strike-meta text-secondary mt-1';
-    meta.textContent = `Used: ${used}/${t.strikesAllowed} · Missed (recorded): ${t.missedDays} · Recorded days: ${recordedDays}`;
-
-    row.appendChild(top);
-    row.appendChild(meta);
-    strikesList.appendChild(row);
-  }
-}
+/* =========================================
+   STRIKES
+========================================= */
 
 async function loadStrikes(){
-  try{
-    const j = await apiGet(`/api/progress/strikes?start=${CHALLENGE_START}&days=${CHALLENGE_DAYS}&strikes=${STRIKES_ALLOWED}`);
-    strikesMeta.textContent = `Allowed: ${j.strikesAllowed} strikes per rule · Counted over ${j.recordedDays} recorded day(s)`;
-    renderStrikes(j.tasks, j.recordedDays);
-  }catch(e){
-    strikesMeta.textContent = 'Failed to load strikes';
-    strikesList.innerHTML = '';
-    const err = document.createElement('div');
-    err.className = 'text-danger small';
-    err.textContent = e.message;
-    strikesList.appendChild(err);
-  }
-}
 
-async function renderCalendar(){
-  calendarGrid.innerHTML = '';
-  renderWeekdayHeader();
+  const data =
+    await apiGet(
+      '/api/progress/strikes'
+    );
 
-  const mk = monthKey(current);
-  setMonthLabel(current);
 
-  const { days } = await apiGet(`/api/days?month=${mk}`);
-  const summary = new Map(days.map(d => [d.dateKey, d]));
+  strikesMeta.textContent =
 
-  const first = new Date(current.getFullYear(), current.getMonth(), 1);
-  const startOffset = firstDayMondayIndex(first);
-  const gridStart = new Date(first);
-  gridStart.setDate(first.getDate() - startOffset);
+    `${data.strikesAllowed} strikes per rule · ` +
 
-  // 6 weeks grid (42 days)
-  for (let i=0; i<42; i++){
-    const d = new Date(gridStart);
-    d.setDate(gridStart.getDate() + i);
+    `${data.recordedDays} recorded day(s)`;
 
-    const isCurrentMonth = d.getMonth() === current.getMonth();
-    const dk = dateKey(d);
-    const s = summary.get(dk) || { doneCount:0, totalCount: (days[0]?.totalCount ?? 0) };
 
-    const cell = document.createElement('div');
-    cell.className = 'day-cell' + (isCurrentMonth ? '' : ' muted');
-    cell.dataset.dateKey = dk;
+  strikesList.innerHTML =
+    '';
 
-    const top = document.createElement('div');
-    top.className = 'day-top';
 
-    const num = document.createElement('div');
-    num.className = 'day-num';
-    num.textContent = String(d.getDate());
+  for (
+    const task of data.tasks
+  ){
 
-    top.appendChild(num);
-    top.appendChild(ringEl(s.doneCount, s.totalCount));
-    cell.appendChild(top);
+    const row =
+      document.createElement(
+        'div'
+      );
 
-    // Subtitle: "Jan 2 2026 · Day 1/75"
-    const dn = dayNumberFromStart(dk);
-    const sub = document.createElement('div');
-    sub.className = 'day-sub text-secondary';
-    sub.textContent = dn
-      ? `${prettyDateFromKey(dk)} · Day ${dn}/${CHALLENGE_DAYS}`
-      : `${prettyDateFromKey(dk)}`;
-    cell.appendChild(sub);
 
-    // subtle today highlight
-    const today = new Date(); today.setHours(0,0,0,0);
-    if (dk === dateKey(today)){
-      cell.style.outline = '2px solid rgba(13,110,253,.35)';
-      cell.style.outlineOffset = '2px';
+    row.className =
+      'strike-row';
+
+
+    const top =
+      document.createElement(
+        'div'
+      );
+
+
+    top.className =
+      'd-flex justify-content-between align-items-start gap-3';
+
+
+    const title =
+      document.createElement(
+        'div'
+      );
+
+
+    title.className =
+      'strike-title';
+
+
+    title.textContent =
+      task.name;
+
+
+    const badge =
+      document.createElement(
+        'span'
+      );
+
+
+    if (
+      task.strikesLeft === 0
+    ){
+
+      badge.className =
+        'badge text-bg-danger';
+
+    }
+    else if (
+      task.strikesLeft === 1
+    ){
+
+      badge.className =
+        'badge text-bg-warning';
+
+    }
+    else {
+
+      badge.className =
+        'badge text-bg-success';
+
     }
 
-    cell.addEventListener('click', () => openDay(dk));
-    calendarGrid.appendChild(cell);
+
+    badge.textContent =
+      `${task.strikesLeft} strikes left`;
+
+
+    const meta =
+      document.createElement(
+        'div'
+      );
+
+
+    meta.className =
+      'strike-meta text-secondary mt-1';
+
+
+    meta.textContent =
+
+      `Used: ${task.strikesUsed}/${task.strikesAllowed}` +
+
+      ` · Missed recorded days: ${task.missedDays}`;
+
+
+    top.appendChild(
+      title
+    );
+
+
+    top.appendChild(
+      badge
+    );
+
+
+    row.appendChild(
+      top
+    );
+
+
+    row.appendChild(
+      meta
+    );
+
+
+    strikesList.appendChild(
+      row
+    );
+
   }
+
 }
 
-function renderTasks(tasks){
-  tasksList.innerHTML = '';
-  for (const t of tasks){
-    const row = document.createElement('label');
-    row.className = 'd-flex align-items-center gap-2 p-2 border rounded-3';
 
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.className = 'form-check-input m-0';
-    cb.checked = !!t.isDone;
-    cb.addEventListener('change', () => {
-      t.isDone = cb.checked;
-      saveStatus.textContent = '';
-    });
 
-    const name = document.createElement('div');
-    name.textContent = t.name;
+/* =========================================
+   CALENDAR
+========================================= */
 
-    row.appendChild(cb);
-    row.appendChild(name);
-    tasksList.appendChild(row);
-  }
+function setMonthLabel(){
+
+  monthLabel.textContent =
+
+    new Intl
+      .DateTimeFormat(
+        undefined,
+        {
+          month:'long',
+          year:'numeric'
+        }
+      )
+      .format(
+        current
+      );
+
 }
 
-async function openDay(dk){
-  openDateKey = dk;
-  saveStatus.textContent = '';
 
-  dayModalDate.textContent = dk;
+function renderWeekdayHeader(){
 
-  try{
-    const { tasks } = await apiGet(`/api/day/${dk}`);
-    openTasks = tasks;
-    renderTasks(openTasks);
+  for (
+    const name of weekdayNames
+  ){
+
+    const element =
+      document.createElement(
+        'div'
+      );
+
+
+    element.className =
+      'weekday-header';
+
+
+    element.textContent =
+      name;
+
+
+    calendarGrid
+      .appendChild(
+        element
+      );
+
+  }
+
+}
+
+
+function completionRing(
+  done,
+  total
+){
+
+  const pct =
+    total === 0
+      ? 0
+      : Math.round(
+          (
+            done /
+            total
+          ) * 100
+        );
+
+
+  const ring =
+    document.createElement(
+      'div'
+    );
+
+
+  ring.className =
+    'ring';
+
+
+  ring.dataset.pct =
+    String(pct);
+
+
+  ring.textContent =
+    `${pct}%`;
+
+
+  return ring;
+
+}
+
+
+async function renderCalendar(){
+
+  calendarGrid.innerHTML =
+    '';
+
+
+  renderWeekdayHeader();
+
+
+  setMonthLabel();
+
+
+  const data =
+    await apiGet(
+      `/api/days?month=${monthKey(
+        current
+      )}`
+    );
+
+
+  const summary =
+    new Map(
+
+      data.days.map(
+        day => [
+          day.dateKey,
+          day
+        ]
+      )
+
+    );
+
+
+  const first =
+    new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      1
+    );
+
+
+  const offset =
+    firstDayMondayIndex(
+      first
+    );
+
+
+  const gridStart =
+    new Date(first);
+
+
+  gridStart.setDate(
+    first.getDate() -
+    offset
+  );
+
+
+  for (
+    let i = 0;
+    i < 42;
+    i++
+  ){
+
+    const date =
+      new Date(
+        gridStart
+      );
+
+
+    date.setDate(
+      gridStart.getDate() +
+      i
+    );
+
+
+    const key =
+      dateKey(
+        date
+      );
+
+
+    const currentMonth =
+      date.getMonth() ===
+      current.getMonth();
+
+
+    const inside =
+      isChallengeDate(
+        key
+      );
+
+
+    const dayData =
+      summary.get(
+        key
+      ) || {
+
+        doneCount:0,
+
+        totalCount:
+          challenge.tasks.length
+
+      };
+
+
+    const cell =
+      document.createElement(
+        'div'
+      );
+
+
+    cell.className =
+      'day-cell';
+
+
+    if (!currentMonth){
+
+      cell.classList.add(
+        'muted'
+      );
+
+    }
+
+
+    if (!inside){
+
+      cell.classList.add(
+        'outside-challenge'
+      );
+
+    }
+
+
+    const top =
+      document.createElement(
+        'div'
+      );
+
+
+    top.className =
+      'day-top';
+
+
+    const number =
+      document.createElement(
+        'div'
+      );
+
+
+    number.className =
+      'day-num';
+
+
+    number.textContent =
+      date.getDate();
+
+
+    top.appendChild(
+      number
+    );
+
+
+    if (inside){
+
+      top.appendChild(
+
+        completionRing(
+          dayData.doneCount,
+          dayData.totalCount
+        )
+
+      );
+
+    }
+
+
+    cell.appendChild(
+      top
+    );
+
+
+    const subtitle =
+      document.createElement(
+        'div'
+      );
+
+
+    subtitle.className =
+      'day-sub text-secondary';
+
+
+    const dayNumber =
+      challengeDayNumber(
+        key
+      );
+
+
+    if (dayNumber){
+
+      subtitle.textContent =
+
+        `${prettyDate(key)} · ` +
+
+        `Day ${dayNumber}/${challenge.durationDays}`;
+
+    }
+    else {
+
+      subtitle.textContent =
+        prettyDate(key);
+
+    }
+
+
+    cell.appendChild(
+      subtitle
+    );
+
+
+    const today =
+      new Date();
+
+
+    today.setHours(
+      0,
+      0,
+      0,
+      0
+    );
+
+
+    if (
+      inside &&
+      key ===
+      dateKey(today)
+    ){
+
+      cell.classList.add(
+        'today-challenge'
+      );
+
+    }
+
+
+    if (inside){
+
+      cell.addEventListener(
+        'click',
+        () =>
+          openDay(
+            key
+          )
+      );
+
+    }
+
+
+    calendarGrid
+      .appendChild(
+        cell
+      );
+
+  }
+
+}
+
+
+
+/* =========================================
+   DAY DETAILS
+========================================= */
+
+function renderTasks(
+  tasks
+){
+
+  tasksList.innerHTML =
+    '';
+
+
+  for (
+    const task of tasks
+  ){
+
+    const row =
+      document.createElement(
+        'label'
+      );
+
+
+    row.className =
+      'day-task-row';
+
+
+    const checkbox =
+      document.createElement(
+        'input'
+      );
+
+
+    checkbox.type =
+      'checkbox';
+
+
+    checkbox.className =
+      'form-check-input m-0';
+
+
+    checkbox.checked =
+      Boolean(
+        task.isDone
+      );
+
+
+    checkbox.addEventListener(
+      'change',
+      () => {
+
+        task.isDone =
+          checkbox.checked;
+
+
+        saveStatus.textContent =
+          '';
+
+      }
+    );
+
+
+    const name =
+      document.createElement(
+        'div'
+      );
+
+
+    name.textContent =
+      task.name;
+
+
+    row.appendChild(
+      checkbox
+    );
+
+
+    row.appendChild(
+      name
+    );
+
+
+    tasksList.appendChild(
+      row
+    );
+
+  }
+
+}
+
+
+async function openDay(
+  key
+){
+
+  if (
+    !isChallengeDate(
+      key
+    )
+  ){
+
+    return;
+
+  }
+
+
+  openDateKey =
+    key;
+
+
+  saveStatus.textContent =
+    '';
+
+
+  const dayNumber =
+    challengeDayNumber(
+      key
+    );
+
+
+  dayModalDate.textContent =
+
+    `${prettyDate(key)} · ` +
+
+    `Day ${dayNumber}/${challenge.durationDays}`;
+
+
+  try {
+
+    const data =
+      await apiGet(
+        `/api/day/${key}`
+      );
+
+
+    openTasks =
+      data.tasks;
+
+
+    renderTasks(
+      openTasks
+    );
+
+
     dayModal.show();
-  }catch(e){
-    alert(e.message);
+
   }
+  catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+
 }
 
-saveBtn.addEventListener('click', async () => {
-  if (!openDateKey) return;
-  saveBtn.disabled = true;
-  saveStatus.textContent = 'Saving...';
 
-  try{
-    await apiPut(`/api/day/${openDateKey}`, {
-      tasks: openTasks.map(t => ({ taskId: t.taskId, isDone: !!t.isDone }))
-    });
-    saveStatus.textContent = 'Saved ✓';
-    await renderCalendar();        // refresh completion rings
-    await loadOverallProgress();   // refresh overall bar
-    await loadStrikes();           // refresh strikes
-  }catch(e){
-    saveStatus.textContent = '';
-    alert(e.message);
-  }finally{
-    saveBtn.disabled = false;
+
+/* =========================================
+   SAVE DAY
+========================================= */
+
+saveBtn.addEventListener(
+  'click',
+  async () => {
+
+    if (!openDateKey){
+
+      return;
+
+    }
+
+
+    saveBtn.disabled =
+      true;
+
+
+    saveStatus.textContent =
+      'Saving...';
+
+
+    try {
+
+      await apiPut(
+
+        `/api/day/${openDateKey}`,
+
+        {
+
+          tasks:
+            openTasks.map(
+              task => ({
+
+                taskId:
+                  task.taskId,
+
+                isDone:
+                  Boolean(
+                    task.isDone
+                  )
+
+              })
+            )
+
+        }
+
+      );
+
+
+      saveStatus.textContent =
+        'Saved ✓';
+
+
+      await Promise.all([
+
+        renderCalendar(),
+
+        loadOverallProgress(),
+
+        loadStrikes()
+
+      ]);
+
+    }
+    catch (error) {
+
+      saveStatus.textContent =
+        '';
+
+
+      alert(
+        error.message
+      );
+
+    }
+    finally {
+
+      saveBtn.disabled =
+        false;
+
+    }
+
   }
-});
+);
 
-prevMonthBtn.addEventListener('click', async () => {
-  current = new Date(current.getFullYear(), current.getMonth()-1, 1);
-  await renderCalendar();
-});
-nextMonthBtn.addEventListener('click', async () => {
-  current = new Date(current.getFullYear(), current.getMonth()+1, 1);
-  await renderCalendar();
-});
-todayBtn.addEventListener('click', async () => {
-  const t = new Date(); t.setHours(0,0,0,0);
-  current = new Date(t.getFullYear(), t.getMonth(), 1);
-  await renderCalendar();
-  await openDay(dateKey(t));
-});
 
-// init
-(async () => {
-  try{
-    await loadOverallProgress();
-    await loadStrikes();
-    await renderCalendar();
-  }catch(err){
-    console.error(err);
-    alert('Failed to load calendar. Check server logs + DB connection.');
+
+/* =========================================
+   CALENDAR NAVIGATION
+========================================= */
+
+prevMonthBtn
+  .addEventListener(
+    'click',
+    async () => {
+
+      current =
+        new Date(
+          current.getFullYear(),
+          current.getMonth() - 1,
+          1
+        );
+
+
+      await renderCalendar();
+
+    }
+  );
+
+
+nextMonthBtn
+  .addEventListener(
+    'click',
+    async () => {
+
+      current =
+        new Date(
+          current.getFullYear(),
+          current.getMonth() + 1,
+          1
+        );
+
+
+      await renderCalendar();
+
+    }
+  );
+
+
+todayBtn
+  .addEventListener(
+    'click',
+    async () => {
+
+      const today =
+        new Date();
+
+
+      today.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+
+      current =
+        new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          1
+        );
+
+
+      await renderCalendar();
+
+
+      const key =
+        dateKey(today);
+
+
+      if (
+        isChallengeDate(
+          key
+        )
+      ){
+
+        await openDay(
+          key
+        );
+
+      }
+
+    }
+  );
+
+
+
+/* =========================================
+   SETUP BUTTONS
+========================================= */
+
+addTaskBtn
+  .addEventListener(
+    'click',
+    addSetupTask
+  );
+
+
+startChallengeBtn
+  .addEventListener(
+    'click',
+    startChallenge
+  );
+
+
+
+/* =========================================
+   APPLICATION BOOT
+========================================= */
+
+async function loadApplication(){
+
+  loadingScreen
+    .classList
+    .remove(
+      'd-none'
+    );
+
+
+  setupScreen
+    .classList
+    .add(
+      'd-none'
+    );
+
+
+  dashboardScreen
+    .classList
+    .add(
+      'd-none'
+    );
+
+
+  try {
+
+    const data =
+      await apiGet(
+        '/api/challenges/current'
+      );
+
+
+    challenge =
+      data.challenge;
+
+
+    if (!challenge){
+
+      showSetup();
+
+      return;
+
+    }
+
+
+    showDashboard();
+
+
+    await Promise.all([
+
+      loadOverallProgress(),
+
+      loadStrikes(),
+
+      renderCalendar()
+
+    ]);
+
   }
-})();
+  catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    loadingScreen.innerHTML =
+
+      `<div class="alert alert-danger">` +
+
+      `Failed to load SDT: ` +
+
+      `${error.message}` +
+
+      `</div>`;
+
+  }
+
+}
+
+
+loadApplication();

@@ -4,99 +4,208 @@
 
 .calendar-grid{
   display:grid;
-  grid-template-columns: repeat(7, minmax(var(--cell-min), 1fr));
-  gap: 8px;
+  grid-template-columns:
+    repeat(
+      7,
+      minmax(
+        var(--cell-min),
+        1fr
+      )
+    );
+  gap:8px;
 }
 
-@media (max-width: 768px){
-  :root{ --cell-min: 72px; }
+@media (max-width:768px){
+  :root{
+    --cell-min:72px;
+  }
 }
 
 .day-cell{
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  padding: 10px;
-  min-height: 110px;
-  cursor: pointer;
-  transition: transform .05s ease, box-shadow .05s ease;
-  background: white;
+  border:
+    1px solid
+    rgba(0,0,0,.08);
+
+  border-radius:12px;
+
+  padding:10px;
+
+  min-height:110px;
+
+  cursor:pointer;
+
+  transition:
+    transform .05s ease,
+    box-shadow .05s ease;
+
+  background:white;
 }
 
-.day-cell:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,.06);
+/*
+ * Only active challenge days
+ * get a hover effect.
+ */
+.day-cell:not(.outside-challenge):hover{
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 6px 16px
+    rgba(0,0,0,.06);
 }
 
+/*
+ * Dates from previous/next
+ * calendar month.
+ */
 .day-cell.muted{
-  opacity: .35;
+  opacity:.35;
+}
+
+/*
+ * Dates outside the challenge period.
+ *
+ * These are deliberately visually
+ * disabled and cannot be clicked
+ * because app.js does not attach
+ * a click handler to them.
+ */
+.day-cell.outside-challenge{
+  background:
+    #f5f6f8;
+
+  color:
+    #a8adb5;
+
+  opacity:.55;
+
+  cursor:
+    default;
+
+  border-color:
+    rgba(0,0,0,.05);
+}
+
+.day-cell.outside-challenge .day-sub{
+  color:
+    #a8adb5 !important;
 }
 
 .day-top{
   display:flex;
+
   align-items:center;
-  justify-content:space-between;
-  gap: 10px;
+
+  justify-content:
+    space-between;
+
+  gap:10px;
 }
 
 .day-num{
-  font-weight: 700;
-  font-size: 18px;
+  font-weight:700;
+
+  font-size:18px;
 }
 
 .ring{
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
+  width:34px;
+
+  height:34px;
+
+  border-radius:999px;
+
   display:grid;
+
   place-items:center;
-  font-size: 11px;
-  font-weight: 700;
-  border: 3px solid rgba(13,110,253,.25);
+
+  font-size:11px;
+
+  font-weight:700;
+
+  border:
+    3px solid
+    rgba(13,110,253,.25);
 }
 
 .ring[data-pct="100"]{
-  border-color: rgba(25,135,84,.8);
+  border-color:
+    rgba(25,135,84,.8);
 }
 
 .weekday-header{
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .02em;
-  text-transform: uppercase;
-  opacity: .65;
-  padding: 6px 10px;
+  font-size:12px;
+
+  font-weight:700;
+
+  letter-spacing:.02em;
+
+  text-transform:
+    uppercase;
+
+  opacity:.65;
+
+  padding:
+    6px 10px;
 }
 
-/* Calendar subtitle inside each cell */
+/*
+ * Calendar subtitle.
+ */
 .day-sub{
-  font-size: 12px;
-  opacity: .75;
-  margin-top: 6px;
-  line-height: 1.2;
+  font-size:12px;
+
+  opacity:.75;
+
+  margin-top:6px;
+
+  line-height:1.2;
 }
 
-/* Giant overall progress bar */
+/*
+ * Highlight today's challenge day.
+ */
+.day-cell.today-challenge{
+  outline:
+    2px solid
+    rgba(13,110,253,.35);
+
+  outline-offset:2px;
+}
+
+/*
+ * Overall challenge progress bar.
+ */
 .sdt-progress{
-  height: 22px;
-  border-radius: 999px;
+  height:22px;
+
+  border-radius:999px;
 }
 
 .sdt-progress .progress-bar{
-  font-weight: 700;
+  font-weight:700;
 }
 
-/* Strikes UI */
+/*
+ * Strikes UI.
+ */
 .strike-row{
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border:
+    1px solid
+    rgba(0,0,0,.08);
+
+  border-radius:12px;
+
+  padding:
+    10px 12px;
 }
 
 .strike-title{
-  font-weight: 600;
+  font-weight:600;
 }
 
 .strike-meta{
-  font-size: 12px;
-  opacity: .75;
+  font-size:12px;
+
+  opacity:.75;
 }

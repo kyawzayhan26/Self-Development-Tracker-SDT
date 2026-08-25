@@ -1,29 +1,18 @@
-/*
-    SDT Database Setup
-
-    Creates:
-    - SDT database
-    - Challenges
-    - Tasks
-    - DayStatus
-*/
-
----------------------------------------------------------
--- DATABASE
----------------------------------------------------------
-
-IF DB_ID(N'SDT') IS NULL
-BEGIN
-    CREATE DATABASE SDT;
-END
-GO
-
 USE SDT;
 GO
 
+/*
+    SDT Challenge System Migration
+
+    Adds:
+    - Challenges table
+    - challengeId relationship on Tasks
+
+    Existing Tasks / DayStatus records are preserved.
+*/
 
 ---------------------------------------------------------
--- CHALLENGES
+-- 1. Create Challenges table
 ---------------------------------------------------------
 
 IF OBJECT_ID(N'dbo.Challenges', N'U') IS NULL
@@ -66,76 +55,42 @@ GO
 
 
 ---------------------------------------------------------
--- TASKS
+-- 2. Add challengeId to Tasks
 ---------------------------------------------------------
 
-IF OBJECT_ID(N'dbo.Tasks', N'U') IS NULL
+IF COL_LENGTH('dbo.Tasks', 'challengeId') IS NULL
 BEGIN
 
-    CREATE TABLE dbo.Tasks
-    (
-        taskId INT IDENTITY(1,1) PRIMARY KEY,
-
-        challengeId INT NULL,
-
-        name NVARCHAR(200) NOT NULL,
-
-        isActive BIT NOT NULL
-            CONSTRAINT DF_Tasks_isActive
-            DEFAULT(1),
-
-        sortOrder INT NOT NULL
-            CONSTRAINT DF_Tasks_sortOrder
-            DEFAULT(0),
-
-        createdAt DATETIME2 NOT NULL
-            CONSTRAINT DF_Tasks_createdAt
-            DEFAULT(SYSDATETIME()),
-
-        CONSTRAINT FK_Tasks_Challenges
-            FOREIGN KEY (challengeId)
-            REFERENCES dbo.Challenges(challengeId)
-    );
+    ALTER TABLE dbo.Tasks
+    ADD challengeId INT NULL;
 
 END
 GO
 
 
 ---------------------------------------------------------
--- DAY STATUS
+-- 3. Add Challenge foreign key
 ---------------------------------------------------------
 
-IF OBJECT_ID(N'dbo.DayStatus', N'U') IS NULL
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_Tasks_Challenges'
+)
 BEGIN
 
-    CREATE TABLE dbo.DayStatus
-    (
-        dateKey DATE NOT NULL,
-
-        taskId INT NOT NULL,
-
-        isDone BIT NOT NULL
-            CONSTRAINT DF_DayStatus_isDone
-            DEFAULT(0),
-
-        updatedAt DATETIME2 NOT NULL
-            CONSTRAINT DF_DayStatus_updatedAt
-            DEFAULT(SYSDATETIME()),
-
-        CONSTRAINT PK_DayStatus
-            PRIMARY KEY (dateKey, taskId),
-
-        CONSTRAINT FK_DayStatus_Tasks
-            FOREIGN KEY (taskId)
-            REFERENCES dbo.Tasks(taskId)
-    );
+    ALTER TABLE dbo.Tasks
+    ADD CONSTRAINT FK_Tasks_Challenges
+        FOREIGN KEY (challengeId)
+        REFERENCES dbo.Challenges(challengeId);
 
 END
 GO
 
 
 ---------------------------------------------------------
--- INDEXES
+-- 4. Index for faster challenge task lookup
 ---------------------------------------------------------
 
 IF NOT EXISTS
@@ -154,5 +109,5 @@ END
 GO
 
 
-PRINT 'SDT database setup complete.';
+PRINT 'SDT challenge migration completed successfully.';
 GO

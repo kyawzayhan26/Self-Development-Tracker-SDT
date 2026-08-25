@@ -1,25 +1,114 @@
 const path = require('path');
 const express = require('express');
 
-const tasksRoutes = require('./routes/tasks.routes');
-const daysRoutes = require('./routes/days.routes');
-const { errorHandler } = require('./middleware/errorHandler');
+const tasksRoutes =
+  require('./routes/tasks.routes');
+
+const daysRoutes =
+  require('./routes/days.routes');
+
+const challengesRoutes =
+  require('./routes/challenges.routes');
+
+const {
+  errorHandler
+} = require('./middleware/errorHandler');
+
 
 const app = express();
 
-// Static frontend
-app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// API
-app.use('/api/tasks', tasksRoutes);
-app.use('/api/days', daysRoutes);
-app.use('/api/day', daysRoutes);       // /api/day/:dateKey
-app.use('/api/progress', daysRoutes);  // /api/progress/overall-progress + /api/progress/strikes
+/*
+ * JSON body parser
+ */
+app.use(
+  express.json()
+);
 
-// Health check
-app.get('/health', (req, res) => res.json({ ok: true, app: 'SDT' }));
 
-// Error handler (last)
-app.use(errorHandler);
+/*
+ * Static frontend
+ */
+app.use(
+  express.static(
+    path.join(
+      __dirname,
+      '..',
+      'public'
+    )
+  )
+);
 
-module.exports = { app };
+
+/*
+ * Challenge API
+ */
+app.use(
+  '/api/challenges',
+  challengesRoutes
+);
+
+
+/*
+ * Task API
+ */
+app.use(
+  '/api/tasks',
+  tasksRoutes
+);
+
+
+/*
+ * Calendar month API
+ */
+app.use(
+  '/api/days',
+  daysRoutes
+);
+
+
+/*
+ * Individual day API
+ */
+app.use(
+  '/api/day',
+  daysRoutes
+);
+
+
+/*
+ * Progress + strikes API
+ */
+app.use(
+  '/api/progress',
+  daysRoutes
+);
+
+
+/*
+ * Health check
+ */
+app.get(
+  '/health',
+  (req, res) => {
+
+    res.json({
+      ok: true,
+      app: 'SDT'
+    });
+
+  }
+);
+
+
+/*
+ * Error handler
+ */
+app.use(
+  errorHandler
+);
+
+
+module.exports = {
+  app
+};
