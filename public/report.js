@@ -3,15 +3,18 @@ const reportLoading =
     'reportLoading'
   );
 
+
 const reportError =
   document.getElementById(
     'reportError'
   );
 
+
 const reportErrorMessage =
   document.getElementById(
     'reportErrorMessage'
   );
+
 
 const reportContent =
   document.getElementById(
@@ -24,10 +27,12 @@ const reportChallengeName =
     'reportChallengeName'
   );
 
+
 const reportChallengeDates =
   document.getElementById(
     'reportChallengeDates'
   );
+
 
 const reportGeneratedAt =
   document.getElementById(
@@ -40,35 +45,42 @@ const metricCurrentDay =
     'metricCurrentDay'
   );
 
+
 const metricRecordedDays =
   document.getElementById(
     'metricRecordedDays'
   );
+
 
 const metricPerfectDays =
   document.getElementById(
     'metricPerfectDays'
   );
 
+
 const metricAverageCompletion =
   document.getElementById(
     'metricAverageCompletion'
   );
+
 
 const metricCompletedTasks =
   document.getElementById(
     'metricCompletedTasks'
   );
 
+
 const metricMissedTasks =
   document.getElementById(
     'metricMissedTasks'
   );
 
+
 const metricUnrecordedDays =
   document.getElementById(
     'metricUnrecordedDays'
   );
+
 
 const metricStrikesUsed =
   document.getElementById(
@@ -81,6 +93,7 @@ const reportProgressBar =
     'reportProgressBar'
   );
 
+
 const reportProgressText =
   document.getElementById(
     'reportProgressText'
@@ -92,15 +105,18 @@ const strongestRuleName =
     'strongestRuleName'
   );
 
+
 const strongestRuleMeta =
   document.getElementById(
     'strongestRuleMeta'
   );
 
+
 const weakestRuleName =
   document.getElementById(
     'weakestRuleName'
   );
+
 
 const weakestRuleMeta =
   document.getElementById(
@@ -113,6 +129,7 @@ const ruleTableBody =
     'ruleTableBody'
   );
 
+
 const dailyTableBody =
   document.getElementById(
     'dailyTableBody'
@@ -124,10 +141,35 @@ const printBtn =
     'printBtn'
   );
 
+
 const backBtn =
   document.getElementById(
     'backBtn'
   );
+
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+
+const reportMode =
+  params.get(
+    'type'
+  ) || 'progress';
+
+
+const challengeId =
+  params.get(
+    'challengeId'
+  );
+
+
+const autoPrint =
+  params.get(
+    'autoPrint'
+  ) === '1';
 
 
 function parseDate(value){
@@ -145,9 +187,16 @@ function prettyDate(value){
     .DateTimeFormat(
       undefined,
       {
-        month:'short',
-        day:'numeric',
-        year:'numeric'
+
+        month:
+          'short',
+
+        day:
+          'numeric',
+
+        year:
+          'numeric'
+
       }
     )
     .format(
@@ -162,8 +211,13 @@ function prettyDateTime(value){
     .DateTimeFormat(
       undefined,
       {
-        dateStyle:'medium',
-        timeStyle:'short'
+
+        dateStyle:
+          'medium',
+
+        timeStyle:
+          'short'
+
       }
     )
     .format(
@@ -174,13 +228,37 @@ function prettyDateTime(value){
 
 async function getReport(){
 
+  let endpoint =
+    '/api/reports/current';
+
+
+  if (
+    reportMode ===
+    'final'
+  ) {
+
+    if (!challengeId){
+
+      throw new Error(
+        'Missing challenge ID for final report.'
+      );
+    }
+
+
+    endpoint =
+      `/api/reports/challenge/${challengeId}/final`;
+  }
+
+
   const response =
     await fetch(
-      '/api/reports/current'
+      endpoint
     );
+
 
   const data =
     await response.json();
+
 
   if (!data.ok){
 
@@ -190,7 +268,39 @@ async function getReport(){
     );
   }
 
+
   return data;
+}
+
+
+function escapeHtml(value){
+
+  return String(value)
+
+    .replaceAll(
+      '&',
+      '&amp;'
+    )
+
+    .replaceAll(
+      '<',
+      '&lt;'
+    )
+
+    .replaceAll(
+      '>',
+      '&gt;'
+    )
+
+    .replaceAll(
+      '"',
+      '&quot;'
+    )
+
+    .replaceAll(
+      "'",
+      '&#039;'
+    );
 }
 
 
@@ -204,7 +314,7 @@ function renderRuleTable(
 
   for (
     const rule of rules
-  ){
+  ) {
 
     const row =
       document.createElement(
@@ -213,7 +323,9 @@ function renderRuleTable(
 
 
     const completion =
-      rule.completionPct === null
+
+      rule.completionPct ===
+      null
 
         ? '—'
 
@@ -222,7 +334,9 @@ function renderRuleTable(
 
     row.innerHTML = `
       <td>
-        <strong>${escapeHtml(rule.name)}</strong>
+        <strong>
+          ${escapeHtml(rule.name)}
+        </strong>
       </td>
 
       <td class="text-end">
@@ -251,7 +365,8 @@ function renderRuleTable(
 
 
 function renderDailyTable(
-  days
+  days,
+  isFinal
 ){
 
   dailyTableBody.innerHTML =
@@ -260,22 +375,32 @@ function renderDailyTable(
 
   if (
     days.length === 0
-  ){
+  ) {
 
     const row =
       document.createElement(
         'tr'
       );
 
+
     row.innerHTML = `
-      <td colspan="5" class="text-center report-muted py-4">
-        The challenge has not started yet.
+      <td
+        colspan="5"
+        class="text-center report-muted py-4"
+      >
+        ${
+          isFinal
+            ? 'No challenge days were reached before this challenge ended.'
+            : 'The challenge has not started yet.'
+        }
       </td>
     `;
+
 
     dailyTableBody.appendChild(
       row
     );
+
 
     return;
   }
@@ -283,7 +408,7 @@ function renderDailyTable(
 
   for (
     const day of days
-  ){
+  ) {
 
     const row =
       document.createElement(
@@ -291,7 +416,9 @@ function renderDailyTable(
       );
 
 
-    if (!day.isRecorded){
+    if (
+      !day.isRecorded
+    ) {
 
       row.classList.add(
         'unrecorded-row'
@@ -300,6 +427,7 @@ function renderDailyTable(
 
 
     const status =
+
       day.isRecorded
 
         ? (
@@ -312,6 +440,7 @@ function renderDailyTable(
 
 
     const completed =
+
       day.isRecorded
 
         ? `${day.completedCount}/${day.totalTasks}`
@@ -320,7 +449,9 @@ function renderDailyTable(
 
 
     const completion =
-      day.completionPct === null
+
+      day.completionPct ===
+      null
 
         ? '—'
 
@@ -366,10 +497,12 @@ function renderHighlight(
   if (!rule){
 
     elementName.textContent =
-      'Not enough data yet';
+      'Not enough data';
+
 
     elementMeta.textContent =
-      'Record at least one day to calculate this.';
+      'No recorded performance data is available.';
+
 
     return;
   }
@@ -380,8 +513,24 @@ function renderHighlight(
 
 
   elementMeta.textContent =
+
     `${rule.completionPct}% completion · ` +
+
     `${rule.completedDays}/${rule.recordedDays} recorded days completed`;
+}
+
+
+function finalReportToken(
+  challenge
+){
+
+  return (
+
+    `${challenge.challengeId}:` +
+
+    `${challenge.completedAt || ''}`
+
+  );
 }
 
 
@@ -392,23 +541,116 @@ function renderReport(
   const challenge =
     data.challenge;
 
+
   const summary =
     data.summary;
 
 
+  const isFinal =
+    data.reportType ===
+    'FINAL';
+
+
   document.title =
-    `${challenge.name} - SDT Progress Report`;
+
+    isFinal
+
+      ? `${challenge.name} - SDT Final Challenge Report`
+
+      : `${challenge.name} - SDT Progress Report`;
+
+
+  /*
+   * Existing report.html has this element
+   * as the second div inside the report header.
+   */
+  const reportTypeElement =
+    document.querySelector(
+      '.report-type'
+    );
+
+
+  if (
+    reportTypeElement
+  ) {
+
+    reportTypeElement.textContent =
+
+      isFinal
+
+        ? 'Final Challenge Report'
+
+        : 'Challenge Progress Report';
+  }
+
+
+  const challengeLabel =
+    document.querySelector(
+      '.report-label'
+    );
+
+
+  if (
+    challengeLabel
+  ) {
+
+    challengeLabel.textContent =
+
+      isFinal
+
+        ? 'Completed Challenge'
+
+        : 'Active Challenge';
+  }
 
 
   reportChallengeName.textContent =
     challenge.name;
 
 
-  reportChallengeDates.textContent =
+  let detailText =
+
     `${prettyDate(challenge.startDate)} – ` +
+
     `${prettyDate(challenge.endDate)} · ` +
+
     `${challenge.durationDays} days · ` +
+
     `${challenge.totalTasks} rules`;
+
+
+  if (
+    isFinal
+  ) {
+
+    if (
+      challenge.completionReason ===
+      'MANUAL'
+    ) {
+
+      detailText +=
+        ' · Ended manually';
+
+    }
+    else {
+
+      detailText +=
+        ' · Completed naturally';
+    }
+
+
+    if (
+      challenge.completedAt
+    ) {
+
+      detailText +=
+        ` · Closed ${prettyDateTime(challenge.completedAt)}`;
+    }
+  }
+
+
+  reportChallengeDates.textContent =
+    detailText;
 
 
   reportGeneratedAt.textContent =
@@ -416,14 +658,12 @@ function renderReport(
 
 
   metricCurrentDay.textContent =
-    summary.currentDayNumber > 0
 
-      ? `${summary.currentDayNumber}/${challenge.durationDays}`
-
-      : `0/${challenge.durationDays}`;
+    `${summary.currentDayNumber}/${challenge.durationDays}`;
 
 
   metricRecordedDays.textContent =
+
     `${summary.recordedDays}/${summary.elapsedDays}`;
 
 
@@ -455,23 +695,68 @@ function renderReport(
     `${summary.overallChallengeProgressPct}%`;
 
 
-  reportProgressText.textContent =
-    `${summary.overallChallengeProgressPct}% of the full challenge completed as perfect days ` +
-    `(${summary.perfectDays}/${challenge.durationDays}). ` +
-    `${summary.remainingDays} planned day(s) remain.`;
+  if (
+    isFinal
+  ) {
+
+    if (
+      challenge.completionReason ===
+      'MANUAL' &&
+
+      summary.elapsedDays <
+      challenge.durationDays
+    ) {
+
+      reportProgressText.textContent =
+
+        `${summary.overallChallengeProgressPct}% of the planned challenge was completed as perfect days ` +
+
+        `(${summary.perfectDays}/${challenge.durationDays}). ` +
+
+        `The challenge was manually ended after ${summary.elapsedDays} of ${challenge.durationDays} planned day(s).`;
+
+    }
+    else {
+
+      reportProgressText.textContent =
+
+        `${summary.overallChallengeProgressPct}% of the full challenge was completed as perfect days ` +
+
+        `(${summary.perfectDays}/${challenge.durationDays}).`;
+    }
+
+  }
+  else {
+
+    reportProgressText.textContent =
+
+      `${summary.overallChallengeProgressPct}% of the full challenge completed as perfect days ` +
+
+      `(${summary.perfectDays}/${challenge.durationDays}). ` +
+
+      `${summary.remainingDays} planned day(s) remain.`;
+  }
 
 
   renderHighlight(
+
     strongestRuleName,
+
     strongestRuleMeta,
+
     data.strongestRule
+
   );
 
 
   renderHighlight(
+
     weakestRuleName,
+
     weakestRuleMeta,
+
     data.weakestRule
+
   );
 
 
@@ -481,34 +766,29 @@ function renderReport(
 
 
   renderDailyTable(
-    data.days
+    data.days,
+    isFinal
   );
-}
 
 
-function escapeHtml(value){
+  /*
+   * Remember that this final report
+   * has already been surfaced.
+   */
+  if (
+    isFinal
+  ) {
 
-  return String(value)
-    .replaceAll(
-      '&',
-      '&amp;'
-    )
-    .replaceAll(
-      '<',
-      '&lt;'
-    )
-    .replaceAll(
-      '>',
-      '&gt;'
-    )
-    .replaceAll(
-      '"',
-      '&quot;'
-    )
-    .replaceAll(
-      "'",
-      '&#039;'
+    localStorage.setItem(
+
+      'sdtLastFinalReportToken',
+
+      finalReportToken(
+        challenge
+      )
+
     );
+  }
 }
 
 
@@ -527,24 +807,53 @@ async function loadReport(){
 
     reportLoading
       .classList
-      .add('d-none');
+      .add(
+        'd-none'
+      );
 
 
     reportContent
       .classList
-      .remove('d-none');
+      .remove(
+        'd-none'
+      );
+
+
+    /*
+     * Manual end or automatic natural
+     * completion can request automatic print.
+     */
+    if (
+      autoPrint &&
+      data.reportType ===
+      'FINAL'
+    ) {
+
+      setTimeout(
+        () => {
+
+          window.print();
+
+        },
+        600
+      );
+    }
 
   }
   catch (error) {
 
     reportLoading
       .classList
-      .add('d-none');
+      .add(
+        'd-none'
+      );
 
 
     reportError
       .classList
-      .remove('d-none');
+      .remove(
+        'd-none'
+      );
 
 
     reportErrorMessage.textContent =
@@ -569,17 +878,9 @@ backBtn
     'click',
     () => {
 
-      if (
-        window.opener
-      ){
-
-        window.close();
-
-        return;
-      }
-
       window.location.href =
         '/';
+
     }
   );
 

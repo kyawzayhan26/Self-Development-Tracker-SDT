@@ -5,20 +5,15 @@
     ============================================================
 
     WARNING:
-    Running this script will DELETE the entire SDT database
-    including:
+    Running this script will DELETE the entire SDT database.
 
+    This includes:
     - All challenges
     - All tasks / rules
     - All daily progress
     - All strike history
     - All test data
 
-    The database is then recreated from scratch.
-
-    Use this during development whenever you want a clean reset.
-
-    IMPORTANT:
     Stop the SDT Node.js server before running this script.
     ============================================================
 */
@@ -29,7 +24,7 @@ GO
 
 
 /* ============================================================
-   1. DELETE EXISTING SDT DATABASE
+   1. DELETE EXISTING DATABASE
    ============================================================ */
 
 IF DB_ID(N'SDT') IS NOT NULL
@@ -60,16 +55,14 @@ GO
 
 
 /* ============================================================
-   2. CREATE FRESH DATABASE
+   2. CREATE DATABASE
    ============================================================ */
 
 PRINT 'Creating fresh SDT database...';
 GO
 
-
 CREATE DATABASE SDT;
 GO
-
 
 USE SDT;
 GO
@@ -77,7 +70,7 @@ GO
 
 
 /* ============================================================
-   3. CHALLENGES TABLE
+   3. CHALLENGES
    ============================================================ */
 
 PRINT 'Creating Challenges table...';
@@ -110,13 +103,34 @@ CREATE TABLE dbo.Challenges
         CONSTRAINT DF_Challenges_Status
         DEFAULT(N'ACTIVE'),
 
+    /*
+        Filled when a challenge finishes.
+
+        This allows final reports to know the
+        real end point of a manually-ended
+        challenge.
+    */
+    completedAt DATETIME2
+        NULL,
+
+    /*
+        NULL while active.
+
+        MANUAL =
+            End Challenge button used.
+
+        NATURAL =
+            Challenge reached its planned end.
+    */
+    completionReason NVARCHAR(20)
+        NULL,
+
     createdAt DATETIME2
         NOT NULL
         CONSTRAINT DF_Challenges_CreatedAt
         DEFAULT(SYSDATETIME()),
 
 
-    /* Challenge length: 1 - 365 days */
     CONSTRAINT CK_Challenges_Duration
         CHECK
         (
@@ -124,7 +138,6 @@ CREATE TABLE dbo.Challenges
         ),
 
 
-    /* Strike allowance: 0 - 99 */
     CONSTRAINT CK_Challenges_Strikes
         CHECK
         (
@@ -132,7 +145,6 @@ CREATE TABLE dbo.Challenges
         ),
 
 
-    /* Currently supported challenge states */
     CONSTRAINT CK_Challenges_Status
         CHECK
         (
@@ -141,6 +153,19 @@ CREATE TABLE dbo.Challenges
                 N'ACTIVE',
                 N'COMPLETED'
             )
+        ),
+
+
+    CONSTRAINT CK_Challenges_CompletionReason
+        CHECK
+        (
+            completionReason IS NULL
+            OR
+            completionReason IN
+            (
+                N'MANUAL',
+                N'NATURAL'
+            )
         )
 );
 GO
@@ -148,7 +173,7 @@ GO
 
 
 /* ============================================================
-   4. TASKS TABLE
+   4. TASKS
    ============================================================ */
 
 PRINT 'Creating Tasks table...';
@@ -199,7 +224,7 @@ GO
 
 
 /* ============================================================
-   5. DAY STATUS TABLE
+   5. DAY STATUS
    ============================================================ */
 
 PRINT 'Creating DayStatus table...';
@@ -225,10 +250,6 @@ CREATE TABLE dbo.DayStatus
         DEFAULT(SYSDATETIME()),
 
 
-    /*
-        A task can only have one status
-        for each calendar date.
-    */
     CONSTRAINT PK_DayStatus
         PRIMARY KEY
         (
@@ -259,10 +280,6 @@ PRINT 'Creating indexes...';
 GO
 
 
-/*
-    Faster lookup of all tasks belonging
-    to a particular challenge.
-*/
 CREATE INDEX IX_Tasks_ChallengeId
 ON dbo.Tasks
 (
@@ -271,10 +288,6 @@ ON dbo.Tasks
 GO
 
 
-/*
-    Faster lookup of challenge tasks
-    in their checklist display order.
-*/
 CREATE INDEX IX_Tasks_Challenge_SortOrder
 ON dbo.Tasks
 (
@@ -284,9 +297,6 @@ ON dbo.Tasks
 GO
 
 
-/*
-    Faster lookup of task status history.
-*/
 CREATE INDEX IX_DayStatus_TaskId
 ON dbo.DayStatus
 (
@@ -295,9 +305,25 @@ ON dbo.DayStatus
 GO
 
 
+CREATE INDEX IX_Challenges_Status
+ON dbo.Challenges
+(
+    status
+);
+GO
+
+
+CREATE INDEX IX_Challenges_CompletedAt
+ON dbo.Challenges
+(
+    completedAt
+);
+GO
+
+
 
 /* ============================================================
-   7. VERIFY DATABASE
+   7. VERIFICATION
    ============================================================ */
 
 PRINT '';
@@ -314,17 +340,10 @@ PRINT '  - DayStatus';
 PRINT '';
 
 PRINT 'No challenge has been created.';
-PRINT 'No tasks have been seeded.';
-PRINT 'Open SDT and create your challenge using the setup screen.';
+PRINT 'Open SDT and create one through the setup screen.';
 PRINT '';
-
 GO
 
-
-
-/* ============================================================
-   OPTIONAL VERIFICATION OUTPUT
-   ============================================================ */
 
 SELECT
     TABLE_NAME AS tableName

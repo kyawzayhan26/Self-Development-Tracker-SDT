@@ -31,10 +31,12 @@ const loadingScreen =
     'loadingScreen'
   );
 
+
 const setupScreen =
   document.getElementById(
     'setupScreen'
   );
+
 
 const dashboardScreen =
   document.getElementById(
@@ -47,35 +49,42 @@ const challengeNameInput =
     'challengeName'
   );
 
+
 const challengeStartInput =
   document.getElementById(
     'challengeStartDate'
   );
+
 
 const challengeDurationInput =
   document.getElementById(
     'challengeDuration'
   );
 
+
 const challengeStrikesInput =
   document.getElementById(
     'challengeStrikes'
   );
+
 
 const setupTasksList =
   document.getElementById(
     'setupTasksList'
   );
 
+
 const setupValidation =
   document.getElementById(
     'setupValidation'
   );
 
+
 const addTaskBtn =
   document.getElementById(
     'addTaskBtn'
   );
+
 
 const startChallengeBtn =
   document.getElementById(
@@ -88,10 +97,12 @@ const activeChallengeName =
     'activeChallengeName'
   );
 
+
 const activeChallengeDates =
   document.getElementById(
     'activeChallengeDates'
   );
+
 
 const activeChallengeMeta =
   document.getElementById(
@@ -110,15 +121,18 @@ const confirmEndChallengeBtn =
     'confirmEndChallengeBtn'
   );
 
+
 const endChallengeStatus =
   document.getElementById(
     'endChallengeStatus'
   );
 
+
 const endChallengeModalEl =
   document.getElementById(
     'endChallengeModal'
   );
+
 
 const endChallengeModal =
   new bootstrap.Modal(
@@ -131,6 +145,7 @@ const monthLabel =
     'monthLabel'
   );
 
+
 const calendarGrid =
   document.getElementById(
     'calendarGrid'
@@ -142,10 +157,12 @@ const prevMonthBtn =
     'prevMonth'
   );
 
+
 const nextMonthBtn =
   document.getElementById(
     'nextMonth'
   );
+
 
 const todayBtn =
   document.getElementById(
@@ -158,10 +175,12 @@ const overallText =
     'overallText'
   );
 
+
 const overallMeta =
   document.getElementById(
     'overallMeta'
   );
+
 
 const overallBar =
   document.getElementById(
@@ -174,6 +193,7 @@ const strikesMeta =
     'strikesMeta'
   );
 
+
 const strikesList =
   document.getElementById(
     'strikesList'
@@ -184,6 +204,7 @@ const dayModalEl =
   document.getElementById(
     'dayModal'
   );
+
 
 const dayModal =
   new bootstrap.Modal(
@@ -196,15 +217,18 @@ const dayModalDate =
     'dayModalDate'
   );
 
+
 const tasksList =
   document.getElementById(
     'tasksList'
   );
 
+
 const saveBtn =
   document.getElementById(
     'saveBtn'
   );
+
 
 const saveStatus =
   document.getElementById(
@@ -213,6 +237,7 @@ const saveStatus =
 
 
 const weekdayNames = [
+
   'Mon',
   'Tue',
   'Wed',
@@ -220,6 +245,7 @@ const weekdayNames = [
   'Fri',
   'Sat',
   'Sun'
+
 ];
 
 
@@ -232,8 +258,10 @@ async function apiGet(url){
   const response =
     await fetch(url);
 
+
   const data =
     await response.json();
+
 
   if (!data.ok){
 
@@ -241,8 +269,8 @@ async function apiGet(url){
       data.error ||
       'Request failed'
     );
-
   }
+
 
   return data;
 }
@@ -257,7 +285,9 @@ async function apiPost(
     await fetch(
       url,
       {
-        method:'POST',
+
+        method:
+          'POST',
 
         headers:{
           'Content-Type':
@@ -265,12 +295,17 @@ async function apiPost(
         },
 
         body:
-          JSON.stringify(body)
+          JSON.stringify(
+            body
+          )
+
       }
     );
 
+
   const data =
     await response.json();
+
 
   if (!data.ok){
 
@@ -278,8 +313,8 @@ async function apiPost(
       data.error ||
       'Request failed'
     );
-
   }
+
 
   return data;
 }
@@ -294,7 +329,9 @@ async function apiPut(
     await fetch(
       url,
       {
-        method:'PUT',
+
+        method:
+          'PUT',
 
         headers:{
           'Content-Type':
@@ -302,12 +339,17 @@ async function apiPut(
         },
 
         body:
-          JSON.stringify(body)
+          JSON.stringify(
+            body
+          )
+
       }
     );
 
+
   const data =
     await response.json();
+
 
   if (!data.ok){
 
@@ -315,8 +357,8 @@ async function apiPut(
       data.error ||
       'Save failed'
     );
-
   }
+
 
   return data;
 }
@@ -339,9 +381,17 @@ function pad2(value){
 function dateKey(date){
 
   return (
+
     `${date.getFullYear()}-` +
-    `${pad2(date.getMonth() + 1)}-` +
-    `${pad2(date.getDate())}`
+
+    `${pad2(
+      date.getMonth() + 1
+    )}-` +
+
+    `${pad2(
+      date.getDate()
+    )}`
+
   );
 }
 
@@ -349,8 +399,13 @@ function dateKey(date){
 function monthKey(date){
 
   return (
+
     `${date.getFullYear()}-` +
-    `${pad2(date.getMonth() + 1)}`
+
+    `${pad2(
+      date.getMonth() + 1
+    )}`
+
   );
 }
 
@@ -369,16 +424,26 @@ function prettyDate(value){
   const date =
     parseDate(value);
 
+
   return new Intl
     .DateTimeFormat(
       undefined,
       {
-        month:'short',
-        day:'numeric',
-        year:'numeric'
+
+        month:
+          'short',
+
+        day:
+          'numeric',
+
+        year:
+          'numeric'
+
       }
     )
-    .format(date);
+    .format(
+      date
+    );
 }
 
 
@@ -403,23 +468,33 @@ function isChallengeDate(
 ){
 
   if (!challenge){
+
     return false;
   }
 
+
   const date =
-    parseDate(value);
+    parseDate(
+      value
+    );
+
 
   const start =
     parseDate(
       challenge.startDate
     );
 
+
   const end =
     challengeEndDate();
 
+
   return (
+
     date >= start &&
+
     date <= end
+
   );
 }
 
@@ -429,33 +504,150 @@ function challengeDayNumber(
 ){
 
   if (
-    !isChallengeDate(value)
-  ){
+    !isChallengeDate(
+      value
+    )
+  ) {
 
     return null;
   }
 
+
   const date =
-    parseDate(value);
+    parseDate(
+      value
+    );
+
 
   const start =
     parseDate(
       challenge.startDate
     );
 
+
   return (
+
     Math.round(
       (
         date - start
       ) /
       86400000
     ) + 1
+
   );
 }
 
 
 /* =========================================
-   SETUP SCREEN
+   FINAL REPORT HELPERS
+========================================= */
+
+function finalReportToken(
+  completedChallenge
+){
+
+  return (
+
+    `${completedChallenge.challengeId}:` +
+
+    `${completedChallenge.completedAt || ''}`
+
+  );
+}
+
+
+async function checkNaturalFinalReport(){
+
+  try {
+
+    const data =
+      await apiGet(
+        '/api/challenges/latest-completed'
+      );
+
+
+    const completedChallenge =
+      data.challenge;
+
+
+    if (
+      !completedChallenge
+    ) {
+
+      return false;
+    }
+
+
+    if (
+      completedChallenge
+        .completionReason !==
+      'NATURAL'
+    ) {
+
+      return false;
+    }
+
+
+    const token =
+      finalReportToken(
+        completedChallenge
+      );
+
+
+    const lastShown =
+      localStorage.getItem(
+        'sdtLastFinalReportToken'
+      );
+
+
+    if (
+      token ===
+      lastShown
+    ) {
+
+      return false;
+    }
+
+
+    /*
+     * Store before redirect to avoid
+     * redirect loops if printing is cancelled.
+     */
+    localStorage.setItem(
+      'sdtLastFinalReportToken',
+      token
+    );
+
+
+    window.location.href =
+
+      `/report.html?` +
+
+      `type=final&` +
+
+      `challengeId=${completedChallenge.challengeId}&` +
+
+      `autoPrint=1`;
+
+
+    return true;
+
+  }
+  catch (error) {
+
+    console.error(
+      'Final report check failed:',
+      error
+    );
+
+
+    return false;
+  }
+}
+
+
+/* =========================================
+   SETUP
 ========================================= */
 
 function tomorrowDateKey(){
@@ -463,15 +655,23 @@ function tomorrowDateKey(){
   const date =
     new Date();
 
+
   date.setHours(
-    0,0,0,0
+    0,
+    0,
+    0,
+    0
   );
+
 
   date.setDate(
     date.getDate() + 1
   );
 
-  return dateKey(date);
+
+  return dateKey(
+    date
+  );
 }
 
 
@@ -480,20 +680,26 @@ function initializeSetup(){
   challengeNameInput.value =
     '';
 
+
   challengeStartInput.value =
     tomorrowDateKey();
+
 
   challengeDurationInput.value =
     30;
 
+
   challengeStrikesInput.value =
     3;
+
 
   setupTasks = [
     ''
   ];
 
+
   clearSetupError();
+
 
   renderSetupTasks();
 }
@@ -501,19 +707,30 @@ function initializeSetup(){
 
 function showSetup(){
 
-  challenge = null;
+  challenge =
+    null;
+
 
   loadingScreen
     .classList
-    .add('d-none');
+    .add(
+      'd-none'
+    );
+
 
   dashboardScreen
     .classList
-    .add('d-none');
+    .add(
+      'd-none'
+    );
+
 
   setupScreen
     .classList
-    .remove('d-none');
+    .remove(
+      'd-none'
+    );
+
 
   initializeSetup();
 }
@@ -521,9 +738,13 @@ function showSetup(){
 
 function addSetupTask(){
 
-  setupTasks.push('');
+  setupTasks.push(
+    ''
+  );
+
 
   renderSetupTasks();
+
 
   setTimeout(
     () => {
@@ -533,6 +754,7 @@ function addSetupTask(){
           .querySelectorAll(
             '.setup-task-input'
           );
+
 
       inputs[
         inputs.length - 1
@@ -551,12 +773,16 @@ function removeSetupTask(index){
     1
   );
 
+
   if (
     setupTasks.length === 0
-  ){
+  ) {
 
-    setupTasks.push('');
+    setupTasks.push(
+      ''
+    );
   }
+
 
   renderSetupTasks();
 }
@@ -568,25 +794,32 @@ function moveSetupTask(
 ){
 
   const target =
-    index + direction;
+    index +
+    direction;
+
 
   if (
     target < 0 ||
+
     target >=
-      setupTasks.length
-  ){
+    setupTasks.length
+  ) {
 
     return;
   }
 
+
   const temp =
     setupTasks[index];
+
 
   setupTasks[index] =
     setupTasks[target];
 
+
   setupTasks[target] =
     temp;
+
 
   renderSetupTasks();
 }
@@ -596,6 +829,7 @@ function renderSetupTasks(){
 
   setupTasksList.innerHTML =
     '';
+
 
   setupTasks.forEach(
     (
@@ -608,6 +842,7 @@ function renderSetupTasks(){
           'div'
         );
 
+
       row.className =
         'setup-task-row';
 
@@ -617,8 +852,10 @@ function renderSetupTasks(){
           'div'
         );
 
+
       number.className =
         'setup-task-number';
+
 
       number.textContent =
         index + 1;
@@ -629,17 +866,22 @@ function renderSetupTasks(){
           'input'
         );
 
+
       input.type =
         'text';
+
 
       input.maxLength =
         200;
 
+
       input.className =
         'form-control setup-task-input';
 
+
       input.placeholder =
         'Example: Walk 10,000 steps';
+
 
       input.value =
         task;
@@ -663,7 +905,7 @@ function renderSetupTasks(){
           if (
             event.key ===
             'Enter'
-          ){
+          ) {
 
             event.preventDefault();
 
@@ -679,6 +921,7 @@ function renderSetupTasks(){
           'div'
         );
 
+
       actions.className =
         'setup-task-actions';
 
@@ -688,17 +931,22 @@ function renderSetupTasks(){
           'button'
         );
 
+
       up.type =
         'button';
+
 
       up.className =
         'btn btn-outline-secondary btn-sm';
 
+
       up.textContent =
         '↑';
 
+
       up.disabled =
         index === 0;
+
 
       up.addEventListener(
         'click',
@@ -715,18 +963,23 @@ function renderSetupTasks(){
           'button'
         );
 
+
       down.type =
         'button';
+
 
       down.className =
         'btn btn-outline-secondary btn-sm';
 
+
       down.textContent =
         '↓';
+
 
       down.disabled =
         index ===
         setupTasks.length - 1;
+
 
       down.addEventListener(
         'click',
@@ -743,32 +996,62 @@ function renderSetupTasks(){
           'button'
         );
 
+
       remove.type =
         'button';
+
 
       remove.className =
         'btn btn-outline-danger btn-sm';
 
+
       remove.textContent =
         'Remove';
+
 
       remove.addEventListener(
         'click',
         () =>
-          removeSetupTask(index)
+          removeSetupTask(
+            index
+          )
       );
 
 
-      actions.appendChild(up);
-      actions.appendChild(down);
-      actions.appendChild(remove);
+      actions.appendChild(
+        up
+      );
 
-      row.appendChild(number);
-      row.appendChild(input);
-      row.appendChild(actions);
 
-      setupTasksList
-        .appendChild(row);
+      actions.appendChild(
+        down
+      );
+
+
+      actions.appendChild(
+        remove
+      );
+
+
+      row.appendChild(
+        number
+      );
+
+
+      row.appendChild(
+        input
+      );
+
+
+      row.appendChild(
+        actions
+      );
+
+
+      setupTasksList.appendChild(
+        row
+      );
+
     }
   );
 }
@@ -781,9 +1064,12 @@ function showSetupError(
   setupValidation.textContent =
     message;
 
+
   setupValidation
     .classList
-    .remove('d-none');
+    .remove(
+      'd-none'
+    );
 }
 
 
@@ -791,7 +1077,10 @@ function clearSetupError(){
 
   setupValidation
     .classList
-    .add('d-none');
+    .add(
+      'd-none'
+    );
+
 
   setupValidation.textContent =
     '';
@@ -802,13 +1091,18 @@ async function startChallenge(){
 
   clearSetupError();
 
+
   const tasks =
     setupTasks
+
       .map(
         task =>
           task.trim()
       )
-      .filter(Boolean);
+
+      .filter(
+        Boolean
+      );
 
 
   const payload = {
@@ -835,10 +1129,13 @@ async function startChallenge(){
       ),
 
     tasks
+
   };
 
 
-  if (!payload.name){
+  if (
+    !payload.name
+  ) {
 
     return showSetupError(
       'Enter a challenge name.'
@@ -846,7 +1143,9 @@ async function startChallenge(){
   }
 
 
-  if (!payload.startDate){
+  if (
+    !payload.startDate
+  ) {
 
     return showSetupError(
       'Choose a start date.'
@@ -856,7 +1155,7 @@ async function startChallenge(){
 
   if (
     tasks.length === 0
-  ){
+  ) {
 
     return showSetupError(
       'Add at least one rule or task.'
@@ -866,6 +1165,7 @@ async function startChallenge(){
 
   startChallengeBtn.disabled =
     true;
+
 
   startChallengeBtn.textContent =
     'Starting...';
@@ -877,6 +1177,7 @@ async function startChallenge(){
       '/api/challenges/start',
       payload
     );
+
 
     await loadApplication();
 
@@ -893,6 +1194,7 @@ async function startChallenge(){
     startChallengeBtn.disabled =
       false;
 
+
     startChallengeBtn.textContent =
       'Start Challenge';
   }
@@ -906,8 +1208,10 @@ async function startChallenge(){
 function openProgressReport(){
 
   if (!challenge){
+
     return;
   }
+
 
   window.open(
     '/report.html',
@@ -923,6 +1227,7 @@ function openProgressReport(){
 async function endCurrentChallenge(){
 
   if (!challenge){
+
     return;
   }
 
@@ -930,8 +1235,10 @@ async function endCurrentChallenge(){
   confirmEndChallengeBtn.disabled =
     true;
 
+
   confirmEndChallengeBtn.textContent =
     'Ending...';
+
 
   endChallengeStatus.textContent =
     '';
@@ -939,19 +1246,30 @@ async function endCurrentChallenge(){
 
   try {
 
-    await apiPost(
-      '/api/challenges/current/end'
-    );
+    const result =
+      await apiPost(
+        '/api/challenges/current/end'
+      );
 
 
     endChallengeModal.hide();
 
-    challenge = null;
 
-    openDateKey = null;
-    openTasks = [];
+    /*
+     * Go directly to the final report.
+     *
+     * Same-window navigation means this
+     * cannot be blocked as a popup.
+     */
+    window.location.href =
 
-    await loadApplication();
+      `/report.html?` +
+
+      `type=final&` +
+
+      `challengeId=${result.challengeId}&` +
+
+      `autoPrint=1`;
 
   }
   catch (error) {
@@ -959,11 +1277,10 @@ async function endCurrentChallenge(){
     endChallengeStatus.textContent =
       error.message;
 
-  }
-  finally {
 
     confirmEndChallengeBtn.disabled =
       false;
+
 
     confirmEndChallengeBtn.textContent =
       'End Challenge';
@@ -979,15 +1296,23 @@ function showDashboard(){
 
   loadingScreen
     .classList
-    .add('d-none');
+    .add(
+      'd-none'
+    );
+
 
   setupScreen
     .classList
-    .add('d-none');
+    .add(
+      'd-none'
+    );
+
 
   dashboardScreen
     .classList
-    .remove('d-none');
+    .remove(
+      'd-none'
+    );
 
 
   activeChallengeName.textContent =
@@ -995,21 +1320,34 @@ function showDashboard(){
 
 
   activeChallengeDates.textContent =
-    `${prettyDate(challenge.startDate)} – ` +
-    `${prettyDate(challenge.endDate)}`;
+
+    `${prettyDate(
+      challenge.startDate
+    )} – ` +
+
+    `${prettyDate(
+      challenge.endDate
+    )}`;
 
 
   activeChallengeMeta.textContent =
+
     `${challenge.durationDays} days · ` +
+
     `${challenge.tasks.length} rules · ` +
+
     `${challenge.strikesAllowed} strikes per rule`;
 
 
   const today =
     new Date();
 
+
   today.setHours(
-    0,0,0,0
+    0,
+    0,
+    0,
+    0
   );
 
 
@@ -1017,6 +1355,7 @@ function showDashboard(){
     parseDate(
       challenge.startDate
     );
+
 
   const end =
     parseDate(
@@ -1027,7 +1366,9 @@ function showDashboard(){
   let targetMonth;
 
 
-  if (today < start){
+  if (
+    today < start
+  ) {
 
     targetMonth =
       start;
@@ -1035,7 +1376,7 @@ function showDashboard(){
   }
   else if (
     today > end
-  ){
+  ) {
 
     targetMonth =
       end;
@@ -1050,9 +1391,13 @@ function showDashboard(){
 
   current =
     new Date(
+
       targetMonth.getFullYear(),
+
       targetMonth.getMonth(),
+
       1
+
     );
 }
 
@@ -1072,18 +1417,24 @@ async function loadOverallProgress(){
   overallText.textContent =
     `${data.pct}% complete`;
 
+
   overallMeta.textContent =
     `${data.completedDays}/${data.days} days completed`;
+
 
   overallBar.style.width =
     `${data.pct}%`;
 
+
   overallBar.textContent =
     `${data.pct}%`;
 
+
   overallBar.setAttribute(
     'aria-valuenow',
-    String(data.pct)
+    String(
+      data.pct
+    )
   );
 }
 
@@ -1101,7 +1452,9 @@ async function loadStrikes(){
 
 
   strikesMeta.textContent =
+
     `${data.strikesAllowed} strikes per rule · ` +
+
     `${data.recordedDays} recorded day(s)`;
 
 
@@ -1111,12 +1464,13 @@ async function loadStrikes(){
 
   for (
     const task of data.tasks
-  ){
+  ) {
 
     const row =
       document.createElement(
         'div'
       );
+
 
     row.className =
       'strike-row';
@@ -1127,6 +1481,7 @@ async function loadStrikes(){
         'div'
       );
 
+
     top.className =
       'd-flex justify-content-between align-items-start gap-3';
 
@@ -1136,8 +1491,10 @@ async function loadStrikes(){
         'div'
       );
 
+
     title.className =
       'strike-title';
+
 
     title.textContent =
       task.name;
@@ -1151,7 +1508,7 @@ async function loadStrikes(){
 
     if (
       task.strikesLeft === 0
-    ){
+    ) {
 
       badge.className =
         'badge text-bg-danger';
@@ -1159,7 +1516,7 @@ async function loadStrikes(){
     }
     else if (
       task.strikesLeft === 1
-    ){
+    ) {
 
       badge.className =
         'badge text-bg-warning';
@@ -1181,22 +1538,41 @@ async function loadStrikes(){
         'div'
       );
 
+
     meta.className =
       'strike-meta text-secondary mt-1';
 
+
     meta.textContent =
+
       `Used: ${task.strikesUsed}/${task.strikesAllowed}` +
+
       ` · Missed recorded days: ${task.missedDays}`;
 
 
-    top.appendChild(title);
-    top.appendChild(badge);
+    top.appendChild(
+      title
+    );
 
-    row.appendChild(top);
-    row.appendChild(meta);
 
-    strikesList
-      .appendChild(row);
+    top.appendChild(
+      badge
+    );
+
+
+    row.appendChild(
+      top
+    );
+
+
+    row.appendChild(
+      meta
+    );
+
+
+    strikesList.appendChild(
+      row
+    );
   }
 }
 
@@ -1208,15 +1584,23 @@ async function loadStrikes(){
 function setMonthLabel(){
 
   monthLabel.textContent =
+
     new Intl
       .DateTimeFormat(
         undefined,
         {
-          month:'long',
-          year:'numeric'
+
+          month:
+            'long',
+
+          year:
+            'numeric'
+
         }
       )
-      .format(current);
+      .format(
+        current
+      );
 }
 
 
@@ -1224,21 +1608,25 @@ function renderWeekdayHeader(){
 
   for (
     const name of weekdayNames
-  ){
+  ) {
 
     const element =
       document.createElement(
         'div'
       );
 
+
     element.className =
       'weekday-header';
+
 
     element.textContent =
       name;
 
-    calendarGrid
-      .appendChild(element);
+
+    calendarGrid.appendChild(
+      element
+    );
   }
 }
 
@@ -1249,8 +1637,11 @@ function completionRing(
 ){
 
   const pct =
+
     total === 0
+
       ? 0
+
       : Math.round(
           (
             done /
@@ -1264,14 +1655,20 @@ function completionRing(
       'div'
     );
 
+
   ring.className =
     'ring';
 
+
   ring.dataset.pct =
-    String(pct);
+    String(
+      pct
+    );
+
 
   ring.textContent =
     `${pct}%`;
+
 
   return ring;
 }
@@ -1282,7 +1679,9 @@ async function renderCalendar(){
   calendarGrid.innerHTML =
     '';
 
+
   renderWeekdayHeader();
+
 
   setMonthLabel();
 
@@ -1306,9 +1705,13 @@ async function renderCalendar(){
 
   const first =
     new Date(
+
       current.getFullYear(),
+
       current.getMonth(),
+
       1
+
     );
 
 
@@ -1319,11 +1722,16 @@ async function renderCalendar(){
 
 
   const gridStart =
-    new Date(first);
+    new Date(
+      first
+    );
+
 
   gridStart.setDate(
+
     first.getDate() -
     offset
+
   );
 
 
@@ -1331,34 +1739,47 @@ async function renderCalendar(){
     let i = 0;
     i < 42;
     i++
-  ){
+  ) {
 
     const date =
-      new Date(gridStart);
+      new Date(
+        gridStart
+      );
+
 
     date.setDate(
+
       gridStart.getDate() +
       i
+
     );
 
 
     const key =
-      dateKey(date);
+      dateKey(
+        date
+      );
 
 
     const currentMonth =
+
       date.getMonth() ===
       current.getMonth();
 
 
     const inside =
-      isChallengeDate(key);
+      isChallengeDate(
+        key
+      );
 
 
     const dayData =
-      summary.get(key) || {
+      summary.get(
+        key
+      ) || {
 
-        doneCount:0,
+        doneCount:
+          0,
 
         totalCount:
           challenge.tasks.length
@@ -1371,11 +1792,14 @@ async function renderCalendar(){
         'div'
       );
 
+
     cell.className =
       'day-cell';
 
 
-    if (!currentMonth){
+    if (
+      !currentMonth
+    ) {
 
       cell.classList.add(
         'muted'
@@ -1383,7 +1807,9 @@ async function renderCalendar(){
     }
 
 
-    if (!inside){
+    if (
+      !inside
+    ) {
 
       cell.classList.add(
         'outside-challenge'
@@ -1396,6 +1822,7 @@ async function renderCalendar(){
         'div'
       );
 
+
     top.className =
       'day-top';
 
@@ -1405,28 +1832,41 @@ async function renderCalendar(){
         'div'
       );
 
+
     number.className =
       'day-num';
+
 
     number.textContent =
       date.getDate();
 
 
-    top.appendChild(number);
+    top.appendChild(
+      number
+    );
 
 
-    if (inside){
+    if (
+      inside
+    ) {
 
       top.appendChild(
+
         completionRing(
+
           dayData.doneCount,
+
           dayData.totalCount
+
         )
+
       );
     }
 
 
-    cell.appendChild(top);
+    cell.appendChild(
+      top
+    );
 
 
     const subtitle =
@@ -1434,25 +1874,34 @@ async function renderCalendar(){
         'div'
       );
 
+
     subtitle.className =
       'day-sub text-secondary';
 
 
     const dayNumber =
-      challengeDayNumber(key);
+      challengeDayNumber(
+        key
+      );
 
 
-    if (dayNumber){
+    if (
+      dayNumber
+    ) {
 
       subtitle.textContent =
+
         `${prettyDate(key)} · ` +
+
         `Day ${dayNumber}/${challenge.durationDays}`;
 
     }
     else {
 
       subtitle.textContent =
-        prettyDate(key);
+        prettyDate(
+          key
+        );
     }
 
 
@@ -1464,15 +1913,21 @@ async function renderCalendar(){
     const today =
       new Date();
 
+
     today.setHours(
-      0,0,0,0
+      0,
+      0,
+      0,
+      0
     );
 
 
     if (
       inside &&
-      key === dateKey(today)
-    ){
+
+      key ===
+      dateKey(today)
+    ) {
 
       cell.classList.add(
         'today-challenge'
@@ -1480,18 +1935,23 @@ async function renderCalendar(){
     }
 
 
-    if (inside){
+    if (
+      inside
+    ) {
 
       cell.addEventListener(
         'click',
         () =>
-          openDay(key)
+          openDay(
+            key
+          )
       );
     }
 
 
-    calendarGrid
-      .appendChild(cell);
+    calendarGrid.appendChild(
+      cell
+    );
   }
 }
 
@@ -1510,12 +1970,13 @@ function renderTasks(
 
   for (
     const task of tasks
-  ){
+  ) {
 
     const row =
       document.createElement(
         'label'
       );
+
 
     row.className =
       'day-task-row';
@@ -1526,11 +1987,14 @@ function renderTasks(
         'input'
       );
 
+
     checkbox.type =
       'checkbox';
 
+
     checkbox.className =
       'form-check-input m-0';
+
 
     checkbox.checked =
       Boolean(
@@ -1545,6 +2009,7 @@ function renderTasks(
         task.isDone =
           checkbox.checked;
 
+
         saveStatus.textContent =
           '';
 
@@ -1557,6 +2022,7 @@ function renderTasks(
         'div'
       );
 
+
     name.textContent =
       task.name;
 
@@ -1565,12 +2031,15 @@ function renderTasks(
       checkbox
     );
 
+
     row.appendChild(
       name
     );
 
-    tasksList
-      .appendChild(row);
+
+    tasksList.appendChild(
+      row
+    );
   }
 }
 
@@ -1580,8 +2049,10 @@ async function openDay(
 ){
 
   if (
-    !isChallengeDate(key)
-  ){
+    !isChallengeDate(
+      key
+    )
+  ) {
 
     return;
   }
@@ -1590,16 +2061,21 @@ async function openDay(
   openDateKey =
     key;
 
+
   saveStatus.textContent =
     '';
 
 
   const dayNumber =
-    challengeDayNumber(key);
+    challengeDayNumber(
+      key
+    );
 
 
   dayModalDate.textContent =
+
     `${prettyDate(key)} · ` +
+
     `Day ${dayNumber}/${challenge.durationDays}`;
 
 
@@ -1614,9 +2090,11 @@ async function openDay(
     openTasks =
       data.tasks;
 
+
     renderTasks(
       openTasks
     );
+
 
     dayModal.show();
 
@@ -1638,7 +2116,9 @@ saveBtn.addEventListener(
   'click',
   async () => {
 
-    if (!openDateKey){
+    if (
+      !openDateKey
+    ) {
 
       return;
     }
@@ -1647,6 +2127,7 @@ saveBtn.addEventListener(
     saveBtn.disabled =
       true;
 
+
     saveStatus.textContent =
       'Saving...';
 
@@ -1654,8 +2135,11 @@ saveBtn.addEventListener(
     try {
 
       await apiPut(
+
         `/api/day/${openDateKey}`,
+
         {
+
           tasks:
             openTasks.map(
               task => ({
@@ -1670,7 +2154,9 @@ saveBtn.addEventListener(
 
               })
             )
+
         }
+
       );
 
 
@@ -1693,6 +2179,7 @@ saveBtn.addEventListener(
 
       saveStatus.textContent =
         '';
+
 
       alert(
         error.message
@@ -1719,10 +2206,15 @@ prevMonthBtn
 
       current =
         new Date(
+
           current.getFullYear(),
+
           current.getMonth() - 1,
+
           1
+
         );
+
 
       await renderCalendar();
     }
@@ -1736,50 +2228,100 @@ nextMonthBtn
 
       current =
         new Date(
+
           current.getFullYear(),
+
           current.getMonth() + 1,
+
           1
+
         );
+
 
       await renderCalendar();
     }
   );
 
 
+/*
+ * TODAY SHORTCUT
+ *
+ * This does two things:
+ *
+ * 1. Moves the calendar to the
+ *    current month.
+ *
+ * 2. Immediately opens today's
+ *    checklist.
+ */
 todayBtn
   .addEventListener(
     'click',
     async () => {
 
+      if (
+        !challenge
+      ) {
+
+        return;
+      }
+
+
       const today =
         new Date();
 
+
       today.setHours(
-        0,0,0,0
+        0,
+        0,
+        0,
+        0
       );
+
+
+      const key =
+        dateKey(
+          today
+        );
+
+
+      /*
+       * Today must belong to the
+       * challenge before a checklist
+       * can be opened.
+       */
+      if (
+        !isChallengeDate(
+          key
+        )
+      ) {
+
+        alert(
+          'Today is outside the current challenge period.'
+        );
+
+        return;
+      }
 
 
       current =
         new Date(
+
           today.getFullYear(),
+
           today.getMonth(),
+
           1
+
         );
 
 
       await renderCalendar();
 
 
-      const key =
-        dateKey(today);
-
-
-      if (
-        isChallengeDate(key)
-      ){
-
-        await openDay(key);
-      }
+      await openDay(
+        key
+      );
     }
   );
 
@@ -1835,15 +2377,23 @@ async function loadApplication(){
 
   loadingScreen
     .classList
-    .remove('d-none');
+    .remove(
+      'd-none'
+    );
+
 
   setupScreen
     .classList
-    .add('d-none');
+    .add(
+      'd-none'
+    );
+
 
   dashboardScreen
     .classList
-    .add('d-none');
+    .add(
+      'd-none'
+    );
 
 
   try {
@@ -1858,7 +2408,27 @@ async function loadApplication(){
       data.challenge;
 
 
-    if (!challenge){
+    if (
+      !challenge
+    ) {
+
+      /*
+       * There is no active challenge.
+       *
+       * Before showing setup, check whether
+       * one has just naturally finished.
+       */
+      const redirected =
+        await checkNaturalFinalReport();
+
+
+      if (
+        redirected
+      ) {
+
+        return;
+      }
+
 
       showSetup();
 
@@ -1888,9 +2458,13 @@ async function loadApplication(){
 
 
     loadingScreen.innerHTML =
+
       `<div class="alert alert-danger">` +
+
       `Failed to load SDT: ` +
+
       `${error.message}` +
+
       `</div>`;
   }
 }
