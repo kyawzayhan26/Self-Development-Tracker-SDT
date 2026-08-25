@@ -1,5 +1,5 @@
 @echo off
-cd /d C:\Users\kyawz\Desktop\SDT
+cd /d C:\Users\kyawz\Documents\GitHub\Self-Development-Tracker-SDT-local-
 
 REM Start the server in a new terminal window
 start cmd /k "npm run dev"
