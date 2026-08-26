@@ -609,10 +609,6 @@ async function checkNaturalFinalReport(){
     }
 
 
-    /*
-     * Store before redirect to avoid
-     * redirect loops if printing is cancelled.
-     */
     localStorage.setItem(
       'sdtLastFinalReportToken',
       token
@@ -1255,12 +1251,6 @@ async function endCurrentChallenge(){
     endChallengeModal.hide();
 
 
-    /*
-     * Go directly to the final report.
-     *
-     * Same-window navigation means this
-     * cannot be blocked as a popup.
-     */
     window.location.href =
 
       `/report.html?` +
@@ -2164,6 +2154,11 @@ saveBtn.addEventListener(
         'Saved ✓';
 
 
+      /*
+       * Refresh the dashboard before
+       * closing the modal so all progress
+       * information is immediately current.
+       */
       await Promise.all([
 
         renderCalendar(),
@@ -2173,6 +2168,24 @@ saveBtn.addEventListener(
         loadStrikes()
 
       ]);
+
+
+      /*
+       * Saving succeeded, so automatically
+       * close the Day Details dialog.
+       */
+      dayModal.hide();
+
+
+      /*
+       * Clear the temporary open-day state.
+       */
+      openDateKey =
+        null;
+
+
+      openTasks =
+        [];
 
     }
     catch (error) {
@@ -2246,13 +2259,8 @@ nextMonthBtn
 /*
  * TODAY SHORTCUT
  *
- * This does two things:
- *
- * 1. Moves the calendar to the
- *    current month.
- *
- * 2. Immediately opens today's
- *    checklist.
+ * Move to the current month and
+ * immediately open today's checklist.
  */
 todayBtn
   .addEventListener(
@@ -2285,11 +2293,6 @@ todayBtn
         );
 
 
-      /*
-       * Today must belong to the
-       * challenge before a checklist
-       * can be opened.
-       */
       if (
         !isChallengeDate(
           key
@@ -2412,12 +2415,6 @@ async function loadApplication(){
       !challenge
     ) {
 
-      /*
-       * There is no active challenge.
-       *
-       * Before showing setup, check whether
-       * one has just naturally finished.
-       */
       const redirected =
         await checkNaturalFinalReport();
 
