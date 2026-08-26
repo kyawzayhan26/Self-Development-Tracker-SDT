@@ -216,7 +216,7 @@ The combination of `dateKey` and `taskId` uniquely identifies a daily task recor
 
 ## Running SDT
 
-See [INSTALL.md](INSTALL.md) for complete installation and local setup instructions.
+See [INSTALL_SDT.md](INSTALL_SDT.md) for complete installation and local setup instructions.
 
 Once configured:
 

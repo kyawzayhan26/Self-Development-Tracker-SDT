@@ -50,7 +50,7 @@ If Windows says `node` is not recognised, close Command Prompt and open it again
 
 Official Microsoft download:
 
-https://www.microsoft.com/en/sql-server/sql-server-downloads
+https://go.microsoft.com/fwlink/?linkid=2344626&culture=en-us
 
 For personal development use, **SQL Server Developer** is recommended.
 
