@@ -12,9 +12,33 @@ body{
 }
 
 
+/*
+ * SETUP PAGE
+ *
+ * The setup page uses a narrower centered
+ * layout for easier reading and configuration.
+ */
 .setup-container{
   max-width:900px;
   margin:0 auto;
+}
+
+
+/*
+ * BRANDING
+ *
+ * The brand simply follows whichever
+ * container it is placed inside.
+ *
+ * Setup:
+ * inside .setup-container -> 900px alignment
+ *
+ * Dashboard:
+ * directly inside Bootstrap .container ->
+ * full dashboard alignment
+ */
+.sdt-brand{
+  min-width:0;
 }
 
 
@@ -24,8 +48,11 @@ body{
 
 .challenge-toolbar{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   gap:24px;
 
   padding:8px 0 12px;
@@ -34,14 +61,18 @@ body{
 
 .challenge-summary{
   min-width:0;
+
   flex-shrink:1;
 }
 
 
 .challenge-actions{
   display:flex;
+
   align-items:center;
+
   justify-content:flex-end;
+
   gap:12px;
 
   flex-wrap:wrap;
@@ -50,7 +81,9 @@ body{
 
 .calendar-toolbar{
   display:flex;
+
   align-items:center;
+
   gap:8px;
 }
 
@@ -60,12 +93,16 @@ body{
 
   .challenge-toolbar{
     align-items:flex-start;
+
     flex-direction:column;
+
     gap:14px;
   }
 
+
   .challenge-actions{
     width:100%;
+
     justify-content:flex-start;
   }
 
@@ -78,7 +115,9 @@ body{
 
 .setup-task-row{
   display:flex;
+
   align-items:center;
+
   gap:10px;
 
   border:
@@ -115,7 +154,9 @@ body{
 
 .setup-task-actions{
   display:flex;
+
   gap:5px;
+
   flex-shrink:0;
 }
 
@@ -145,6 +186,7 @@ body{
   :root{
     --cell-min:72px;
   }
+
 
   .calendar-grid{
     overflow-x:auto;
