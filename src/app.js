@@ -30,6 +30,46 @@ app.use(
 
 
 /*
+ * Public Supabase configuration
+ *
+ * These values are safe to expose to the browser:
+ * - Supabase project URL
+ * - Supabase publishable key
+ *
+ * Never expose a Supabase secret/service-role key here.
+ */
+app.get(
+  '/api/config',
+  (req, res) => {
+
+    const supabaseUrl =
+      process.env.SUPABASE_URL;
+
+    const supabasePublishableKey =
+      process.env.SUPABASE_PUBLISHABLE_KEY;
+
+    if (
+      !supabaseUrl ||
+      !supabasePublishableKey
+    ) {
+
+      return res.status(500).json({
+        error:
+          'Supabase browser configuration is incomplete.'
+      });
+
+    }
+
+    res.json({
+      supabaseUrl,
+      supabasePublishableKey
+    });
+
+  }
+);
+
+
+/*
  * Static frontend
  */
 app.use(
