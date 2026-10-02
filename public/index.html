@@ -207,7 +207,7 @@
 
 
   <!-- ================================= -->
-  <!-- ACCOUNT BAR -->
+  <!-- DESKTOP ACCOUNT BAR -->
   <!-- ================================= -->
 
   <div class="account-bar">
@@ -273,12 +273,34 @@
         </div>
 
 
+        <!-- Desktop history button -->
+
         <button
           id="historyBtn"
           type="button"
           class="btn btn-outline-primary btn-sm mt-3"
         >
           Challenge History
+        </button>
+
+
+        <!-- Mobile burger button -->
+
+        <button
+          id="mobileMenuBtn"
+          type="button"
+          class="btn btn-outline-secondary mobile-menu-btn"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#mobileMenu"
+          aria-controls="mobileMenu"
+          aria-label="Open menu"
+        >
+          <span
+            class="mobile-menu-icon"
+            aria-hidden="true"
+          >
+            ☰
+          </span>
         </button>
 
       </div>
@@ -316,8 +338,6 @@
         class="d-none"
       >
 
-
-        <!-- SETUP INTRO -->
 
         <div class="mb-4">
 
@@ -570,6 +590,8 @@
             </div>
 
 
+            <!-- Desktop actions -->
+
             <button
               id="progressReportBtn"
               type="button"
@@ -589,6 +611,8 @@
               End Challenge
             </button>
 
+
+            <!-- Calendar navigation -->
 
             <div class="calendar-toolbar">
 
@@ -754,6 +778,152 @@
     </div>
 
   </main>
+
+</div>
+
+
+
+<!-- ================================= -->
+<!-- MOBILE MENU -->
+<!-- ================================= -->
+
+<div
+  class="offcanvas offcanvas-end mobile-menu"
+  tabindex="-1"
+  id="mobileMenu"
+  aria-labelledby="mobileMenuLabel"
+>
+
+  <div class="offcanvas-header">
+
+    <div>
+
+      <div
+        id="mobileMenuLabel"
+        class="h5 mb-0"
+      >
+        SDT
+      </div>
+
+      <div class="text-secondary small">
+        Self Development Tracker
+      </div>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="offcanvas"
+      aria-label="Close"
+    ></button>
+
+  </div>
+
+
+  <div class="offcanvas-body">
+
+
+    <!-- ACCOUNT -->
+
+    <div class="mobile-menu-account">
+
+      <div class="text-secondary small mb-1">
+        Signed in as
+      </div>
+
+      <div
+        id="mobileMenuEmail"
+        class="fw-semibold text-break"
+      >
+        —
+      </div>
+
+    </div>
+
+
+
+    <!-- CHALLENGE ACTIONS -->
+
+    <div class="mobile-menu-section">
+
+      <div class="mobile-menu-section-title">
+        Challenge
+      </div>
+
+
+      <button
+        id="mobileHistoryBtn"
+        type="button"
+        class="mobile-menu-action"
+      >
+        <span>
+          Challenge History
+        </span>
+
+        <span aria-hidden="true">
+          ›
+        </span>
+      </button>
+
+
+      <button
+        id="mobileProgressReportBtn"
+        type="button"
+        class="mobile-menu-action mobile-active-challenge-action"
+      >
+        <span>
+          Progress Report
+        </span>
+
+        <span aria-hidden="true">
+          ›
+        </span>
+      </button>
+
+    </div>
+
+
+
+    <!-- ACCOUNT / DANGER ACTIONS -->
+
+    <div class="mobile-menu-section mobile-menu-bottom">
+
+
+      <button
+        id="mobileEndChallengeBtn"
+        type="button"
+        class="mobile-menu-action mobile-menu-danger mobile-active-challenge-action"
+      >
+        <span>
+          End Challenge
+        </span>
+
+        <span aria-hidden="true">
+          ›
+        </span>
+      </button>
+
+
+      <button
+        id="mobileLogoutBtn"
+        type="button"
+        class="mobile-menu-action"
+      >
+        <span>
+          Log Out
+        </span>
+
+        <span aria-hidden="true">
+          ›
+        </span>
+      </button>
+
+    </div>
+
+
+  </div>
 
 </div>
 
@@ -946,9 +1116,7 @@
           >
             Daily note
 
-            <span
-              class="text-secondary fw-normal"
-            >
+            <span class="text-secondary fw-normal">
               (optional)
             </span>
 

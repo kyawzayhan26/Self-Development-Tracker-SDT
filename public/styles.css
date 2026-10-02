@@ -94,9 +94,139 @@ body{
 ========================================= */
 
 .sdt-app-header{
+  position:relative;
+
   display:flex;
   flex-direction:column;
   align-items:flex-start;
+}
+
+
+/* Mobile menu button is hidden by default. */
+
+.mobile-menu-btn{
+  display:none;
+}
+
+
+/* =========================================
+   MOBILE OFFCANVAS MENU
+========================================= */
+
+.mobile-menu{
+  width:min(86vw,340px) !important;
+}
+
+
+.mobile-menu .offcanvas-header{
+  padding:20px;
+
+  border-bottom:
+    1px solid
+    rgba(0,0,0,.08);
+}
+
+
+.mobile-menu .offcanvas-body{
+  display:flex;
+
+  flex-direction:column;
+
+  padding:0;
+}
+
+
+.mobile-menu-account{
+  padding:20px;
+
+  border-bottom:
+    1px solid
+    rgba(0,0,0,.08);
+}
+
+
+.mobile-menu-section{
+  padding:12px;
+}
+
+
+.mobile-menu-section-title{
+  padding:
+    8px
+    10px;
+
+  color:#6c757d;
+
+  font-size:11px;
+
+  font-weight:700;
+
+  text-transform:uppercase;
+
+  letter-spacing:.06em;
+}
+
+
+.mobile-menu-action{
+  width:100%;
+
+  min-height:48px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:12px;
+
+  padding:
+    11px
+    10px;
+
+  border:0;
+
+  border-radius:9px;
+
+  background:transparent;
+
+  color:#212529;
+
+  text-align:left;
+
+  font-size:15px;
+
+  transition:
+    background-color .12s ease;
+}
+
+
+.mobile-menu-action:hover,
+.mobile-menu-action:focus-visible{
+  background:#f5f6f8;
+}
+
+
+.mobile-menu-action:focus-visible{
+  outline:
+    2px solid
+    rgba(13,110,253,.35);
+
+  outline-offset:2px;
+}
+
+
+.mobile-menu-danger{
+  color:#dc3545;
+}
+
+
+.mobile-menu-bottom{
+  margin-top:auto;
+
+  border-top:
+    1px solid
+    rgba(0,0,0,.08);
 }
 
 
@@ -686,7 +816,7 @@ body{
   ======================================= */
 
   .sdt-main{
-    padding-top:24px;
+    padding-top:16px;
 
     padding-bottom:32px;
   }
@@ -702,61 +832,81 @@ body{
 
 
   /* =======================================
-     ACCOUNT BAR
+     MOBILE HEADER / NAVIGATION
   ======================================= */
 
-  .account-bar-inner{
-    min-height:54px;
+  /*
+   * Account controls are now available in
+   * the burger menu, so the desktop account
+   * bar no longer consumes mobile space.
+   */
+  .account-bar{
+    display:none;
   }
 
-
-  #userAccount{
-    width:100%;
-
-    flex-wrap:nowrap;
-
-    justify-content:space-between;
-
-    gap:12px;
-  }
-
-
-  #userEmail{
-    min-width:0;
-
-    overflow:hidden;
-
-    text-overflow:ellipsis;
-
-    white-space:nowrap;
-  }
-
-
-  #logoutBtn{
-    flex-shrink:0;
-  }
-
-
-  /* =======================================
-     APPLICATION HEADER
-  ======================================= */
 
   .sdt-app-header{
-    margin-bottom:28px !important;
+    min-height:52px;
+
+    margin-bottom:20px !important;
+
+    padding-right:54px;
   }
 
 
   .sdt-brand h1{
-    font-size:28px;
+    margin-bottom:0 !important;
+
+    font-size:25px;
+
+    line-height:1.15;
   }
 
 
+  .sdt-brand .text-secondary{
+    margin-top:3px;
+
+    font-size:13px;
+
+    line-height:1.25;
+  }
+
+
+  /*
+   * Desktop Challenge History button is
+   * replaced by the burger menu.
+   */
   #historyBtn{
-    min-height:40px;
+    display:none;
+  }
 
-    padding-left:14px;
 
-    padding-right:14px;
+  .mobile-menu-btn{
+    position:absolute;
+
+    top:0;
+    right:0;
+
+    width:44px;
+    height:44px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    padding:0;
+
+    border-radius:10px;
+  }
+
+
+  .mobile-menu-icon{
+    display:block;
+
+    font-size:21px;
+
+    line-height:1;
   }
 
 
@@ -858,15 +1008,18 @@ body{
 
 
   /* =======================================
-     ACTIVE CHALLENGE
+     COMPACT ACTIVE CHALLENGE
   ======================================= */
 
   .challenge-toolbar{
-    padding-top:0;
+    gap:10px;
 
-    padding-bottom:8px;
+    margin-bottom:10px !important;
 
-    gap:18px;
+    padding:
+      0
+      0
+      4px;
   }
 
 
@@ -875,86 +1028,115 @@ body{
   }
 
 
+  /*
+   * Keep context but make the label tiny.
+   */
+  .challenge-summary >
+  .text-uppercase{
+    margin-bottom:3px !important;
+
+    font-size:10px !important;
+
+    line-height:1.2;
+
+    letter-spacing:.05em;
+  }
+
+
   #activeChallengeName{
-    font-size:24px;
+    margin-bottom:3px !important;
+
+    font-size:21px;
+
+    line-height:1.2;
   }
 
 
   #activeChallengeDates{
-    font-size:14px;
+    font-size:12px;
+
+    line-height:1.3;
   }
 
 
+  /*
+   * These actions now live inside the
+   * mobile burger menu.
+   */
+  #progressReportBtn,
+  #endChallengeBtn{
+    display:none;
+  }
+
+
+  /*
+   * Duration/rules/strike allowance is
+   * redundant on mobile. The progress and
+   * strike cards already expose the useful
+   * information.
+   */
+  #activeChallengeMeta{
+    display:none;
+  }
+
+
+  /*
+   * Only calendar controls remain inside
+   * challenge-actions.
+   */
   .challenge-actions{
     width:100%;
 
-    display:grid;
-
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0,1fr)
-      );
-
-    gap:10px;
-  }
-
-
-  #activeChallengeMeta{
-    grid-column:
-      1 / -1;
-
-    line-height:1.5;
-  }
-
-
-  #progressReportBtn,
-  #endChallengeBtn{
-    width:100%;
-
-    min-height:42px;
+    display:block;
   }
 
 
   /* =======================================
-     MONTH CONTROLS
+     COMPACT MONTH CONTROLS
   ======================================= */
 
+  /*
+   * One-row layout:
+   *
+   * ‹    October 2026    ›    Today
+   */
   .calendar-toolbar{
-    grid-column:
-      1 / -1;
-
     width:100%;
 
     display:grid;
 
     grid-template-columns:
-      44px
+      40px
       minmax(0,1fr)
-      44px;
+      40px
+      auto;
 
     grid-template-areas:
-      "previous month next"
-      "today today today";
+      "previous month next today";
 
-    gap:8px;
+    gap:7px;
 
     align-items:center;
 
-    margin-top:2px;
+    margin-top:3px;
   }
 
 
   #prevMonth{
     grid-area:previous;
 
-    width:44px;
-    min-height:42px;
+    width:40px;
+
+    min-height:38px;
+
+    padding:0;
   }
 
 
   #monthLabel{
     grid-area:month;
+
+    min-width:0;
 
     text-align:center;
 
@@ -962,24 +1144,33 @@ body{
 
     text-overflow:ellipsis;
 
-    font-size:15px;
+    white-space:nowrap;
+
+    font-size:14px;
   }
 
 
   #nextMonth{
     grid-area:next;
 
-    width:44px;
-    min-height:42px;
+    width:40px;
+
+    min-height:38px;
+
+    padding:0;
   }
 
 
   #todayBtn{
     grid-area:today;
 
-    width:100%;
+    width:auto;
 
-    min-height:40px;
+    min-height:38px;
+
+    padding:
+      6px
+      12px;
   }
 
 
@@ -988,6 +1179,8 @@ body{
   ======================================= */
 
   #dashboardScreen .card{
+    margin-bottom:12px !important;
+
     border-radius:14px;
   }
 
@@ -998,31 +1191,57 @@ body{
 
 
   /* =======================================
-     PROGRESS
+     COMPACT PROGRESS
   ======================================= */
 
+  /*
+   * Progress remains above the calendar,
+   * but takes significantly less room.
+   */
+  #dashboardScreen .card:first-of-type .card-body{
+    padding:
+      12px
+      14px;
+  }
+
+
+  #dashboardScreen .card:first-of-type
+  .card-body >
+  .d-flex{
+    margin-bottom:7px !important;
+  }
+
+
   #overallText{
-    font-size:20px;
+    font-size:18px;
+
+    line-height:1.2;
+  }
+
+
+  #overallMeta{
+    font-size:11px;
   }
 
 
   .sdt-progress{
-    height:20px;
+    height:16px;
   }
 
 
   /* =======================================
      MOBILE MONTH CALENDAR
 
-     Important:
      - No horizontal scrolling
-     - All 7 days remain visible
-     - Large desktop day cards become
-       compact mobile calendar cells
+     - All 7 days visible
+     - Compact iPhone-style month view
   ======================================= */
 
   #dashboardScreen .card:has(#calendarGrid) .card-body{
-    padding:12px 10px 14px;
+    padding:
+      12px
+      10px
+      14px;
 
     overflow:visible;
   }
@@ -1078,7 +1297,9 @@ body{
 
     min-height:58px;
 
-    padding:5px 2px;
+    padding:
+      5px
+      2px;
 
     border-radius:9px;
 
@@ -1098,10 +1319,6 @@ body{
   }
 
 
-  /*
-   * Disable desktop hover movement.
-   * Touch devices do not need it.
-   */
   .day-cell:not(.outside-challenge):hover{
     transform:none;
 
@@ -1138,10 +1355,8 @@ body{
 
 
   /*
-   * Desktop ring becomes a small status
-   * indicator on mobile.
-   *
-   * The percentage remains visible inside.
+   * Desktop completion ring becomes the
+   * compact status indicator.
    */
   .ring{
     width:27px;
@@ -1158,36 +1373,26 @@ body{
   }
 
 
-  /*
-   * A perfect day receives the green ring
-   * already used by the desktop version.
-   */
   .ring[data-pct="100"]{
     border-width:2px;
   }
 
 
   /*
-   * The detailed "Day X" / status text that
-   * works on desktop is intentionally hidden
-   * on mobile.
-
-   * The user can tap the date to see details.
+   * Detailed Day X / status information is
+   * hidden. Tapping the date opens details.
    */
   .day-sub{
     display:none;
   }
 
 
-  /*
-   * Outside-challenge dates stay visible so
-   * the month retains its familiar calendar
-   * structure, but they become very subtle.
-   */
   .day-cell.outside-challenge{
     min-height:58px;
 
-    padding:5px 2px;
+    padding:
+      5px
+      2px;
 
     background:#f8f9fa;
 
@@ -1198,9 +1403,6 @@ body{
   }
 
 
-  /*
-   * Today's date gets a clearer outline.
-   */
   .day-cell.today-challenge{
     outline:
       2px solid
@@ -1210,11 +1412,6 @@ body{
   }
 
 
-  /*
-   * Recorded calendar cells remain easy
-   * to tap even though the visual design
-   * is compact.
-   */
   .day-cell:not(.outside-challenge){
     touch-action:manipulation;
   }
@@ -1271,7 +1468,9 @@ body{
 
 
   #dayModal .modal-footer{
-    padding:12px 16px;
+    padding:
+      12px
+      16px;
 
     flex-wrap:wrap;
   }
@@ -1407,7 +1606,9 @@ body{
 
 
   .history-card-meta{
-    gap:7px 16px;
+    gap:
+      7px
+      16px;
 
     font-size:12px;
   }
@@ -1426,7 +1627,9 @@ body{
 
 
   .history-empty{
-    padding:36px 16px;
+    padding:
+      36px
+      16px;
   }
 
 
@@ -1483,29 +1686,39 @@ body{
 
 
   .sdt-main{
-    padding-top:20px;
-  }
-
-
-  #userEmail{
-    font-size:11px;
-  }
-
-
-  .challenge-actions{
-    grid-template-columns:1fr;
-  }
-
-
-  #activeChallengeMeta,
-  .calendar-toolbar{
-    grid-column:1;
+    padding-top:14px;
   }
 
 
   /*
-   * Calendar becomes slightly tighter but
-   * still retains all seven columns.
+   * On very narrow phones, move Today to
+   * its own row rather than squeezing it.
+   */
+  .calendar-toolbar{
+    grid-template-columns:
+      38px
+      minmax(0,1fr)
+      38px;
+
+    grid-template-areas:
+      "previous month next"
+      "today today today";
+  }
+
+
+  #prevMonth,
+  #nextMonth{
+    width:38px;
+  }
+
+
+  #todayBtn{
+    width:100%;
+  }
+
+
+  /*
+   * Calendar remains seven columns.
    */
   #calendarGrid{
     gap:3px;

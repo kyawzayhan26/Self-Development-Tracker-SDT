@@ -9,6 +9,7 @@
  * - Authentication
  * - Daily Notes
  * - Challenge History
+ * - Responsive Mobile Navigation
  */
 
 let challenge = null;
@@ -159,6 +160,53 @@ const saveBtn =
 
 const saveStatus =
   document.getElementById('saveStatus');
+
+
+/* =========================================
+   MOBILE MENU ELEMENTS
+========================================= */
+
+const mobileMenuEl =
+  document.getElementById('mobileMenu');
+
+const mobileMenu =
+  mobileMenuEl
+    ? bootstrap.Offcanvas
+        .getOrCreateInstance(
+          mobileMenuEl
+        )
+    : null;
+
+const mobileMenuEmail =
+  document.getElementById(
+    'mobileMenuEmail'
+  );
+
+const mobileHistoryBtn =
+  document.getElementById(
+    'mobileHistoryBtn'
+  );
+
+const mobileProgressReportBtn =
+  document.getElementById(
+    'mobileProgressReportBtn'
+  );
+
+const mobileEndChallengeBtn =
+  document.getElementById(
+    'mobileEndChallengeBtn'
+  );
+
+const mobileLogoutBtn =
+  document.getElementById(
+    'mobileLogoutBtn'
+  );
+
+const mobileActiveChallengeActions =
+  document.querySelectorAll(
+    '.mobile-active-challenge-action'
+  );
+
 
 const weekdayNames = [
   'Mon',
@@ -430,6 +478,55 @@ function challengeDayNumber(value) {
       86400000
     ) + 1
   );
+}
+
+
+/* =========================================
+   MOBILE MENU HELPERS
+========================================= */
+
+function closeMobileMenu() {
+  if (mobileMenu) {
+    mobileMenu.hide();
+  }
+}
+
+
+function syncMobileMenuAccount() {
+  if (!mobileMenuEmail) {
+    return;
+  }
+
+  const desktopEmail =
+    document.getElementById(
+      'userEmail'
+    );
+
+  mobileMenuEmail.textContent =
+    desktopEmail?.textContent?.trim() ||
+    '—';
+}
+
+
+function syncMobileMenuState() {
+  const hasActiveChallenge =
+    Boolean(challenge);
+
+  mobileActiveChallengeActions
+    .forEach(
+      element => {
+        element.classList.toggle(
+          'd-none',
+          !hasActiveChallenge
+        );
+      }
+    );
+}
+
+
+function prepareMobileMenu() {
+  syncMobileMenuAccount();
+  syncMobileMenuState();
 }
 
 
@@ -840,6 +937,8 @@ function initializeSetup() {
 function showSetup() {
   challenge = null;
 
+  syncMobileMenuState();
+
   loadingScreen
     .classList
     .add('d-none');
@@ -1237,6 +1336,8 @@ async function endCurrentChallenge() {
 ========================================= */
 
 function showDashboard() {
+  syncMobileMenuState();
+
   loadingScreen
     .classList
     .add('d-none');
@@ -1943,7 +2044,7 @@ todayBtn.addEventListener(
 
 
 /* =========================================
-   BUTTONS
+   DESKTOP BUTTONS
 ========================================= */
 
 addTaskBtn.addEventListener(
@@ -1986,6 +2087,103 @@ endChallengeModalEl.addEventListener(
 
 
 /* =========================================
+   MOBILE MENU EVENTS
+========================================= */
+
+mobileMenuEl
+  ?.addEventListener(
+    'show.bs.offcanvas',
+    () => {
+      prepareMobileMenu();
+    }
+  );
+
+
+mobileHistoryBtn
+  ?.addEventListener(
+    'click',
+    () => {
+      closeMobileMenu();
+
+      /*
+       * Wait for Bootstrap to finish closing
+       * the offcanvas before opening a modal.
+       */
+      setTimeout(
+        () => {
+          openChallengeHistory();
+        },
+        220
+      );
+    }
+  );
+
+
+mobileProgressReportBtn
+  ?.addEventListener(
+    'click',
+    () => {
+      if (!challenge) {
+        return;
+      }
+
+      closeMobileMenu();
+
+      /*
+       * Reports open in a new tab, so no
+       * modal transition is required.
+       */
+      openProgressReport();
+    }
+  );
+
+
+mobileEndChallengeBtn
+  ?.addEventListener(
+    'click',
+    () => {
+      if (!challenge) {
+        return;
+      }
+
+      closeMobileMenu();
+
+      /*
+       * Avoid overlapping the Bootstrap
+       * offcanvas backdrop and modal backdrop.
+       */
+      setTimeout(
+        () => {
+          endChallengeModal.show();
+        },
+        220
+      );
+    }
+  );
+
+
+mobileLogoutBtn
+  ?.addEventListener(
+    'click',
+    () => {
+      closeMobileMenu();
+
+      /*
+       * Reuse the existing authentication
+       * logout flow rather than duplicating
+       * auth logic here.
+       */
+      const logoutBtn =
+        document.getElementById(
+          'logoutBtn'
+        );
+
+      logoutBtn?.click();
+    }
+  );
+
+
+/* =========================================
    APPLICATION BOOT
 ========================================= */
 
@@ -2010,6 +2208,8 @@ async function loadApplication() {
 
     challenge =
       data.challenge;
+
+    syncMobileMenuState();
 
     if (!challenge) {
       const redirected =
