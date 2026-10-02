@@ -2,28 +2,22 @@
  * SDT Frontend
  *
  * Modes:
- *
  * 1. Setup
- *    Configure challenge + rules
- *
  * 2. Dashboard
- *    Track active challenge
+ *
+ * V2 Features:
+ * - Authentication
+ * - Daily Notes
+ * - Challenge History
  */
-
 
 let challenge = null;
 
 let current = new Date();
-current.setHours(
-  0,
-  0,
-  0,
-  0
-);
+current.setHours(0, 0, 0, 0);
 
 let openDateKey = null;
 let openTasks = [];
-
 let setupTasks = [];
 
 
@@ -32,189 +26,139 @@ let setupTasks = [];
 ========================================= */
 
 const loadingScreen =
-  document.getElementById(
-    'loadingScreen'
-  );
+  document.getElementById('loadingScreen');
 
 const setupScreen =
-  document.getElementById(
-    'setupScreen'
-  );
+  document.getElementById('setupScreen');
 
 const dashboardScreen =
-  document.getElementById(
-    'dashboardScreen'
-  );
+  document.getElementById('dashboardScreen');
 
 const challengeNameInput =
-  document.getElementById(
-    'challengeName'
-  );
+  document.getElementById('challengeName');
 
 const challengeStartInput =
-  document.getElementById(
-    'challengeStartDate'
-  );
+  document.getElementById('challengeStartDate');
 
 const challengeDurationInput =
-  document.getElementById(
-    'challengeDuration'
-  );
+  document.getElementById('challengeDuration');
 
 const challengeStrikesInput =
-  document.getElementById(
-    'challengeStrikes'
-  );
+  document.getElementById('challengeStrikes');
 
 const setupTasksList =
-  document.getElementById(
-    'setupTasksList'
-  );
+  document.getElementById('setupTasksList');
 
 const setupValidation =
-  document.getElementById(
-    'setupValidation'
-  );
+  document.getElementById('setupValidation');
 
 const addTaskBtn =
-  document.getElementById(
-    'addTaskBtn'
-  );
+  document.getElementById('addTaskBtn');
 
 const startChallengeBtn =
-  document.getElementById(
-    'startChallengeBtn'
-  );
+  document.getElementById('startChallengeBtn');
 
 const activeChallengeName =
-  document.getElementById(
-    'activeChallengeName'
-  );
+  document.getElementById('activeChallengeName');
 
 const activeChallengeDates =
-  document.getElementById(
-    'activeChallengeDates'
-  );
+  document.getElementById('activeChallengeDates');
 
 const activeChallengeMeta =
-  document.getElementById(
-    'activeChallengeMeta'
-  );
+  document.getElementById('activeChallengeMeta');
 
 const progressReportBtn =
-  document.getElementById(
-    'progressReportBtn'
-  );
+  document.getElementById('progressReportBtn');
 
 const confirmEndChallengeBtn =
-  document.getElementById(
-    'confirmEndChallengeBtn'
-  );
+  document.getElementById('confirmEndChallengeBtn');
 
 const endChallengeStatus =
-  document.getElementById(
-    'endChallengeStatus'
-  );
+  document.getElementById('endChallengeStatus');
 
 const endChallengeModalEl =
-  document.getElementById(
-    'endChallengeModal'
-  );
+  document.getElementById('endChallengeModal');
 
 const endChallengeModal =
-  new bootstrap.Modal(
-    endChallengeModalEl
-  );
+  new bootstrap.Modal(endChallengeModalEl);
+
+const historyBtn =
+  document.getElementById('historyBtn');
+
+const historyModalEl =
+  document.getElementById('historyModal');
+
+const historyModal =
+  new bootstrap.Modal(historyModalEl);
+
+const historyLoading =
+  document.getElementById('historyLoading');
+
+const historyError =
+  document.getElementById('historyError');
+
+const historyEmpty =
+  document.getElementById('historyEmpty');
+
+const historyList =
+  document.getElementById('historyList');
+
+const historyCount =
+  document.getElementById('historyCount');
 
 const monthLabel =
-  document.getElementById(
-    'monthLabel'
-  );
+  document.getElementById('monthLabel');
 
 const calendarGrid =
-  document.getElementById(
-    'calendarGrid'
-  );
+  document.getElementById('calendarGrid');
 
 const prevMonthBtn =
-  document.getElementById(
-    'prevMonth'
-  );
+  document.getElementById('prevMonth');
 
 const nextMonthBtn =
-  document.getElementById(
-    'nextMonth'
-  );
+  document.getElementById('nextMonth');
 
 const todayBtn =
-  document.getElementById(
-    'todayBtn'
-  );
+  document.getElementById('todayBtn');
 
 const overallText =
-  document.getElementById(
-    'overallText'
-  );
+  document.getElementById('overallText');
 
 const overallMeta =
-  document.getElementById(
-    'overallMeta'
-  );
+  document.getElementById('overallMeta');
 
 const overallBar =
-  document.getElementById(
-    'overallBar'
-  );
+  document.getElementById('overallBar');
 
 const strikesMeta =
-  document.getElementById(
-    'strikesMeta'
-  );
+  document.getElementById('strikesMeta');
 
 const strikesList =
-  document.getElementById(
-    'strikesList'
-  );
+  document.getElementById('strikesList');
 
 const dayModalEl =
-  document.getElementById(
-    'dayModal'
-  );
+  document.getElementById('dayModal');
 
 const dayModal =
-  new bootstrap.Modal(
-    dayModalEl
-  );
+  new bootstrap.Modal(dayModalEl);
 
 const dayModalDate =
-  document.getElementById(
-    'dayModalDate'
-  );
+  document.getElementById('dayModalDate');
 
 const tasksList =
-  document.getElementById(
-    'tasksList'
-  );
+  document.getElementById('tasksList');
 
 const dayNote =
-  document.getElementById(
-    'dayNote'
-  );
+  document.getElementById('dayNote');
 
 const dayNoteCount =
-  document.getElementById(
-    'dayNoteCount'
-  );
+  document.getElementById('dayNoteCount');
 
 const saveBtn =
-  document.getElementById(
-    'saveBtn'
-  );
+  document.getElementById('saveBtn');
 
 const saveStatus =
-  document.getElementById(
-    'saveStatus'
-  );
+  document.getElementById('saveStatus');
 
 const weekdayNames = [
   'Mon',
@@ -235,9 +179,7 @@ async function getApiHeaders(
   includeJson = false
 ) {
   const token =
-    await window
-      .sdtAuth
-      .getAccessToken();
+    await window.sdtAuth.getAccessToken();
 
   if (!token) {
     throw new Error(
@@ -274,9 +216,7 @@ async function readApiResponse(
     );
   }
 
-  if (
-    response.status === 401
-  ) {
+  if (response.status === 401) {
     throw new Error(
       data.error ||
       'Your session has expired. Please sign in again.'
@@ -304,9 +244,7 @@ async function apiGet(url) {
   const response =
     await fetch(
       url,
-      {
-        headers
-      }
+      { headers }
     );
 
   return readApiResponse(
@@ -320,23 +258,16 @@ async function apiPost(
   body = {}
 ) {
   const headers =
-    await getApiHeaders(
-      true
-    );
+    await getApiHeaders(true);
 
   const response =
     await fetch(
       url,
       {
-        method:
-          'POST',
-
+        method: 'POST',
         headers,
-
         body:
-          JSON.stringify(
-            body
-          )
+          JSON.stringify(body)
       }
     );
 
@@ -351,23 +282,16 @@ async function apiPut(
   body
 ) {
   const headers =
-    await getApiHeaders(
-      true
-    );
+    await getApiHeaders(true);
 
   const response =
     await fetch(
       url,
       {
-        method:
-          'PUT',
-
+        method: 'PUT',
         headers,
-
         body:
-          JSON.stringify(
-            body
-          )
+          JSON.stringify(body)
       }
     );
 
@@ -383,22 +307,15 @@ async function apiPut(
 
 function pad2(value) {
   return String(value)
-    .padStart(
-      2,
-      '0'
-    );
+    .padStart(2, '0');
 }
 
 
 function dateKey(date) {
   return (
     `${date.getFullYear()}-` +
-    `${pad2(
-      date.getMonth() + 1
-    )}-` +
-    `${pad2(
-      date.getDate()
-    )}`
+    `${pad2(date.getMonth() + 1)}-` +
+    `${pad2(date.getDate())}`
   );
 }
 
@@ -406,48 +323,58 @@ function dateKey(date) {
 function monthKey(date) {
   return (
     `${date.getFullYear()}-` +
-    `${pad2(
-      date.getMonth() + 1
-    )}`
+    `${pad2(date.getMonth() + 1)}`
   );
 }
 
 
 function parseDate(value) {
   return new Date(
-    value +
-    'T00:00:00'
+    value + 'T00:00:00'
   );
 }
 
 
 function prettyDate(value) {
-  const date =
-    parseDate(value);
+  if (!value) {
+    return '—';
+  }
 
   return new Intl
     .DateTimeFormat(
       undefined,
       {
-        month:
-          'short',
-
-        day:
-          'numeric',
-
-        year:
-          'numeric'
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
       }
     )
     .format(
-      date
+      parseDate(value)
     );
 }
 
 
-function firstDayMondayIndex(
-  date
-) {
+function prettyDateTime(value) {
+  if (!value) {
+    return '—';
+  }
+
+  return new Intl
+    .DateTimeFormat(
+      undefined,
+      {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }
+    )
+    .format(
+      new Date(value)
+    );
+}
+
+
+function firstDayMondayIndex(date) {
   return (
     date.getDay() + 6
   ) % 7;
@@ -461,9 +388,7 @@ function challengeEndDate() {
 }
 
 
-function isChallengeDate(
-  value
-) {
+function isChallengeDate(value) {
   if (!challenge) {
     return false;
   }
@@ -486,14 +411,8 @@ function isChallengeDate(
 }
 
 
-function challengeDayNumber(
-  value
-) {
-  if (
-    !isChallengeDate(
-      value
-    )
-  ) {
+function challengeDayNumber(value) {
+  if (!isChallengeDate(value)) {
     return null;
   }
 
@@ -507,9 +426,7 @@ function challengeDayNumber(
 
   return (
     Math.round(
-      (
-        date - start
-      ) /
+      (date - start) /
       86400000
     ) + 1
   );
@@ -540,9 +457,7 @@ async function checkNaturalFinalReport() {
     const completedChallenge =
       data.challenge;
 
-    if (
-      !completedChallenge
-    ) {
+    if (!completedChallenge) {
       return false;
     }
 
@@ -564,10 +479,7 @@ async function checkNaturalFinalReport() {
         'sdtLastFinalReportToken'
       );
 
-    if (
-      token ===
-      lastShown
-    ) {
+    if (token === lastShown) {
       return false;
     }
 
@@ -596,6 +508,292 @@ async function checkNaturalFinalReport() {
 
 
 /* =========================================
+   CHALLENGE HISTORY
+========================================= */
+
+function historyCompletionLabel(
+  completionReason
+) {
+  if (
+    completionReason ===
+    'NATURAL'
+  ) {
+    return 'Completed naturally';
+  }
+
+  if (
+    completionReason ===
+    'MANUAL'
+  ) {
+    return 'Ended manually';
+  }
+
+  return 'Completed';
+}
+
+
+function createHistoryCard(
+  item
+) {
+  const card =
+    document.createElement('div');
+
+  card.className =
+    'history-card';
+
+  const content =
+    document.createElement('div');
+
+  content.className =
+    'history-card-content';
+
+  const headingRow =
+    document.createElement('div');
+
+  headingRow.className =
+    'history-card-heading';
+
+  const titleWrap =
+    document.createElement('div');
+
+  titleWrap.className =
+    'history-card-title-wrap';
+
+  const title =
+    document.createElement('h3');
+
+  title.className =
+    'history-card-title';
+
+  title.textContent =
+    item.name;
+
+  const badge =
+    document.createElement('span');
+
+  badge.className =
+    item.completionReason ===
+    'NATURAL'
+      ? 'badge text-bg-success'
+      : 'badge text-bg-secondary';
+
+  badge.textContent =
+    historyCompletionLabel(
+      item.completionReason
+    );
+
+  titleWrap.appendChild(title);
+  titleWrap.appendChild(badge);
+
+  const dates =
+    document.createElement('div');
+
+  dates.className =
+    'history-card-dates';
+
+  dates.textContent =
+    `${prettyDate(item.startDate)} – ` +
+    `${prettyDate(item.endDate)}`;
+
+  headingRow.appendChild(
+    titleWrap
+  );
+
+  content.appendChild(
+    headingRow
+  );
+
+  content.appendChild(
+    dates
+  );
+
+  const meta =
+    document.createElement('div');
+
+  meta.className =
+    'history-card-meta';
+
+  const duration =
+    document.createElement('span');
+
+  duration.textContent =
+    `${item.durationDays} day` +
+    `${item.durationDays === 1 ? '' : 's'}`;
+
+  const rules =
+    document.createElement('span');
+
+  const taskCount =
+    Array.isArray(item.tasks)
+      ? item.tasks.length
+      : 0;
+
+  rules.textContent =
+    `${taskCount} rule` +
+    `${taskCount === 1 ? '' : 's'}`;
+
+  const strikes =
+    document.createElement('span');
+
+  strikes.textContent =
+    `${item.strikesAllowed} strike` +
+    `${item.strikesAllowed === 1 ? '' : 's'} allowed`;
+
+  meta.appendChild(duration);
+  meta.appendChild(rules);
+  meta.appendChild(strikes);
+
+  content.appendChild(meta);
+
+  if (item.completedAt) {
+    const completed =
+      document.createElement('div');
+
+    completed.className =
+      'history-card-completed';
+
+    completed.textContent =
+      `Closed ${prettyDateTime(item.completedAt)}`;
+
+    content.appendChild(
+      completed
+    );
+  }
+
+  const actions =
+    document.createElement('div');
+
+  actions.className =
+    'history-card-actions';
+
+  const reportButton =
+    document.createElement('button');
+
+  reportButton.type =
+    'button';
+
+  reportButton.className =
+    'btn btn-outline-primary btn-sm';
+
+  reportButton.textContent =
+    'View Final Report';
+
+  reportButton.addEventListener(
+    'click',
+    () => {
+      window.open(
+        `/report.html?` +
+        `type=final&` +
+        `challengeId=${item.challengeId}`,
+        '_blank'
+      );
+    }
+  );
+
+  actions.appendChild(
+    reportButton
+  );
+
+  card.appendChild(content);
+  card.appendChild(actions);
+
+  return card;
+}
+
+
+async function loadChallengeHistory() {
+  historyLoading
+    .classList
+    .remove('d-none');
+
+  historyError
+    .classList
+    .add('d-none');
+
+  historyEmpty
+    .classList
+    .add('d-none');
+
+  historyList
+    .classList
+    .add('d-none');
+
+  historyList.innerHTML =
+    '';
+
+  historyCount.textContent =
+    '';
+
+  try {
+    const data =
+      await apiGet(
+        '/api/challenges/history'
+      );
+
+    const challenges =
+      Array.isArray(data.challenges)
+        ? data.challenges
+        : [];
+
+    historyLoading
+      .classList
+      .add('d-none');
+
+    historyCount.textContent =
+      challenges.length === 1
+        ? '1 completed challenge'
+        : `${challenges.length} completed challenges`;
+
+    if (
+      challenges.length === 0
+    ) {
+      historyEmpty
+        .classList
+        .remove('d-none');
+
+      return;
+    }
+
+    for (
+      const item of challenges
+    ) {
+      historyList.appendChild(
+        createHistoryCard(item)
+      );
+    }
+
+    historyList
+      .classList
+      .remove('d-none');
+  }
+  catch (error) {
+    console.error(
+      'Challenge history failed:',
+      error
+    );
+
+    historyLoading
+      .classList
+      .add('d-none');
+
+    historyError.textContent =
+      error.message;
+
+    historyError
+      .classList
+      .remove('d-none');
+  }
+}
+
+
+async function openChallengeHistory() {
+  historyModal.show();
+
+  await loadChallengeHistory();
+}
+
+
+/* =========================================
    SETUP
 ========================================= */
 
@@ -614,9 +812,7 @@ function tomorrowDateKey() {
     date.getDate() + 1
   );
 
-  return dateKey(
-    date
-  );
+  return dateKey(date);
 }
 
 
@@ -633,9 +829,7 @@ function initializeSetup() {
   challengeStrikesInput.value =
     3;
 
-  setupTasks = [
-    ''
-  ];
+  setupTasks = [''];
 
   clearSetupError();
 
@@ -644,35 +838,26 @@ function initializeSetup() {
 
 
 function showSetup() {
-  challenge =
-    null;
+  challenge = null;
 
   loadingScreen
     .classList
-    .add(
-      'd-none'
-    );
+    .add('d-none');
 
   dashboardScreen
     .classList
-    .add(
-      'd-none'
-    );
+    .add('d-none');
 
   setupScreen
     .classList
-    .remove(
-      'd-none'
-    );
+    .remove('d-none');
 
   initializeSetup();
 }
 
 
 function addSetupTask() {
-  setupTasks.push(
-    ''
-  );
+  setupTasks.push('');
 
   renderSetupTasks();
 
@@ -693,9 +878,7 @@ function addSetupTask() {
 }
 
 
-function removeSetupTask(
-  index
-) {
+function removeSetupTask(index) {
   setupTasks.splice(
     index,
     1
@@ -704,9 +887,7 @@ function removeSetupTask(
   if (
     setupTasks.length === 0
   ) {
-    setupTasks.push(
-      ''
-    );
+    setupTasks.push('');
   }
 
   renderSetupTasks();
@@ -718,13 +899,11 @@ function moveSetupTask(
   direction
 ) {
   const target =
-    index +
-    direction;
+    index + direction;
 
   if (
     target < 0 ||
-    target >=
-    setupTasks.length
+    target >= setupTasks.length
   ) {
     return;
   }
@@ -747,22 +926,15 @@ function renderSetupTasks() {
     '';
 
   setupTasks.forEach(
-    (
-      task,
-      index
-    ) => {
+    (task, index) => {
       const row =
-        document.createElement(
-          'div'
-        );
+        document.createElement('div');
 
       row.className =
         'setup-task-row';
 
       const number =
-        document.createElement(
-          'div'
-        );
+        document.createElement('div');
 
       number.className =
         'setup-task-number';
@@ -771,9 +943,7 @@ function renderSetupTasks() {
         index + 1;
 
       const input =
-        document.createElement(
-          'input'
-        );
+        document.createElement('input');
 
       input.type =
         'text';
@@ -813,17 +983,13 @@ function renderSetupTasks() {
       );
 
       const actions =
-        document.createElement(
-          'div'
-        );
+        document.createElement('div');
 
       actions.className =
         'setup-task-actions';
 
       const up =
-        document.createElement(
-          'button'
-        );
+        document.createElement('button');
 
       up.type =
         'button';
@@ -847,9 +1013,7 @@ function renderSetupTasks() {
       );
 
       const down =
-        document.createElement(
-          'button'
-        );
+        document.createElement('button');
 
       down.type =
         'button';
@@ -874,9 +1038,7 @@ function renderSetupTasks() {
       );
 
       const remove =
-        document.createElement(
-          'button'
-        );
+        document.createElement('button');
 
       remove.type =
         'button';
@@ -890,63 +1052,37 @@ function renderSetupTasks() {
       remove.addEventListener(
         'click',
         () =>
-          removeSetupTask(
-            index
-          )
+          removeSetupTask(index)
       );
 
-      actions.appendChild(
-        up
-      );
+      actions.appendChild(up);
+      actions.appendChild(down);
+      actions.appendChild(remove);
 
-      actions.appendChild(
-        down
-      );
+      row.appendChild(number);
+      row.appendChild(input);
+      row.appendChild(actions);
 
-      actions.appendChild(
-        remove
-      );
-
-      row.appendChild(
-        number
-      );
-
-      row.appendChild(
-        input
-      );
-
-      row.appendChild(
-        actions
-      );
-
-      setupTasksList.appendChild(
-        row
-      );
+      setupTasksList.appendChild(row);
     }
   );
 }
 
 
-function showSetupError(
-  message
-) {
+function showSetupError(message) {
   setupValidation.textContent =
     message;
 
   setupValidation
     .classList
-    .remove(
-      'd-none'
-    );
+    .remove('d-none');
 }
 
 
 function clearSetupError() {
   setupValidation
     .classList
-    .add(
-      'd-none'
-    );
+    .add('d-none');
 
   setupValidation.textContent =
     '';
@@ -962,9 +1098,7 @@ async function startChallenge() {
         task =>
           task.trim()
       )
-      .filter(
-        Boolean
-      );
+      .filter(Boolean);
 
   const payload = {
     name:
@@ -973,35 +1107,28 @@ async function startChallenge() {
         .trim(),
 
     startDate:
-      challengeStartInput
-        .value,
+      challengeStartInput.value,
 
     durationDays:
       Number(
-        challengeDurationInput
-          .value
+        challengeDurationInput.value
       ),
 
     strikesAllowed:
       Number(
-        challengeStrikesInput
-          .value
+        challengeStrikesInput.value
       ),
 
     tasks
   };
 
-  if (
-    !payload.name
-  ) {
+  if (!payload.name) {
     return showSetupError(
       'Enter a challenge name.'
     );
   }
 
-  if (
-    !payload.startDate
-  ) {
+  if (!payload.startDate) {
     return showSetupError(
       'Choose a start date.'
     );
@@ -1112,32 +1239,22 @@ async function endCurrentChallenge() {
 function showDashboard() {
   loadingScreen
     .classList
-    .add(
-      'd-none'
-    );
+    .add('d-none');
 
   setupScreen
     .classList
-    .add(
-      'd-none'
-    );
+    .add('d-none');
 
   dashboardScreen
     .classList
-    .remove(
-      'd-none'
-    );
+    .remove('d-none');
 
   activeChallengeName.textContent =
     challenge.name;
 
   activeChallengeDates.textContent =
-    `${prettyDate(
-      challenge.startDate
-    )} – ` +
-    `${prettyDate(
-      challenge.endDate
-    )}`;
+    `${prettyDate(challenge.startDate)} – ` +
+    `${prettyDate(challenge.endDate)}`;
 
   activeChallengeMeta.textContent =
     `${challenge.durationDays} days · ` +
@@ -1166,15 +1283,11 @@ function showDashboard() {
 
   let targetMonth;
 
-  if (
-    today < start
-  ) {
+  if (today < start) {
     targetMonth =
       start;
   }
-  else if (
-    today > end
-  ) {
+  else if (today > end) {
     targetMonth =
       end;
   }
@@ -1216,9 +1329,7 @@ async function loadOverallProgress() {
 
   overallBar.setAttribute(
     'aria-valuenow',
-    String(
-      data.pct
-    )
+    String(data.pct)
   );
 }
 
@@ -1244,25 +1355,19 @@ async function loadStrikes() {
     const task of data.tasks
   ) {
     const row =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     row.className =
       'strike-row';
 
     const top =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     top.className =
       'd-flex justify-content-between align-items-start gap-3';
 
     const title =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     title.className =
       'strike-title';
@@ -1271,9 +1376,7 @@ async function loadStrikes() {
       task.name;
 
     const badge =
-      document.createElement(
-        'span'
-      );
+      document.createElement('span');
 
     if (
       task.strikesLeft === 0
@@ -1296,9 +1399,7 @@ async function loadStrikes() {
       `${task.strikesLeft} strikes left`;
 
     const meta =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     meta.className =
       'strike-meta text-secondary mt-1';
@@ -1307,25 +1408,13 @@ async function loadStrikes() {
       `Used: ${task.strikesUsed}/${task.strikesAllowed}` +
       ` · Missed recorded days: ${task.missedDays}`;
 
-    top.appendChild(
-      title
-    );
+    top.appendChild(title);
+    top.appendChild(badge);
 
-    top.appendChild(
-      badge
-    );
+    row.appendChild(top);
+    row.appendChild(meta);
 
-    row.appendChild(
-      top
-    );
-
-    row.appendChild(
-      meta
-    );
-
-    strikesList.appendChild(
-      row
-    );
+    strikesList.appendChild(row);
   }
 }
 
@@ -1340,16 +1429,11 @@ function setMonthLabel() {
       .DateTimeFormat(
         undefined,
         {
-          month:
-            'long',
-
-          year:
-            'numeric'
+          month: 'long',
+          year: 'numeric'
         }
       )
-      .format(
-        current
-      );
+      .format(current);
 }
 
 
@@ -1358,9 +1442,7 @@ function renderWeekdayHeader() {
     const name of weekdayNames
   ) {
     const element =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     element.className =
       'weekday-header';
@@ -1383,24 +1465,17 @@ function completionRing(
     total === 0
       ? 0
       : Math.round(
-          (
-            done /
-            total
-          ) * 100
+          (done / total) * 100
         );
 
   const ring =
-    document.createElement(
-      'div'
-    );
+    document.createElement('div');
 
   ring.className =
     'ring';
 
   ring.dataset.pct =
-    String(
-      pct
-    );
+    String(pct);
 
   ring.textContent =
     `${pct}%`;
@@ -1414,7 +1489,6 @@ async function renderCalendar() {
     '';
 
   renderWeekdayHeader();
-
   setMonthLabel();
 
   const data =
@@ -1440,14 +1514,10 @@ async function renderCalendar() {
     );
 
   const offset =
-    firstDayMondayIndex(
-      first
-    );
+    firstDayMondayIndex(first);
 
   const gridStart =
-    new Date(
-      first
-    );
+    new Date(first);
 
   gridStart.setDate(
     first.getDate() -
@@ -1460,76 +1530,55 @@ async function renderCalendar() {
     i++
   ) {
     const date =
-      new Date(
-        gridStart
-      );
+      new Date(gridStart);
 
     date.setDate(
-      gridStart.getDate() +
-      i
+      gridStart.getDate() + i
     );
 
     const key =
-      dateKey(
-        date
-      );
+      dateKey(date);
 
     const currentMonth =
       date.getMonth() ===
       current.getMonth();
 
     const inside =
-      isChallengeDate(
-        key
-      );
+      isChallengeDate(key);
 
     const dayData =
-      summary.get(
-        key
-      ) || {
-        doneCount:
-          0,
-
+      summary.get(key) || {
+        doneCount: 0,
         totalCount:
           challenge.tasks.length
       };
 
     const cell =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     cell.className =
       'day-cell';
 
-    if (
-      !currentMonth
-    ) {
+    if (!currentMonth) {
       cell.classList.add(
         'muted'
       );
     }
 
-    if (
-      !inside
-    ) {
+    if (!inside) {
       cell.classList.add(
         'outside-challenge'
       );
     }
 
     const top =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     top.className =
       'day-top';
 
     const number =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     number.className =
       'day-num';
@@ -1537,13 +1586,9 @@ async function renderCalendar() {
     number.textContent =
       date.getDate();
 
-    top.appendChild(
-      number
-    );
+    top.appendChild(number);
 
-    if (
-      inside
-    ) {
+    if (inside) {
       top.appendChild(
         completionRing(
           dayData.doneCount,
@@ -1552,35 +1597,25 @@ async function renderCalendar() {
       );
     }
 
-    cell.appendChild(
-      top
-    );
+    cell.appendChild(top);
 
     const subtitle =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     subtitle.className =
       'day-sub text-secondary';
 
     const dayNumber =
-      challengeDayNumber(
-        key
-      );
+      challengeDayNumber(key);
 
-    if (
-      dayNumber
-    ) {
+    if (dayNumber) {
       subtitle.textContent =
         `${prettyDate(key)} · ` +
         `Day ${dayNumber}/${challenge.durationDays}`;
     }
     else {
       subtitle.textContent =
-        prettyDate(
-          key
-        );
+        prettyDate(key);
     }
 
     cell.appendChild(
@@ -1599,23 +1634,18 @@ async function renderCalendar() {
 
     if (
       inside &&
-      key ===
-      dateKey(today)
+      key === dateKey(today)
     ) {
       cell.classList.add(
         'today-challenge'
       );
     }
 
-    if (
-      inside
-    ) {
+    if (inside) {
       cell.addEventListener(
         'click',
         () =>
-          openDay(
-            key
-          )
+          openDay(key)
       );
     }
 
@@ -1630,9 +1660,7 @@ async function renderCalendar() {
    DAY DETAILS
 ========================================= */
 
-function renderTasks(
-  tasks
-) {
+function renderTasks(tasks) {
   tasksList.innerHTML =
     '';
 
@@ -1640,17 +1668,13 @@ function renderTasks(
     const task of tasks
   ) {
     const row =
-      document.createElement(
-        'label'
-      );
+      document.createElement('label');
 
     row.className =
       'day-task-row';
 
     const checkbox =
-      document.createElement(
-        'input'
-      );
+      document.createElement('input');
 
     checkbox.type =
       'checkbox';
@@ -1659,9 +1683,7 @@ function renderTasks(
       'form-check-input m-0';
 
     checkbox.checked =
-      Boolean(
-        task.isDone
-      );
+      Boolean(task.isDone);
 
     checkbox.addEventListener(
       'change',
@@ -1675,24 +1697,15 @@ function renderTasks(
     );
 
     const name =
-      document.createElement(
-        'div'
-      );
+      document.createElement('div');
 
     name.textContent =
       task.name;
 
-    row.appendChild(
-      checkbox
-    );
+    row.appendChild(checkbox);
+    row.appendChild(name);
 
-    row.appendChild(
-      name
-    );
-
-    tasksList.appendChild(
-      row
-    );
+    tasksList.appendChild(row);
   }
 }
 
@@ -1710,14 +1723,8 @@ function updateNoteCounter() {
 }
 
 
-async function openDay(
-  key
-) {
-  if (
-    !isChallengeDate(
-      key
-    )
-  ) {
+async function openDay(key) {
+  if (!isChallengeDate(key)) {
     return;
   }
 
@@ -1727,20 +1734,13 @@ async function openDay(
   saveStatus.textContent =
     '';
 
-  /*
-   * Clear previous note immediately so the
-   * previous day's note is never briefly shown
-   * while another day is loading.
-   */
   dayNote.value =
     '';
 
   updateNoteCounter();
 
   const dayNumber =
-    challengeDayNumber(
-      key
-    );
+    challengeDayNumber(key);
 
   dayModalDate.textContent =
     `${prettyDate(key)} · ` +
@@ -1759,10 +1759,6 @@ async function openDay(
       openTasks
     );
 
-    /*
-     * V2 CR-004:
-     * Restore the existing day-level note.
-     */
     dayNote.value =
       data.note || '';
 
@@ -1800,9 +1796,7 @@ dayNote.addEventListener(
 saveBtn.addEventListener(
   'click',
   async () => {
-    if (
-      !openDateKey
-    ) {
+    if (!openDateKey) {
       return;
     }
 
@@ -1815,7 +1809,6 @@ saveBtn.addEventListener(
     try {
       await apiPut(
         `/api/day/${openDateKey}`,
-
         {
           tasks:
             openTasks.map(
@@ -1830,11 +1823,6 @@ saveBtn.addEventListener(
               })
             ),
 
-          /*
-           * V2 CR-004:
-           * Save one optional note for the
-           * entire challenge day.
-           */
           note:
             dayNote.value.trim()
         }
@@ -1843,11 +1831,6 @@ saveBtn.addEventListener(
       saveStatus.textContent =
         'Saved ✓';
 
-      /*
-       * Refresh the dashboard before
-       * closing the modal so all progress
-       * information is immediately current.
-       */
       await Promise.all([
         renderCalendar(),
         loadOverallProgress(),
@@ -1856,9 +1839,6 @@ saveBtn.addEventListener(
 
       dayModal.hide();
 
-      /*
-       * Clear temporary open-day state.
-       */
       openDateKey =
         null;
 
@@ -1890,137 +1870,119 @@ saveBtn.addEventListener(
    CALENDAR NAVIGATION
 ========================================= */
 
-prevMonthBtn
-  .addEventListener(
-    'click',
-    async () => {
-      current =
-        new Date(
-          current.getFullYear(),
-          current.getMonth() - 1,
-          1
-        );
-
-      await renderCalendar();
-    }
-  );
-
-
-nextMonthBtn
-  .addEventListener(
-    'click',
-    async () => {
-      current =
-        new Date(
-          current.getFullYear(),
-          current.getMonth() + 1,
-          1
-        );
-
-      await renderCalendar();
-    }
-  );
-
-
-/*
- * TODAY SHORTCUT
- *
- * Move to the current month and
- * immediately open today's checklist.
- */
-todayBtn
-  .addEventListener(
-    'click',
-    async () => {
-      if (
-        !challenge
-      ) {
-        return;
-      }
-
-      const today =
-        new Date();
-
-      today.setHours(
-        0,
-        0,
-        0,
-        0
+prevMonthBtn.addEventListener(
+  'click',
+  async () => {
+    current =
+      new Date(
+        current.getFullYear(),
+        current.getMonth() - 1,
+        1
       );
 
-      const key =
-        dateKey(
-          today
-        );
+    await renderCalendar();
+  }
+);
 
-      if (
-        !isChallengeDate(
-          key
-        )
-      ) {
-        alert(
-          'Today is outside the current challenge period.'
-        );
 
-        return;
-      }
-
-      current =
-        new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          1
-        );
-
-      await renderCalendar();
-
-      await openDay(
-        key
+nextMonthBtn.addEventListener(
+  'click',
+  async () => {
+    current =
+      new Date(
+        current.getFullYear(),
+        current.getMonth() + 1,
+        1
       );
+
+    await renderCalendar();
+  }
+);
+
+
+todayBtn.addEventListener(
+  'click',
+  async () => {
+    if (!challenge) {
+      return;
     }
-  );
+
+    const today =
+      new Date();
+
+    today.setHours(
+      0,
+      0,
+      0,
+      0
+    );
+
+    const key =
+      dateKey(today);
+
+    if (!isChallengeDate(key)) {
+      alert(
+        'Today is outside the current challenge period.'
+      );
+
+      return;
+    }
+
+    current =
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      );
+
+    await renderCalendar();
+
+    await openDay(key);
+  }
+);
 
 
 /* =========================================
    BUTTONS
 ========================================= */
 
-addTaskBtn
-  .addEventListener(
-    'click',
-    addSetupTask
-  );
+addTaskBtn.addEventListener(
+  'click',
+  addSetupTask
+);
 
 
-startChallengeBtn
-  .addEventListener(
-    'click',
-    startChallenge
-  );
+startChallengeBtn.addEventListener(
+  'click',
+  startChallenge
+);
 
 
-progressReportBtn
-  .addEventListener(
-    'click',
-    openProgressReport
-  );
+progressReportBtn.addEventListener(
+  'click',
+  openProgressReport
+);
 
 
-confirmEndChallengeBtn
-  .addEventListener(
-    'click',
-    endCurrentChallenge
-  );
+historyBtn.addEventListener(
+  'click',
+  openChallengeHistory
+);
 
 
-endChallengeModalEl
-  .addEventListener(
-    'show.bs.modal',
-    () => {
-      endChallengeStatus.textContent =
-        '';
-    }
-  );
+confirmEndChallengeBtn.addEventListener(
+  'click',
+  endCurrentChallenge
+);
+
+
+endChallengeModalEl.addEventListener(
+  'show.bs.modal',
+  () => {
+    endChallengeStatus.textContent =
+      '';
+  }
+);
 
 
 /* =========================================
@@ -2030,21 +1992,15 @@ endChallengeModalEl
 async function loadApplication() {
   loadingScreen
     .classList
-    .remove(
-      'd-none'
-    );
+    .remove('d-none');
 
   setupScreen
     .classList
-    .add(
-      'd-none'
-    );
+    .add('d-none');
 
   dashboardScreen
     .classList
-    .add(
-      'd-none'
-    );
+    .add('d-none');
 
   try {
     const data =
@@ -2055,15 +2011,11 @@ async function loadApplication() {
     challenge =
       data.challenge;
 
-    if (
-      !challenge
-    ) {
+    if (!challenge) {
       const redirected =
         await checkNaturalFinalReport();
 
-      if (
-        redirected
-      ) {
+      if (redirected) {
         return;
       }
 
@@ -2081,9 +2033,7 @@ async function loadApplication() {
     ]);
   }
   catch (error) {
-    console.error(
-      error
-    );
+    console.error(error);
 
     loadingScreen.innerHTML =
       `<div class="alert alert-danger">` +

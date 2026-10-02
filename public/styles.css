@@ -1,5 +1,7 @@
 :root{
   --cell-min:92px;
+  --sdt-page-width:900px;
+  --sdt-page-padding:20px;
 }
 
 
@@ -13,32 +15,79 @@ body{
 
 
 /*
- * SETUP PAGE
+ * Shared application width.
  *
- * The setup page uses a narrower centered
- * layout for easier reading and configuration.
+ * The account bar, SDT heading, setup form,
+ * dashboard and action buttons all use the
+ * same horizontal boundaries.
  */
-.setup-container{
-  max-width:900px;
-  margin:0 auto;
+.sdt-page-width{
+  width:100%;
+  max-width:
+    calc(
+      var(--sdt-page-width) +
+      (var(--sdt-page-padding) * 2)
+    );
+
+  margin-left:auto;
+  margin-right:auto;
+
+  padding-left:
+    var(--sdt-page-padding);
+
+  padding-right:
+    var(--sdt-page-padding);
 }
 
 
-/*
- * BRANDING
- *
- * The brand simply follows whichever
- * container it is placed inside.
- *
- * Setup:
- * inside .setup-container -> 900px alignment
- *
- * Dashboard:
- * directly inside Bootstrap .container ->
- * full dashboard alignment
- */
+.sdt-main{
+  padding-top:32px;
+  padding-bottom:48px;
+}
+
+
+.setup-container{
+  width:100%;
+  max-width:none;
+  margin:0;
+}
+
+
 .sdt-brand{
   min-width:0;
+}
+
+
+/* =========================================
+   ACCOUNT BAR
+========================================= */
+
+.account-bar{
+  width:100%;
+  background:#fff;
+  border-bottom:
+    1px solid
+    rgba(0,0,0,.1);
+}
+
+
+.account-bar-inner{
+  min-height:50px;
+
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+
+/* =========================================
+   APPLICATION HEADER
+========================================= */
+
+.sdt-app-header{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
 }
 
 
@@ -48,61 +97,46 @@ body{
 
 .challenge-toolbar{
   display:flex;
-
   align-items:center;
-
   justify-content:space-between;
-
   gap:24px;
-
   padding:8px 0 12px;
 }
 
 
 .challenge-summary{
   min-width:0;
-
   flex-shrink:1;
 }
 
 
 .challenge-actions{
   display:flex;
-
   align-items:center;
-
   justify-content:flex-end;
-
   gap:12px;
-
   flex-wrap:wrap;
 }
 
 
 .calendar-toolbar{
   display:flex;
-
   align-items:center;
-
   gap:8px;
 }
 
 
-/* Smaller screens */
 @media (max-width:900px){
 
   .challenge-toolbar{
     align-items:flex-start;
-
     flex-direction:column;
-
     gap:14px;
   }
 
 
   .challenge-actions{
     width:100%;
-
     justify-content:flex-start;
   }
 
@@ -115,9 +149,7 @@ body{
 
 .setup-task-row{
   display:flex;
-
   align-items:center;
-
   gap:10px;
 
   border:
@@ -134,11 +166,9 @@ body{
 
 .setup-task-number{
   width:32px;
-
   flex-shrink:0;
 
   font-weight:700;
-
   text-align:center;
 
   color:#6c757d;
@@ -147,16 +177,13 @@ body{
 
 .setup-task-input{
   flex:1;
-
   min-width:0;
 }
 
 
 .setup-task-actions{
   display:flex;
-
   gap:5px;
-
   flex-shrink:0;
 }
 
@@ -231,7 +258,6 @@ body{
 }
 
 
-/* Dates outside challenge duration */
 .day-cell.outside-challenge{
   background:#f3f4f6;
 
@@ -253,29 +279,22 @@ body{
 
 .day-top{
   display:flex;
-
   align-items:center;
-
   justify-content:space-between;
-
   gap:10px;
 }
 
 
 .day-num{
   font-weight:700;
-
   font-size:18px;
 }
 
 
 .day-sub{
   font-size:12px;
-
   opacity:.75;
-
   margin-top:6px;
-
   line-height:1.2;
 }
 
@@ -295,17 +314,14 @@ body{
 
 .ring{
   width:34px;
-
   height:34px;
 
   border-radius:999px;
 
   display:grid;
-
   place-items:center;
 
   font-size:11px;
-
   font-weight:700;
 
   border:
@@ -326,7 +342,6 @@ body{
 
 .weekday-header{
   font-size:12px;
-
   font-weight:700;
 
   letter-spacing:.02em;
@@ -335,8 +350,7 @@ body{
 
   opacity:.65;
 
-  padding:
-    6px 10px;
+  padding:6px 10px;
 }
 
 
@@ -346,7 +360,6 @@ body{
 
 .sdt-progress{
   height:22px;
-
   border-radius:999px;
 }
 
@@ -367,8 +380,7 @@ body{
 
   border-radius:12px;
 
-  padding:
-    10px 12px;
+  padding:10px 12px;
 
   background:white;
 }
@@ -381,7 +393,6 @@ body{
 
 .strike-meta{
   font-size:12px;
-
   opacity:.75;
 }
 
@@ -392,7 +403,6 @@ body{
 
 .day-task-row{
   display:flex;
-
   align-items:center;
 
   gap:10px;
@@ -406,6 +416,7 @@ body{
   border-radius:10px;
 }
 
+
 /* =========================================
    V2 AUTHENTICATION
 ========================================= */
@@ -414,14 +425,273 @@ body{
   display:flex;
 }
 
+
 #authScreen .card{
   border-radius:16px;
 }
+
 
 #authScreen .form-control{
   border-radius:10px;
 }
 
+
 #authScreen .btn-lg{
   border-radius:10px;
+}
+
+
+/* =========================================
+   V2 CHALLENGE HISTORY
+========================================= */
+
+.history-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+
+.history-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:24px;
+
+  padding:18px;
+
+  background:#fff;
+
+  border:
+    1px solid
+    rgba(0,0,0,.09);
+
+  border-radius:14px;
+
+  transition:
+    box-shadow .12s ease,
+    transform .12s ease;
+}
+
+
+.history-card:hover{
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 6px 18px
+    rgba(0,0,0,.06);
+}
+
+
+.history-card-content{
+  flex:1;
+  min-width:0;
+}
+
+
+.history-card-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+
+.history-card-title-wrap{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+
+.history-card-title{
+  margin:0;
+
+  font-size:17px;
+  font-weight:700;
+}
+
+
+.history-card-dates{
+  margin-top:5px;
+
+  color:#6c757d;
+
+  font-size:14px;
+}
+
+
+.history-card-meta{
+  display:flex;
+  flex-wrap:wrap;
+
+  gap:8px 18px;
+
+  margin-top:12px;
+
+  color:#495057;
+
+  font-size:13px;
+}
+
+
+.history-card-meta span{
+  position:relative;
+}
+
+
+.history-card-meta span:not(:last-child)::after{
+  content:"";
+
+  position:absolute;
+
+  right:-10px;
+  top:50%;
+
+  width:3px;
+  height:3px;
+
+  background:#adb5bd;
+
+  border-radius:50%;
+
+  transform:
+    translateY(-50%);
+}
+
+
+.history-card-completed{
+  margin-top:7px;
+
+  color:#6c757d;
+
+  font-size:12px;
+}
+
+
+.history-card-actions{
+  flex-shrink:0;
+}
+
+
+.history-empty{
+  text-align:center;
+
+  padding:48px 20px;
+
+  border:
+    1px dashed
+    rgba(0,0,0,.15);
+
+  border-radius:14px;
+
+  background:#fafafa;
+}
+
+
+.history-empty-icon{
+  display:grid;
+  place-items:center;
+
+  width:48px;
+  height:48px;
+
+  margin:
+    0 auto
+    14px;
+
+  border-radius:50%;
+
+  background:
+    rgba(13,110,253,.1);
+
+  color:#0d6efd;
+
+  font-size:20px;
+  font-weight:700;
+}
+
+
+#historyModal .modal-content{
+  border-radius:16px;
+}
+
+
+#historyModal .modal-body{
+  min-height:220px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width:576px){
+
+  :root{
+    --sdt-page-padding:16px;
+  }
+
+
+  .sdt-main{
+    padding-top:24px;
+    padding-bottom:32px;
+  }
+
+
+  .account-bar-inner{
+    min-height:54px;
+  }
+
+
+  .history-card{
+    align-items:stretch;
+    flex-direction:column;
+
+    gap:14px;
+  }
+
+
+  .history-card-actions{
+    width:100%;
+  }
+
+
+  .history-card-actions .btn{
+    width:100%;
+  }
+
+
+  #userAccount{
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+
+  .sdt-app-header{
+    margin-bottom:20px !important;
+  }
+
+
+  .setup-task-row{
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+
+
+  .setup-task-input{
+    flex-basis:
+      calc(100% - 50px);
+  }
+
+
+  .setup-task-actions{
+    width:100%;
+    justify-content:flex-end;
+    padding-left:42px;
+  }
+
 }
