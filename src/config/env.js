@@ -1,20 +1,63 @@
 require('dotenv').config();
 
-function must(name, fallback = undefined) {
-  const v = process.env[name] ?? fallback;
-  if (v === undefined || v === '') {
-    throw new Error(`Missing env var: ${name}`);
+
+/*
+ * ============================================================
+ * SDT V2 - ENVIRONMENT CONFIGURATION
+ * ============================================================
+ */
+
+
+function must(
+  name,
+  fallback = undefined
+) {
+
+  const value =
+    process.env[name] ??
+    fallback;
+
+
+  if (
+    value === undefined ||
+    value === ''
+  ) {
+
+    throw new Error(
+      `Missing env var: ${name}`
+    );
   }
-  return v;
+
+
+  return value;
 }
 
+
 module.exports = {
-  PORT: parseInt(process.env.PORT || '3000', 10),
-  DB: {
-    server: must('DB_SERVER'),
-    port: parseInt(process.env.DB_PORT || '1433', 10),
-    user: must('DB_USER'),
-    password: must('DB_PASSWORD'),
-    database: must('DB_DATABASE', 'SDT')
+
+  PORT:
+    parseInt(
+      process.env.PORT ||
+      '4000',
+      10
+    ),
+
+  NODE_ENV:
+    process.env.NODE_ENV ||
+    'development',
+
+  SUPABASE: {
+
+    url:
+      must(
+        'SUPABASE_URL'
+      ),
+
+    publishableKey:
+      must(
+        'SUPABASE_PUBLISHABLE_KEY'
+      )
+
   }
+
 };
