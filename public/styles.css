@@ -9,20 +9,28 @@
    GENERAL
 ========================================= */
 
-body{
-  background:#fafafa;
+*{
+  box-sizing:border-box;
 }
 
 
-/*
- * Shared application width.
- *
- * The account bar, SDT heading, setup form,
- * dashboard and action buttons all use the
- * same horizontal boundaries.
- */
+html{
+  width:100%;
+  overflow-x:hidden;
+}
+
+
+body{
+  width:100%;
+  margin:0;
+  background:#fafafa;
+  overflow-x:hidden;
+}
+
+
 .sdt-page-width{
   width:100%;
+
   max-width:
     calc(
       var(--sdt-page-width) +
@@ -65,6 +73,7 @@ body{
 .account-bar{
   width:100%;
   background:#fff;
+
   border-bottom:
     1px solid
     rgba(0,0,0,.1);
@@ -97,9 +106,12 @@ body{
 
 .challenge-toolbar{
   display:flex;
+
   align-items:center;
   justify-content:space-between;
+
   gap:24px;
+
   padding:8px 0 12px;
 }
 
@@ -112,34 +124,22 @@ body{
 
 .challenge-actions{
   display:flex;
+
   align-items:center;
   justify-content:flex-end;
+
   gap:12px;
+
   flex-wrap:wrap;
 }
 
 
 .calendar-toolbar{
   display:flex;
+
   align-items:center;
+
   gap:8px;
-}
-
-
-@media (max-width:900px){
-
-  .challenge-toolbar{
-    align-items:flex-start;
-    flex-direction:column;
-    gap:14px;
-  }
-
-
-  .challenge-actions{
-    width:100%;
-    justify-content:flex-start;
-  }
-
 }
 
 
@@ -149,7 +149,9 @@ body{
 
 .setup-task-row{
   display:flex;
+
   align-items:center;
+
   gap:10px;
 
   border:
@@ -166,9 +168,11 @@ body{
 
 .setup-task-number{
   width:32px;
+
   flex-shrink:0;
 
   font-weight:700;
+
   text-align:center;
 
   color:#6c757d;
@@ -177,19 +181,22 @@ body{
 
 .setup-task-input{
   flex:1;
+
   min-width:0;
 }
 
 
 .setup-task-actions{
   display:flex;
+
   gap:5px;
+
   flex-shrink:0;
 }
 
 
 /* =========================================
-   CALENDAR
+   DESKTOP CALENDAR
 ========================================= */
 
 .calendar-grid{
@@ -205,20 +212,6 @@ body{
     );
 
   gap:8px;
-}
-
-
-@media (max-width:768px){
-
-  :root{
-    --cell-min:72px;
-  }
-
-
-  .calendar-grid{
-    overflow-x:auto;
-  }
-
 }
 
 
@@ -279,22 +272,28 @@ body{
 
 .day-top{
   display:flex;
+
   align-items:center;
   justify-content:space-between;
+
   gap:10px;
 }
 
 
 .day-num{
   font-weight:700;
+
   font-size:18px;
 }
 
 
 .day-sub{
   font-size:12px;
+
   opacity:.75;
+
   margin-top:6px;
+
   line-height:1.2;
 }
 
@@ -321,6 +320,8 @@ body{
   display:grid;
   place-items:center;
 
+  flex-shrink:0;
+
   font-size:11px;
   font-weight:700;
 
@@ -342,6 +343,7 @@ body{
 
 .weekday-header{
   font-size:12px;
+
   font-weight:700;
 
   letter-spacing:.02em;
@@ -360,6 +362,7 @@ body{
 
 .sdt-progress{
   height:22px;
+
   border-radius:999px;
 }
 
@@ -393,6 +396,7 @@ body{
 
 .strike-meta{
   font-size:12px;
+
   opacity:.75;
 }
 
@@ -403,6 +407,7 @@ body{
 
 .day-task-row{
   display:flex;
+
   align-items:center;
 
   gap:10px;
@@ -418,7 +423,7 @@ body{
 
 
 /* =========================================
-   V2 AUTHENTICATION
+   AUTHENTICATION
 ========================================= */
 
 #userAccount:not(.d-none){
@@ -442,19 +447,23 @@ body{
 
 
 /* =========================================
-   V2 CHALLENGE HISTORY
+   CHALLENGE HISTORY
 ========================================= */
 
 .history-list{
   display:flex;
+
   flex-direction:column;
+
   gap:12px;
 }
 
 
 .history-card{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
 
   gap:24px;
@@ -487,22 +496,29 @@ body{
 
 .history-card-content{
   flex:1;
+
   min-width:0;
 }
 
 
 .history-card-heading{
   display:flex;
+
   align-items:flex-start;
+
   justify-content:space-between;
+
   gap:12px;
 }
 
 
 .history-card-title-wrap{
   display:flex;
+
   align-items:center;
+
   flex-wrap:wrap;
+
   gap:10px;
 }
 
@@ -511,6 +527,7 @@ body{
   margin:0;
 
   font-size:17px;
+
   font-weight:700;
 }
 
@@ -526,6 +543,7 @@ body{
 
 .history-card-meta{
   display:flex;
+
   flex-wrap:wrap;
 
   gap:8px 18px;
@@ -594,6 +612,7 @@ body{
 
 .history-empty-icon{
   display:grid;
+
   place-items:center;
 
   width:48px;
@@ -626,7 +645,33 @@ body{
 
 
 /* =========================================
-   RESPONSIVE
+   TABLET / SMALL DESKTOP
+========================================= */
+
+@media (max-width:900px){
+
+  .challenge-toolbar{
+    align-items:flex-start;
+
+    flex-direction:column;
+
+    gap:14px;
+  }
+
+
+  .challenge-actions{
+    width:100%;
+
+    justify-content:flex-start;
+  }
+
+}
+
+
+/* =========================================
+   MOBILE
+   Primary target: iPhone 15 Pro
+   approximately 393px wide
 ========================================= */
 
 @media (max-width:576px){
@@ -636,22 +681,735 @@ body{
   }
 
 
+  /* =======================================
+     PAGE
+  ======================================= */
+
   .sdt-main{
     padding-top:24px;
+
     padding-bottom:32px;
   }
 
+
+  .sdt-page-width{
+    padding-left:
+      var(--sdt-page-padding);
+
+    padding-right:
+      var(--sdt-page-padding);
+  }
+
+
+  /* =======================================
+     ACCOUNT BAR
+  ======================================= */
 
   .account-bar-inner{
     min-height:54px;
   }
 
 
+  #userAccount{
+    width:100%;
+
+    flex-wrap:nowrap;
+
+    justify-content:space-between;
+
+    gap:12px;
+  }
+
+
+  #userEmail{
+    min-width:0;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+  }
+
+
+  #logoutBtn{
+    flex-shrink:0;
+  }
+
+
+  /* =======================================
+     APPLICATION HEADER
+  ======================================= */
+
+  .sdt-app-header{
+    margin-bottom:28px !important;
+  }
+
+
+  .sdt-brand h1{
+    font-size:28px;
+  }
+
+
+  #historyBtn{
+    min-height:40px;
+
+    padding-left:14px;
+
+    padding-right:14px;
+  }
+
+
+  /* =======================================
+     SETUP PAGE
+  ======================================= */
+
+  #setupScreen h2{
+    font-size:24px;
+  }
+
+
+  #setupScreen > .mb-4{
+    margin-bottom:20px !important;
+  }
+
+
+  #setupScreen .card{
+    border-radius:14px;
+  }
+
+
+  #setupScreen .card-body{
+    padding:18px !important;
+  }
+
+
+  #setupScreen .form-control,
+  #setupScreen .input-group-text{
+    min-height:44px;
+  }
+
+
+  #addTaskBtn{
+    width:100%;
+
+    min-height:44px;
+  }
+
+
+  /* =======================================
+     SETUP TASK ROWS
+  ======================================= */
+
+  .setup-task-row{
+    display:grid;
+
+    grid-template-columns:
+      30px
+      minmax(0,1fr);
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px;
+  }
+
+
+  .setup-task-number{
+    width:30px;
+  }
+
+
+  .setup-task-input{
+    width:100%;
+
+    min-height:44px;
+  }
+
+
+  .setup-task-actions{
+    grid-column:
+      2 / 3;
+
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+      44px
+      44px
+      minmax(0,1fr);
+
+    gap:8px;
+  }
+
+
+  .setup-task-actions .btn{
+    min-height:40px;
+  }
+
+
+  #startChallengeBtn{
+    width:100%;
+
+    min-height:50px;
+  }
+
+
+  /* =======================================
+     ACTIVE CHALLENGE
+  ======================================= */
+
+  .challenge-toolbar{
+    padding-top:0;
+
+    padding-bottom:8px;
+
+    gap:18px;
+  }
+
+
+  .challenge-summary{
+    width:100%;
+  }
+
+
+  #activeChallengeName{
+    font-size:24px;
+  }
+
+
+  #activeChallengeDates{
+    font-size:14px;
+  }
+
+
+  .challenge-actions{
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0,1fr)
+      );
+
+    gap:10px;
+  }
+
+
+  #activeChallengeMeta{
+    grid-column:
+      1 / -1;
+
+    line-height:1.5;
+  }
+
+
+  #progressReportBtn,
+  #endChallengeBtn{
+    width:100%;
+
+    min-height:42px;
+  }
+
+
+  /* =======================================
+     MONTH CONTROLS
+  ======================================= */
+
+  .calendar-toolbar{
+    grid-column:
+      1 / -1;
+
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+      44px
+      minmax(0,1fr)
+      44px;
+
+    grid-template-areas:
+      "previous month next"
+      "today today today";
+
+    gap:8px;
+
+    align-items:center;
+
+    margin-top:2px;
+  }
+
+
+  #prevMonth{
+    grid-area:previous;
+
+    width:44px;
+    min-height:42px;
+  }
+
+
+  #monthLabel{
+    grid-area:month;
+
+    text-align:center;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    font-size:15px;
+  }
+
+
+  #nextMonth{
+    grid-area:next;
+
+    width:44px;
+    min-height:42px;
+  }
+
+
+  #todayBtn{
+    grid-area:today;
+
+    width:100%;
+
+    min-height:40px;
+  }
+
+
+  /* =======================================
+     DASHBOARD CARDS
+  ======================================= */
+
+  #dashboardScreen .card{
+    border-radius:14px;
+  }
+
+
+  #dashboardScreen .card-body{
+    padding:16px;
+  }
+
+
+  /* =======================================
+     PROGRESS
+  ======================================= */
+
+  #overallText{
+    font-size:20px;
+  }
+
+
+  .sdt-progress{
+    height:20px;
+  }
+
+
+  /* =======================================
+     MOBILE MONTH CALENDAR
+
+     Important:
+     - No horizontal scrolling
+     - All 7 days remain visible
+     - Large desktop day cards become
+       compact mobile calendar cells
+  ======================================= */
+
+  #dashboardScreen .card:has(#calendarGrid) .card-body{
+    padding:12px 10px 14px;
+
+    overflow:visible;
+  }
+
+
+  #calendarGrid{
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+      repeat(
+        7,
+        minmax(0,1fr)
+      );
+
+    gap:4px;
+
+    overflow:visible;
+  }
+
+
+  /* Weekday labels */
+
+  .weekday-header{
+    width:auto;
+
+    min-width:0;
+
+    padding:
+      5px
+      0
+      7px;
+
+    text-align:center;
+
+    font-size:10px;
+
+    line-height:1;
+
+    overflow:hidden;
+  }
+
+
+  /* Individual date */
+
+  .day-cell{
+    position:relative;
+
+    width:100%;
+
+    min-width:0;
+
+    min-height:58px;
+
+    padding:5px 2px;
+
+    border-radius:9px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:flex-start;
+
+    gap:3px;
+
+    text-align:center;
+
+    overflow:hidden;
+  }
+
+
+  /*
+   * Disable desktop hover movement.
+   * Touch devices do not need it.
+   */
+  .day-cell:not(.outside-challenge):hover{
+    transform:none;
+
+    box-shadow:none;
+  }
+
+
+  .day-top{
+    width:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:flex-start;
+
+    gap:3px;
+  }
+
+
+  .day-num{
+    width:100%;
+
+    font-size:13px;
+
+    line-height:16px;
+
+    font-weight:700;
+
+    text-align:center;
+  }
+
+
+  /*
+   * Desktop ring becomes a small status
+   * indicator on mobile.
+   *
+   * The percentage remains visible inside.
+   */
+  .ring{
+    width:27px;
+
+    height:27px;
+
+    border-width:2px;
+
+    font-size:8px;
+
+    line-height:1;
+
+    flex-shrink:0;
+  }
+
+
+  /*
+   * A perfect day receives the green ring
+   * already used by the desktop version.
+   */
+  .ring[data-pct="100"]{
+    border-width:2px;
+  }
+
+
+  /*
+   * The detailed "Day X" / status text that
+   * works on desktop is intentionally hidden
+   * on mobile.
+
+   * The user can tap the date to see details.
+   */
+  .day-sub{
+    display:none;
+  }
+
+
+  /*
+   * Outside-challenge dates stay visible so
+   * the month retains its familiar calendar
+   * structure, but they become very subtle.
+   */
+  .day-cell.outside-challenge{
+    min-height:58px;
+
+    padding:5px 2px;
+
+    background:#f8f9fa;
+
+    opacity:.42;
+
+    border-color:
+      rgba(0,0,0,.035);
+  }
+
+
+  /*
+   * Today's date gets a clearer outline.
+   */
+  .day-cell.today-challenge{
+    outline:
+      2px solid
+      rgba(13,110,253,.45);
+
+    outline-offset:0;
+  }
+
+
+  /*
+   * Recorded calendar cells remain easy
+   * to tap even though the visual design
+   * is compact.
+   */
+  .day-cell:not(.outside-challenge){
+    touch-action:manipulation;
+  }
+
+
+  /* =======================================
+     STRIKES
+  ======================================= */
+
+  .strike-row{
+    padding:12px;
+  }
+
+
+  .strike-row .d-flex{
+    gap:10px !important;
+  }
+
+
+  .strike-title{
+    font-size:14px;
+  }
+
+
+  .strike-row .badge{
+    flex-shrink:0;
+  }
+
+
+  /* =======================================
+     DAY DETAILS MODAL
+  ======================================= */
+
+  #dayModal .modal-dialog{
+    margin:12px;
+  }
+
+
+  #dayModal .modal-content{
+    border-radius:16px;
+
+    max-height:
+      calc(
+        100dvh - 24px
+      );
+  }
+
+
+  #dayModal .modal-body{
+    padding:16px;
+
+    overflow-y:auto;
+  }
+
+
+  #dayModal .modal-footer{
+    padding:12px 16px;
+
+    flex-wrap:wrap;
+  }
+
+
+  .day-task-row{
+    min-height:48px;
+
+    padding:12px;
+  }
+
+
+  .day-task-row .form-check-input{
+    width:20px;
+
+    height:20px;
+
+    flex-shrink:0;
+  }
+
+
+  #dayNote{
+    min-height:110px;
+  }
+
+
+  #dayModal .form-text{
+    align-items:flex-start;
+
+    font-size:12px;
+  }
+
+
+  #saveStatus{
+    width:100%;
+
+    margin-right:0 !important;
+
+    margin-bottom:4px;
+  }
+
+
+  #saveBtn{
+    min-width:90px;
+  }
+
+
+  /* =======================================
+     END CHALLENGE MODAL
+  ======================================= */
+
+  #endChallengeModal .modal-dialog{
+    margin:12px;
+  }
+
+
+  #endChallengeModal .modal-content{
+    border-radius:16px;
+  }
+
+
+  #endChallengeModal .modal-footer{
+    flex-wrap:wrap;
+  }
+
+
+  #endChallengeStatus{
+    width:100%;
+
+    margin-right:0 !important;
+  }
+
+
+  /* =======================================
+     CHALLENGE HISTORY
+  ======================================= */
+
+  #historyModal .modal-dialog{
+    margin:12px;
+  }
+
+
+  #historyModal .modal-content{
+    border-radius:16px;
+
+    max-height:
+      calc(
+        100dvh - 24px
+      );
+  }
+
+
+  #historyModal .modal-header{
+    padding:16px;
+  }
+
+
+  #historyModal .modal-body{
+    padding:14px;
+
+    min-height:180px;
+  }
+
+
   .history-card{
     align-items:stretch;
+
     flex-direction:column;
 
     gap:14px;
+
+    padding:15px;
+  }
+
+
+  .history-card-title-wrap{
+    align-items:flex-start;
+
+    gap:8px;
+  }
+
+
+  .history-card-title{
+    width:100%;
+
+    font-size:16px;
+  }
+
+
+  .history-card-dates{
+    font-size:13px;
+  }
+
+
+  .history-card-meta{
+    gap:7px 16px;
+
+    font-size:12px;
   }
 
 
@@ -662,36 +1420,127 @@ body{
 
   .history-card-actions .btn{
     width:100%;
+
+    min-height:42px;
   }
 
 
-  #userAccount{
-    flex-wrap:wrap;
-    justify-content:flex-end;
+  .history-empty{
+    padding:36px 16px;
   }
 
 
-  .sdt-app-header{
-    margin-bottom:20px !important;
+  /* =======================================
+     AUTH SCREEN
+  ======================================= */
+
+  #authScreen .container{
+    padding-left:16px;
+
+    padding-right:16px;
   }
 
 
-  .setup-task-row{
-    align-items:flex-start;
-    flex-wrap:wrap;
+  #authScreen .card-body{
+    padding:24px !important;
   }
 
 
-  .setup-task-input{
-    flex-basis:
-      calc(100% - 50px);
+  #authScreen .display-6{
+    font-size:34px;
+  }
+
+
+  #authScreen .form-control-lg{
+    min-height:50px;
+
+    font-size:16px;
+  }
+
+
+  /*
+   * Prevent iOS Safari from automatically
+   * zooming when a field receives focus.
+   */
+  input,
+  select,
+  textarea{
+    font-size:16px !important;
+  }
+
+}
+
+
+/* =========================================
+   VERY SMALL PHONES
+========================================= */
+
+@media (max-width:370px){
+
+  :root{
+    --sdt-page-padding:14px;
+  }
+
+
+  .sdt-main{
+    padding-top:20px;
+  }
+
+
+  #userEmail{
+    font-size:11px;
+  }
+
+
+  .challenge-actions{
+    grid-template-columns:1fr;
+  }
+
+
+  #activeChallengeMeta,
+  .calendar-toolbar{
+    grid-column:1;
+  }
+
+
+  /*
+   * Calendar becomes slightly tighter but
+   * still retains all seven columns.
+   */
+  #calendarGrid{
+    gap:3px;
+  }
+
+
+  .day-cell,
+  .day-cell.outside-challenge{
+    min-height:54px;
+
+    padding:
+      4px
+      1px;
+  }
+
+
+  .day-num{
+    font-size:12px;
+  }
+
+
+  .ring{
+    width:25px;
+
+    height:25px;
+
+    font-size:7px;
   }
 
 
   .setup-task-actions{
-    width:100%;
-    justify-content:flex-end;
-    padding-left:42px;
+    grid-template-columns:
+      40px
+      40px
+      minmax(0,1fr);
   }
 
 }
