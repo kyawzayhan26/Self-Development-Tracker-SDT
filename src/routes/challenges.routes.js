@@ -12,10 +12,6 @@ const router =
  * ============================================================
  */
 
-
-/*
- * Convert a YYYY-MM-DD string into a UTC Date.
- */
 function parseDate(
   value
 ) {
@@ -26,9 +22,6 @@ function parseDate(
 }
 
 
-/*
- * Convert a Date into YYYY-MM-DD.
- */
 function formatDate(
   date
 ) {
@@ -42,16 +35,6 @@ function formatDate(
 }
 
 
-/*
- * Calculate the final date of a challenge.
- *
- * Day 1 = start date.
- *
- * Example:
- * Start: 2026-10-01
- * Duration: 30
- * End: 2026-10-30
- */
 function calculateEndDate(
   startDate,
   durationDays
@@ -76,9 +59,6 @@ function calculateEndDate(
 }
 
 
-/*
- * Today's UTC date as YYYY-MM-DD.
- */
 function todayDateKey() {
 
   return new Date()
@@ -93,13 +73,6 @@ function todayDateKey() {
 /*
  * ============================================================
  * NATURAL COMPLETION
- * ============================================================
- *
- * Complete the authenticated user's active challenge when its
- * final day has already passed.
- *
- * RLS additionally ensures the user cannot update another
- * user's challenge.
  * ============================================================
  */
 
@@ -159,10 +132,6 @@ async function completeExpiredChallenge(
     todayDateKey();
 
 
-  /*
-   * Challenge remains active throughout its final day.
-   * It becomes completed the following day.
-   */
   if (
     endDate >= today
   ) {
@@ -177,6 +146,7 @@ async function completeExpiredChallenge(
     await supabase
       .from('challenges')
       .update({
+
         status:
           'completed',
 
@@ -185,6 +155,7 @@ async function completeExpiredChallenge(
 
         completion_reason:
           'NATURAL'
+
       })
       .eq(
         'challenge_id',
@@ -209,14 +180,6 @@ async function completeExpiredChallenge(
 /*
  * ============================================================
  * RESPONSE MAPPING
- * ============================================================
- *
- * The existing frontend uses camelCase.
- *
- * Supabase/PostgreSQL uses snake_case.
- *
- * Keeping the old response shape means we can migrate the
- * backend without unnecessarily rewriting the frontend.
  * ============================================================
  */
 
@@ -393,9 +356,6 @@ router.get(
         data[0];
 
 
-      /*
-       * Only expose active tasks.
-       */
       challenge.tasks =
         Array.isArray(
           challenge.tasks
@@ -407,7 +367,6 @@ router.get(
               )
               .sort(
                 (a, b) =>
-
                   (
                     a.sort_order || 0
                   ) -
@@ -534,6 +493,147 @@ router.get(
 
 /*
  * ============================================================
+ * GET /api/challenges/history
+ * ============================================================
+ *
+ * Returns every completed challenge belonging to the
+ * authenticated user.
+ *
+ * Challenge data remains in the existing tables. No separate
+ * archive/history table is required.
+ *
+ * RLS plus the explicit user_id filter ensure one user cannot
+ * retrieve another user's challenge history.
+ * ============================================================
+ */
+
+router.get(
+  '/history',
+
+  async (
+    req,
+    res,
+    next
+  ) => {
+
+    try {
+
+      const supabase =
+        req.supabase;
+
+      const userId =
+        req.user.id;
+
+
+      /*
+       * First make sure an expired active challenge is moved
+       * into completed status before history is retrieved.
+       */
+      await completeExpiredChallenge(
+        supabase,
+        userId
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from('challenges')
+          .select(`
+            challenge_id,
+            name,
+            start_date,
+            duration_days,
+            strikes_allowed,
+            status,
+            completed_at,
+            completion_reason,
+            created_at,
+            tasks (
+              task_id,
+              name,
+              sort_order,
+              is_active
+            )
+          `)
+          .eq(
+            'user_id',
+            userId
+          )
+          .eq(
+            'status',
+            'completed'
+          )
+          .order(
+            'completed_at',
+            {
+              ascending: false
+            }
+          );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      const challenges =
+        (data || [])
+          .map(
+            challenge => {
+
+              challenge.tasks =
+                Array.isArray(
+                  challenge.tasks
+                )
+                  ? challenge.tasks
+                      .filter(
+                        task =>
+                          task.is_active
+                      )
+                      .sort(
+                        (a, b) =>
+                          (
+                            a.sort_order || 0
+                          ) -
+                          (
+                            b.sort_order || 0
+                          )
+                      )
+                  : [];
+
+
+              return mapChallenge(
+                challenge
+              );
+            }
+          );
+
+
+      res.json({
+
+        ok: true,
+
+        count:
+          challenges.length,
+
+        challenges
+
+      });
+
+    }
+    catch (error) {
+
+      next(error);
+    }
+  }
+);
+
+
+/*
+ * ============================================================
  * POST /api/challenges/start
  * ============================================================
  */
@@ -555,12 +655,6 @@ router.post(
       const userId =
         req.user.id;
 
-
-      /*
-       * --------------------------------------------------------
-       * Validate challenge name
-       * --------------------------------------------------------
-       */
 
       const name =
         String(
@@ -599,12 +693,6 @@ router.post(
       }
 
 
-      /*
-       * --------------------------------------------------------
-       * Validate start date
-       * --------------------------------------------------------
-       */
-
       const startDate =
         String(
           req.body?.startDate ||
@@ -630,12 +718,6 @@ router.post(
         throw error;
       }
 
-
-      /*
-       * --------------------------------------------------------
-       * Validate duration
-       * --------------------------------------------------------
-       */
 
       const durationDays =
         Number(
@@ -663,12 +745,6 @@ router.post(
       }
 
 
-      /*
-       * --------------------------------------------------------
-       * Validate strikes
-       * --------------------------------------------------------
-       */
-
       const strikesAllowed =
         Number(
           req.body?.strikesAllowed
@@ -694,12 +770,6 @@ router.post(
         throw error;
       }
 
-
-      /*
-       * --------------------------------------------------------
-       * Validate tasks
-       * --------------------------------------------------------
-       */
 
       const incomingTasks =
         req.body?.tasks;
@@ -830,21 +900,12 @@ router.post(
       }
 
 
-      /*
-       * Complete an expired active challenge first.
-       */
       await completeExpiredChallenge(
         supabase,
         userId
       );
 
 
-      /*
-       * Check whether THIS USER already has an active
-       * challenge.
-       *
-       * The database unique partial index also enforces this.
-       */
       const {
         data: existing,
         error: existingError
@@ -887,12 +948,6 @@ router.post(
       }
 
 
-      /*
-       * --------------------------------------------------------
-       * Create challenge
-       * --------------------------------------------------------
-       */
-
       const {
         data: challenge,
         error: challengeError
@@ -900,6 +955,7 @@ router.post(
         await supabase
           .from('challenges')
           .insert({
+
             user_id:
               userId,
 
@@ -922,6 +978,7 @@ router.post(
 
             completion_reason:
               null
+
           })
           .select(
             'challenge_id'
@@ -931,12 +988,6 @@ router.post(
 
       if (challengeError) {
 
-        /*
-         * PostgreSQL unique violation.
-         *
-         * This may happen if two requests attempt to create
-         * an active challenge at almost the same time.
-         */
         if (
           challengeError.code ===
           '23505'
@@ -957,12 +1008,6 @@ router.post(
         throw challengeError;
       }
 
-
-      /*
-       * --------------------------------------------------------
-       * Create challenge tasks
-       * --------------------------------------------------------
-       */
 
       const taskRows =
         tasks.map(
@@ -999,13 +1044,6 @@ router.post(
 
       if (taskError) {
 
-        /*
-         * If task creation fails, remove the newly-created
-         * challenge so the user is not left with an incomplete
-         * challenge.
-         *
-         * RLS still applies to this delete.
-         */
         await supabase
           .from('challenges')
           .delete()
