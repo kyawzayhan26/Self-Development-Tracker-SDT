@@ -1,5 +1,7 @@
 :root{
   --cell-min:92px;
+  --sdt-page-width:900px;
+  --sdt-page-padding:20px;
 }
 
 
@@ -7,38 +9,224 @@
    GENERAL
 ========================================= */
 
+*{
+  box-sizing:border-box;
+}
+
+
+html{
+  width:100%;
+  overflow-x:hidden;
+}
+
+
 body{
+  width:100%;
+  margin:0;
   background:#fafafa;
+  overflow-x:hidden;
 }
 
 
-/*
- * SETUP PAGE
- *
- * The setup page uses a narrower centered
- * layout for easier reading and configuration.
- */
+.sdt-page-width{
+  width:100%;
+
+  max-width:
+    calc(
+      var(--sdt-page-width) +
+      (var(--sdt-page-padding) * 2)
+    );
+
+  margin-left:auto;
+  margin-right:auto;
+
+  padding-left:
+    var(--sdt-page-padding);
+
+  padding-right:
+    var(--sdt-page-padding);
+}
+
+
+.sdt-main{
+  padding-top:32px;
+  padding-bottom:48px;
+}
+
+
 .setup-container{
-  max-width:900px;
-  margin:0 auto;
+  width:100%;
+  max-width:none;
+  margin:0;
 }
 
 
-/*
- * BRANDING
- *
- * The brand simply follows whichever
- * container it is placed inside.
- *
- * Setup:
- * inside .setup-container -> 900px alignment
- *
- * Dashboard:
- * directly inside Bootstrap .container ->
- * full dashboard alignment
- */
 .sdt-brand{
   min-width:0;
+}
+
+
+/* =========================================
+   ACCOUNT BAR
+========================================= */
+
+.account-bar{
+  width:100%;
+  background:#fff;
+
+  border-bottom:
+    1px solid
+    rgba(0,0,0,.1);
+}
+
+
+.account-bar-inner{
+  min-height:50px;
+
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+
+/* =========================================
+   APPLICATION HEADER
+========================================= */
+
+.sdt-app-header{
+  position:relative;
+
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+
+/* Mobile menu button is hidden by default. */
+
+.mobile-menu-btn{
+  display:none;
+}
+
+
+/* =========================================
+   MOBILE OFFCANVAS MENU
+========================================= */
+
+.mobile-menu{
+  width:min(86vw,340px) !important;
+}
+
+
+.mobile-menu .offcanvas-header{
+  padding:20px;
+
+  border-bottom:
+    1px solid
+    rgba(0,0,0,.08);
+}
+
+
+.mobile-menu .offcanvas-body{
+  display:flex;
+
+  flex-direction:column;
+
+  padding:0;
+}
+
+
+.mobile-menu-account{
+  padding:20px;
+
+  border-bottom:
+    1px solid
+    rgba(0,0,0,.08);
+}
+
+
+.mobile-menu-section{
+  padding:12px;
+}
+
+
+.mobile-menu-section-title{
+  padding:
+    8px
+    10px;
+
+  color:#6c757d;
+
+  font-size:11px;
+
+  font-weight:700;
+
+  text-transform:uppercase;
+
+  letter-spacing:.06em;
+}
+
+
+.mobile-menu-action{
+  width:100%;
+
+  min-height:48px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:12px;
+
+  padding:
+    11px
+    10px;
+
+  border:0;
+
+  border-radius:9px;
+
+  background:transparent;
+
+  color:#212529;
+
+  text-align:left;
+
+  font-size:15px;
+
+  transition:
+    background-color .12s ease;
+}
+
+
+.mobile-menu-action:hover,
+.mobile-menu-action:focus-visible{
+  background:#f5f6f8;
+}
+
+
+.mobile-menu-action:focus-visible{
+  outline:
+    2px solid
+    rgba(13,110,253,.35);
+
+  outline-offset:2px;
+}
+
+
+.mobile-menu-danger{
+  color:#dc3545;
+}
+
+
+.mobile-menu-bottom{
+  margin-top:auto;
+
+  border-top:
+    1px solid
+    rgba(0,0,0,.08);
 }
 
 
@@ -50,7 +238,6 @@ body{
   display:flex;
 
   align-items:center;
-
   justify-content:space-between;
 
   gap:24px;
@@ -61,7 +248,6 @@ body{
 
 .challenge-summary{
   min-width:0;
-
   flex-shrink:1;
 }
 
@@ -70,7 +256,6 @@ body{
   display:flex;
 
   align-items:center;
-
   justify-content:flex-end;
 
   gap:12px;
@@ -85,27 +270,6 @@ body{
   align-items:center;
 
   gap:8px;
-}
-
-
-/* Smaller screens */
-@media (max-width:900px){
-
-  .challenge-toolbar{
-    align-items:flex-start;
-
-    flex-direction:column;
-
-    gap:14px;
-  }
-
-
-  .challenge-actions{
-    width:100%;
-
-    justify-content:flex-start;
-  }
-
 }
 
 
@@ -162,7 +326,7 @@ body{
 
 
 /* =========================================
-   CALENDAR
+   DESKTOP CALENDAR
 ========================================= */
 
 .calendar-grid{
@@ -178,20 +342,6 @@ body{
     );
 
   gap:8px;
-}
-
-
-@media (max-width:768px){
-
-  :root{
-    --cell-min:72px;
-  }
-
-
-  .calendar-grid{
-    overflow-x:auto;
-  }
-
 }
 
 
@@ -231,7 +381,6 @@ body{
 }
 
 
-/* Dates outside challenge duration */
 .day-cell.outside-challenge{
   background:#f3f4f6;
 
@@ -255,7 +404,6 @@ body{
   display:flex;
 
   align-items:center;
-
   justify-content:space-between;
 
   gap:10px;
@@ -295,17 +443,16 @@ body{
 
 .ring{
   width:34px;
-
   height:34px;
 
   border-radius:999px;
 
   display:grid;
-
   place-items:center;
 
-  font-size:11px;
+  flex-shrink:0;
 
+  font-size:11px;
   font-weight:700;
 
   border:
@@ -335,8 +482,7 @@ body{
 
   opacity:.65;
 
-  padding:
-    6px 10px;
+  padding:6px 10px;
 }
 
 
@@ -367,8 +513,7 @@ body{
 
   border-radius:12px;
 
-  padding:
-    10px 12px;
+  padding:10px 12px;
 
   background:white;
 }
@@ -404,4 +549,1211 @@ body{
     rgba(0,0,0,.08);
 
   border-radius:10px;
+}
+
+
+/* =========================================
+   AUTHENTICATION
+========================================= */
+
+#userAccount:not(.d-none){
+  display:flex;
+}
+
+
+#authScreen .card{
+  border-radius:16px;
+}
+
+
+#authScreen .form-control{
+  border-radius:10px;
+}
+
+
+#authScreen .btn-lg{
+  border-radius:10px;
+}
+
+
+/* =========================================
+   CHALLENGE HISTORY
+========================================= */
+
+.history-list{
+  display:flex;
+
+  flex-direction:column;
+
+  gap:12px;
+}
+
+
+.history-card{
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:24px;
+
+  padding:18px;
+
+  background:#fff;
+
+  border:
+    1px solid
+    rgba(0,0,0,.09);
+
+  border-radius:14px;
+
+  transition:
+    box-shadow .12s ease,
+    transform .12s ease;
+}
+
+
+.history-card:hover{
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 6px 18px
+    rgba(0,0,0,.06);
+}
+
+
+.history-card-content{
+  flex:1;
+
+  min-width:0;
+}
+
+
+.history-card-heading{
+  display:flex;
+
+  align-items:flex-start;
+
+  justify-content:space-between;
+
+  gap:12px;
+}
+
+
+.history-card-title-wrap{
+  display:flex;
+
+  align-items:center;
+
+  flex-wrap:wrap;
+
+  gap:10px;
+}
+
+
+.history-card-title{
+  margin:0;
+
+  font-size:17px;
+
+  font-weight:700;
+}
+
+
+.history-card-dates{
+  margin-top:5px;
+
+  color:#6c757d;
+
+  font-size:14px;
+}
+
+
+.history-card-meta{
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:8px 18px;
+
+  margin-top:12px;
+
+  color:#495057;
+
+  font-size:13px;
+}
+
+
+.history-card-meta span{
+  position:relative;
+}
+
+
+.history-card-meta span:not(:last-child)::after{
+  content:"";
+
+  position:absolute;
+
+  right:-10px;
+  top:50%;
+
+  width:3px;
+  height:3px;
+
+  background:#adb5bd;
+
+  border-radius:50%;
+
+  transform:
+    translateY(-50%);
+}
+
+
+.history-card-completed{
+  margin-top:7px;
+
+  color:#6c757d;
+
+  font-size:12px;
+}
+
+
+.history-card-actions{
+  flex-shrink:0;
+}
+
+
+.history-empty{
+  text-align:center;
+
+  padding:48px 20px;
+
+  border:
+    1px dashed
+    rgba(0,0,0,.15);
+
+  border-radius:14px;
+
+  background:#fafafa;
+}
+
+
+.history-empty-icon{
+  display:grid;
+
+  place-items:center;
+
+  width:48px;
+  height:48px;
+
+  margin:
+    0 auto
+    14px;
+
+  border-radius:50%;
+
+  background:
+    rgba(13,110,253,.1);
+
+  color:#0d6efd;
+
+  font-size:20px;
+  font-weight:700;
+}
+
+
+#historyModal .modal-content{
+  border-radius:16px;
+}
+
+
+#historyModal .modal-body{
+  min-height:220px;
+}
+
+
+/* =========================================
+   TABLET / SMALL DESKTOP
+========================================= */
+
+@media (max-width:900px){
+
+  .challenge-toolbar{
+    align-items:flex-start;
+
+    flex-direction:column;
+
+    gap:14px;
+  }
+
+
+  .challenge-actions{
+    width:100%;
+
+    justify-content:flex-start;
+  }
+
+}
+
+
+/* =========================================
+   MOBILE
+   Primary target: iPhone 15 Pro
+   approximately 393px wide
+========================================= */
+
+@media (max-width:576px){
+
+  :root{
+    --sdt-page-padding:16px;
+  }
+
+
+  /* =======================================
+     PAGE
+  ======================================= */
+
+  .sdt-main{
+    padding-top:16px;
+
+    padding-bottom:32px;
+  }
+
+
+  .sdt-page-width{
+    padding-left:
+      var(--sdt-page-padding);
+
+    padding-right:
+      var(--sdt-page-padding);
+  }
+
+
+  /* =======================================
+     MOBILE HEADER / NAVIGATION
+  ======================================= */
+
+  /*
+   * Account controls are now available in
+   * the burger menu, so the desktop account
+   * bar no longer consumes mobile space.
+   */
+  .account-bar{
+    display:none;
+  }
+
+
+  .sdt-app-header{
+    min-height:52px;
+
+    margin-bottom:20px !important;
+
+    padding-right:54px;
+  }
+
+
+  .sdt-brand h1{
+    margin-bottom:0 !important;
+
+    font-size:25px;
+
+    line-height:1.15;
+  }
+
+
+  .sdt-brand .text-secondary{
+    margin-top:3px;
+
+    font-size:13px;
+
+    line-height:1.25;
+  }
+
+
+  /*
+   * Desktop Challenge History button is
+   * replaced by the burger menu.
+   */
+  #historyBtn{
+    display:none;
+  }
+
+
+  .mobile-menu-btn{
+    position:absolute;
+
+    top:0;
+    right:0;
+
+    width:44px;
+    height:44px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    padding:0;
+
+    border-radius:10px;
+  }
+
+
+  .mobile-menu-icon{
+    display:block;
+
+    font-size:21px;
+
+    line-height:1;
+  }
+
+
+  /* =======================================
+     SETUP PAGE
+  ======================================= */
+
+  #setupScreen h2{
+    font-size:24px;
+  }
+
+
+  #setupScreen > .mb-4{
+    margin-bottom:20px !important;
+  }
+
+
+  #setupScreen .card{
+    border-radius:14px;
+  }
+
+
+  #setupScreen .card-body{
+    padding:18px !important;
+  }
+
+
+  #setupScreen .form-control,
+  #setupScreen .input-group-text{
+    min-height:44px;
+  }
+
+
+  #addTaskBtn{
+    width:100%;
+
+    min-height:44px;
+  }
+
+
+  /* =======================================
+     SETUP TASK ROWS
+  ======================================= */
+
+  .setup-task-row{
+    display:grid;
+
+    grid-template-columns:
+      30px
+      minmax(0,1fr);
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px;
+  }
+
+
+  .setup-task-number{
+    width:30px;
+  }
+
+
+  .setup-task-input{
+    width:100%;
+
+    min-height:44px;
+  }
+
+
+  .setup-task-actions{
+    grid-column:
+      2 / 3;
+
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+      44px
+      44px
+      minmax(0,1fr);
+
+    gap:8px;
+  }
+
+
+  .setup-task-actions .btn{
+    min-height:40px;
+  }
+
+
+  #startChallengeBtn{
+    width:100%;
+
+    min-height:50px;
+  }
+
+
+  /* =======================================
+     COMPACT ACTIVE CHALLENGE
+  ======================================= */
+
+  .challenge-toolbar{
+    gap:10px;
+
+    margin-bottom:10px !important;
+
+    padding:
+      0
+      0
+      4px;
+  }
+
+
+  .challenge-summary{
+    width:100%;
+  }
+
+
+  /*
+   * Keep context but make the label tiny.
+   */
+  .challenge-summary >
+  .text-uppercase{
+    margin-bottom:3px !important;
+
+    font-size:10px !important;
+
+    line-height:1.2;
+
+    letter-spacing:.05em;
+  }
+
+
+  #activeChallengeName{
+    margin-bottom:3px !important;
+
+    font-size:21px;
+
+    line-height:1.2;
+  }
+
+
+  #activeChallengeDates{
+    font-size:12px;
+
+    line-height:1.3;
+  }
+
+
+  /*
+   * These actions now live inside the
+   * mobile burger menu.
+   */
+  #progressReportBtn,
+  #endChallengeBtn{
+    display:none;
+  }
+
+
+  /*
+   * Duration/rules/strike allowance is
+   * redundant on mobile. The progress and
+   * strike cards already expose the useful
+   * information.
+   */
+  #activeChallengeMeta{
+    display:none;
+  }
+
+
+  /*
+   * Only calendar controls remain inside
+   * challenge-actions.
+   */
+  .challenge-actions{
+    width:100%;
+
+    display:block;
+  }
+
+
+  /* =======================================
+     COMPACT MONTH CONTROLS
+  ======================================= */
+
+  /*
+   * One-row layout:
+   *
+   * ‹    October 2026    ›    Today
+   */
+  .calendar-toolbar{
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+      40px
+      minmax(0,1fr)
+      40px
+      auto;
+
+    grid-template-areas:
+      "previous month next today";
+
+    gap:7px;
+
+    align-items:center;
+
+    margin-top:3px;
+  }
+
+
+  #prevMonth{
+    grid-area:previous;
+
+    width:40px;
+
+    min-height:38px;
+
+    padding:0;
+  }
+
+
+  #monthLabel{
+    grid-area:month;
+
+    min-width:0;
+
+    text-align:center;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+
+    font-size:14px;
+  }
+
+
+  #nextMonth{
+    grid-area:next;
+
+    width:40px;
+
+    min-height:38px;
+
+    padding:0;
+  }
+
+
+  #todayBtn{
+    grid-area:today;
+
+    width:auto;
+
+    min-height:38px;
+
+    padding:
+      6px
+      12px;
+  }
+
+
+  /* =======================================
+     DASHBOARD CARDS
+  ======================================= */
+
+  #dashboardScreen .card{
+    margin-bottom:12px !important;
+
+    border-radius:14px;
+  }
+
+
+  #dashboardScreen .card-body{
+    padding:16px;
+  }
+
+
+  /* =======================================
+     COMPACT PROGRESS
+  ======================================= */
+
+  /*
+   * Progress remains above the calendar,
+   * but takes significantly less room.
+   */
+  #dashboardScreen .card:first-of-type .card-body{
+    padding:
+      12px
+      14px;
+  }
+
+
+  #dashboardScreen .card:first-of-type
+  .card-body >
+  .d-flex{
+    margin-bottom:7px !important;
+  }
+
+
+  #overallText{
+    font-size:18px;
+
+    line-height:1.2;
+  }
+
+
+  #overallMeta{
+    font-size:11px;
+  }
+
+
+  .sdt-progress{
+    height:16px;
+  }
+
+
+  /* =======================================
+     MOBILE MONTH CALENDAR
+
+     - No horizontal scrolling
+     - All 7 days visible
+     - Compact iPhone-style month view
+  ======================================= */
+
+  #dashboardScreen .card:has(#calendarGrid) .card-body{
+    padding:
+      12px
+      10px
+      14px;
+
+    overflow:visible;
+  }
+
+
+  #calendarGrid{
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+      repeat(
+        7,
+        minmax(0,1fr)
+      );
+
+    gap:4px;
+
+    overflow:visible;
+  }
+
+
+  /* Weekday labels */
+
+  .weekday-header{
+    width:auto;
+
+    min-width:0;
+
+    padding:
+      5px
+      0
+      7px;
+
+    text-align:center;
+
+    font-size:10px;
+
+    line-height:1;
+
+    overflow:hidden;
+  }
+
+
+  /* Individual date */
+
+  .day-cell{
+    position:relative;
+
+    width:100%;
+
+    min-width:0;
+
+    min-height:58px;
+
+    padding:
+      5px
+      2px;
+
+    border-radius:9px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:flex-start;
+
+    gap:3px;
+
+    text-align:center;
+
+    overflow:hidden;
+  }
+
+
+  .day-cell:not(.outside-challenge):hover{
+    transform:none;
+
+    box-shadow:none;
+  }
+
+
+  .day-top{
+    width:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:flex-start;
+
+    gap:3px;
+  }
+
+
+  .day-num{
+    width:100%;
+
+    font-size:13px;
+
+    line-height:16px;
+
+    font-weight:700;
+
+    text-align:center;
+  }
+
+
+  /*
+   * Desktop completion ring becomes the
+   * compact status indicator.
+   */
+  .ring{
+    width:27px;
+
+    height:27px;
+
+    border-width:2px;
+
+    font-size:8px;
+
+    line-height:1;
+
+    flex-shrink:0;
+  }
+
+
+  .ring[data-pct="100"]{
+    border-width:2px;
+  }
+
+
+  /*
+   * Detailed Day X / status information is
+   * hidden. Tapping the date opens details.
+   */
+  .day-sub{
+    display:none;
+  }
+
+
+  .day-cell.outside-challenge{
+    min-height:58px;
+
+    padding:
+      5px
+      2px;
+
+    background:#f8f9fa;
+
+    opacity:.42;
+
+    border-color:
+      rgba(0,0,0,.035);
+  }
+
+
+  .day-cell.today-challenge{
+    outline:
+      2px solid
+      rgba(13,110,253,.45);
+
+    outline-offset:0;
+  }
+
+
+  .day-cell:not(.outside-challenge){
+    touch-action:manipulation;
+  }
+
+
+  /* =======================================
+     STRIKES
+  ======================================= */
+
+  .strike-row{
+    padding:12px;
+  }
+
+
+  .strike-row .d-flex{
+    gap:10px !important;
+  }
+
+
+  .strike-title{
+    font-size:14px;
+  }
+
+
+  .strike-row .badge{
+    flex-shrink:0;
+  }
+
+
+  /* =======================================
+     DAY DETAILS MODAL
+  ======================================= */
+
+  #dayModal .modal-dialog{
+    margin:12px;
+  }
+
+
+  #dayModal .modal-content{
+    border-radius:16px;
+
+    max-height:
+      calc(
+        100dvh - 24px
+      );
+  }
+
+
+  #dayModal .modal-body{
+    padding:16px;
+
+    overflow-y:auto;
+  }
+
+
+  #dayModal .modal-footer{
+    padding:
+      12px
+      16px;
+
+    flex-wrap:wrap;
+  }
+
+
+  .day-task-row{
+    min-height:48px;
+
+    padding:12px;
+  }
+
+
+  .day-task-row .form-check-input{
+    width:20px;
+
+    height:20px;
+
+    flex-shrink:0;
+  }
+
+
+  #dayNote{
+    min-height:110px;
+  }
+
+
+  #dayModal .form-text{
+    align-items:flex-start;
+
+    font-size:12px;
+  }
+
+
+  #saveStatus{
+    width:100%;
+
+    margin-right:0 !important;
+
+    margin-bottom:4px;
+  }
+
+
+  #saveBtn{
+    min-width:90px;
+  }
+
+
+  /* =======================================
+     END CHALLENGE MODAL
+  ======================================= */
+
+  #endChallengeModal .modal-dialog{
+    margin:12px;
+  }
+
+
+  #endChallengeModal .modal-content{
+    border-radius:16px;
+  }
+
+
+  #endChallengeModal .modal-footer{
+    flex-wrap:wrap;
+  }
+
+
+  #endChallengeStatus{
+    width:100%;
+
+    margin-right:0 !important;
+  }
+
+
+  /* =======================================
+     CHALLENGE HISTORY
+  ======================================= */
+
+  #historyModal .modal-dialog{
+    margin:12px;
+  }
+
+
+  #historyModal .modal-content{
+    border-radius:16px;
+
+    max-height:
+      calc(
+        100dvh - 24px
+      );
+  }
+
+
+  #historyModal .modal-header{
+    padding:16px;
+  }
+
+
+  #historyModal .modal-body{
+    padding:14px;
+
+    min-height:180px;
+  }
+
+
+  .history-card{
+    align-items:stretch;
+
+    flex-direction:column;
+
+    gap:14px;
+
+    padding:15px;
+  }
+
+
+  .history-card-title-wrap{
+    align-items:flex-start;
+
+    gap:8px;
+  }
+
+
+  .history-card-title{
+    width:100%;
+
+    font-size:16px;
+  }
+
+
+  .history-card-dates{
+    font-size:13px;
+  }
+
+
+  .history-card-meta{
+    gap:
+      7px
+      16px;
+
+    font-size:12px;
+  }
+
+
+  .history-card-actions{
+    width:100%;
+  }
+
+
+  .history-card-actions .btn{
+    width:100%;
+
+    min-height:42px;
+  }
+
+
+  .history-empty{
+    padding:
+      36px
+      16px;
+  }
+
+
+  /* =======================================
+     AUTH SCREEN
+  ======================================= */
+
+  #authScreen .container{
+    padding-left:16px;
+
+    padding-right:16px;
+  }
+
+
+  #authScreen .card-body{
+    padding:24px !important;
+  }
+
+
+  #authScreen .display-6{
+    font-size:34px;
+  }
+
+
+  #authScreen .form-control-lg{
+    min-height:50px;
+
+    font-size:16px;
+  }
+
+
+  /*
+   * Prevent iOS Safari from automatically
+   * zooming when a field receives focus.
+   */
+  input,
+  select,
+  textarea{
+    font-size:16px !important;
+  }
+
+}
+
+
+/* =========================================
+   VERY SMALL PHONES
+========================================= */
+
+@media (max-width:370px){
+
+  :root{
+    --sdt-page-padding:14px;
+  }
+
+
+  .sdt-main{
+    padding-top:14px;
+  }
+
+
+  /*
+   * On very narrow phones, move Today to
+   * its own row rather than squeezing it.
+   */
+  .calendar-toolbar{
+    grid-template-columns:
+      38px
+      minmax(0,1fr)
+      38px;
+
+    grid-template-areas:
+      "previous month next"
+      "today today today";
+  }
+
+
+  #prevMonth,
+  #nextMonth{
+    width:38px;
+  }
+
+
+  #todayBtn{
+    width:100%;
+  }
+
+
+  /*
+   * Calendar remains seven columns.
+   */
+  #calendarGrid{
+    gap:3px;
+  }
+
+
+  .day-cell,
+  .day-cell.outside-challenge{
+    min-height:54px;
+
+    padding:
+      4px
+      1px;
+  }
+
+
+  .day-num{
+    font-size:12px;
+  }
+
+
+  .ring{
+    width:25px;
+
+    height:25px;
+
+    font-size:7px;
+  }
+
+
+  .setup-task-actions{
+    grid-template-columns:
+      40px
+      40px
+      minmax(0,1fr);
+  }
+
 }

@@ -1,16 +1,19 @@
 {
   "name": "sdt-self-development-tracker",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "SDT - Self Development Tracker (local-only 75-hard-style tracker)",
+  "description": "SDT - Self Development Tracker V2",
   "main": "src/server.js",
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "mssql": "^10.0.2"
+    "express": "^4.19.2"
   }
 }

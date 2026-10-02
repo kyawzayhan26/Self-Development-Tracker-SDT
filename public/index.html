@@ -31,49 +31,27 @@
 <body>
 
 
-<div class="container py-4">
+<!-- ================================= -->
+<!-- AUTHENTICATION -->
+<!-- ================================= -->
 
-
-  <!-- ================================= -->
-  <!-- LOADING -->
-  <!-- ================================= -->
+<div
+  id="authScreen"
+  class="d-none"
+>
 
   <div
-    id="loadingScreen"
-    class="text-center py-5"
+    class="container min-vh-100 d-flex align-items-center justify-content-center py-5"
   >
 
     <div
-      class="spinner-border text-primary"
-      role="status"
-    ></div>
+      class="w-100"
+      style="max-width:460px;"
+    >
 
-    <div class="mt-3 text-secondary">
-      Loading SDT...
-    </div>
+      <div class="text-center mb-4">
 
-  </div>
-
-
-
-  <!-- ================================= -->
-  <!-- SETUP SCREEN -->
-  <!-- ================================= -->
-
-  <div
-    id="setupScreen"
-    class="d-none"
-  >
-
-
-    <div class="setup-container">
-
-
-      <!-- SETUP BRAND -->
-
-      <div class="sdt-brand mb-4">
-
-        <h1 class="h2 mb-1">
+        <h1 class="display-6 fw-bold mb-1">
           SDT
         </h1>
 
@@ -84,208 +62,179 @@
       </div>
 
 
+      <div class="card shadow-sm">
 
-      <!-- SETUP INTRO -->
+        <div class="card-body p-4 p-md-5">
 
-      <div class="mb-4">
+          <div class="mb-4">
 
-        <h2 class="h3 mb-2">
-          Build Your Challenge
-        </h2>
+            <h2
+              id="authTitle"
+              class="h3 mb-2"
+            >
+              Welcome Back
+            </h2>
 
-        <p class="text-secondary mb-0">
-          Define the commitment before you begin.
-          Once the challenge starts, its rules
-          are locked.
-        </p>
-
-      </div>
-
-
-
-      <!-- SETTINGS -->
-
-      <div class="card shadow-sm mb-4">
-
-        <div class="card-body p-4">
-
-
-          <h3 class="h5 mb-4">
-            Challenge Settings
-          </h3>
-
-
-          <div class="row g-3">
-
-
-            <div class="col-md-6">
-
-              <label
-                for="challengeName"
-                class="form-label"
-              >
-                Challenge name
-              </label>
-
-              <input
-                id="challengeName"
-                type="text"
-                class="form-control"
-                maxlength="150"
-                placeholder="Example: 30 Day Reset"
-              >
-
-            </div>
-
-
-
-            <div class="col-md-6">
-
-              <label
-                for="challengeStartDate"
-                class="form-label"
-              >
-                Start date
-              </label>
-
-              <input
-                id="challengeStartDate"
-                type="date"
-                class="form-control"
-              >
-
-            </div>
-
-
-
-            <div class="col-md-6">
-
-              <label
-                for="challengeDuration"
-                class="form-label"
-              >
-                Challenge duration
-              </label>
-
-              <div class="input-group">
-
-                <input
-                  id="challengeDuration"
-                  type="number"
-                  class="form-control"
-                  min="1"
-                  max="365"
-                  value="30"
-                >
-
-                <span class="input-group-text">
-                  days
-                </span>
-
-              </div>
-
-            </div>
-
-
-
-            <div class="col-md-6">
-
-              <label
-                for="challengeStrikes"
-                class="form-label"
-              >
-                Strikes allowed per rule
-              </label>
-
-              <input
-                id="challengeStrikes"
-                type="number"
-                class="form-control"
-                min="0"
-                max="99"
-                value="3"
-              >
-
-            </div>
-
+            <p
+              id="authDescription"
+              class="text-secondary mb-0"
+            >
+              Sign in to continue to your challenges.
+            </p>
 
           </div>
 
-        </div>
 
-      </div>
+          <form id="authForm">
+
+            <div class="mb-3">
+
+              <label
+                for="authEmail"
+                class="form-label"
+              >
+                Email
+              </label>
+
+              <input
+                id="authEmail"
+                type="email"
+                class="form-control form-control-lg"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+              >
+
+            </div>
 
 
+            <div class="mb-3">
 
-      <!-- RULE BUILDER -->
+              <label
+                for="authPassword"
+                class="form-label"
+              >
+                Password
+              </label>
 
-      <div class="card shadow-sm mb-4">
+              <input
+                id="authPassword"
+                type="password"
+                class="form-control form-control-lg"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                minlength="8"
+                required
+              >
 
-        <div class="card-body p-4">
-
-
-          <div
-            class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3"
-          >
-
-            <div>
-
-              <h3 class="h5 mb-1">
-                Rules & Tasks
-              </h3>
-
-              <div class="text-secondary small">
-                These will become your daily checklist.
+              <div class="form-text">
+                Minimum 8 characters.
               </div>
 
             </div>
 
 
-            <button
-              id="addTaskBtn"
-              type="button"
-              class="btn btn-outline-primary"
+            <div
+              id="authMessage"
+              class="alert alert-danger mt-3 d-none"
+              role="alert"
+            ></div>
+
+
+            <div class="d-grid mt-4">
+
+              <button
+                id="authSubmitBtn"
+                type="submit"
+                class="btn btn-primary btn-lg"
+              >
+                Sign In
+              </button>
+
+            </div>
+
+          </form>
+
+
+          <div
+            class="text-center border-top mt-4 pt-4"
+          >
+
+            <span
+              id="authSwitchText"
+              class="text-secondary"
             >
-              + Add Rule
+              Don't have an account?
+            </span>
+
+            <button
+              id="authSwitchBtn"
+              type="button"
+              class="btn btn-link text-decoration-none p-1"
+            >
+              Create Account
             </button>
 
           </div>
 
-
-          <div
-            id="setupTasksList"
-            class="vstack gap-2"
-          ></div>
-
-
-          <div
-            id="setupValidation"
-            class="alert alert-danger mt-3 d-none"
-          ></div>
-
-
         </div>
 
       </div>
 
 
+      <div
+        class="text-center text-secondary small mt-4"
+      >
+        Build better habits. Track your progress.
+      </div>
 
-      <!-- START BUTTON -->
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- ================================= -->
+<!-- AUTHENTICATED APPLICATION -->
+<!-- ================================= -->
+
+<div
+  id="appContainer"
+  class="d-none"
+>
+
+
+  <!-- ================================= -->
+  <!-- DESKTOP ACCOUNT BAR -->
+  <!-- ================================= -->
+
+  <div class="account-bar">
+
+    <div class="sdt-page-width account-bar-inner">
 
       <div
-        class="d-flex justify-content-end"
+        id="userAccount"
+        class="d-none align-items-center gap-2"
       >
 
-        <button
-          id="startChallengeBtn"
-          type="button"
-          class="btn btn-primary btn-lg px-5"
+        <span
+          id="userEmail"
+          class="text-secondary small"
         >
-          Start Challenge
+          —
+        </span>
+
+        <button
+          id="logoutBtn"
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+        >
+          Log Out
         </button>
 
       </div>
-
 
     </div>
 
@@ -294,253 +243,804 @@
 
 
   <!-- ================================= -->
-  <!-- ACTIVE CHALLENGE -->
+  <!-- MAIN CONTENT -->
   <!-- ================================= -->
 
-  <div
-    id="dashboardScreen"
-    class="d-none"
-  >
+  <main class="sdt-main">
+
+    <div class="sdt-page-width">
 
 
-    <!-- DASHBOARD BRAND -->
+      <!-- ================================= -->
+      <!-- APPLICATION HEADER -->
+      <!-- ================================= -->
 
-    <div class="sdt-brand dashboard-brand mb-4">
+      <div
+        id="appHeader"
+        class="sdt-app-header mb-4"
+      >
 
-      <h1 class="h2 mb-1">
+        <div class="sdt-brand">
+
+          <h1 class="h2 mb-1">
+            SDT
+          </h1>
+
+          <div class="text-secondary">
+            Self Development Tracker
+          </div>
+
+        </div>
+
+
+        <!-- Desktop history button -->
+
+        <button
+          id="historyBtn"
+          type="button"
+          class="btn btn-outline-primary btn-sm mt-3"
+        >
+          Challenge History
+        </button>
+
+
+        <!-- Mobile burger button -->
+
+        <button
+          id="mobileMenuBtn"
+          type="button"
+          class="btn btn-outline-secondary mobile-menu-btn"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#mobileMenu"
+          aria-controls="mobileMenu"
+          aria-label="Open menu"
+        >
+          <span
+            class="mobile-menu-icon"
+            aria-hidden="true"
+          >
+            ☰
+          </span>
+        </button>
+
+      </div>
+
+
+
+      <!-- ================================= -->
+      <!-- LOADING -->
+      <!-- ================================= -->
+
+      <div
+        id="loadingScreen"
+        class="text-center py-5"
+      >
+
+        <div
+          class="spinner-border text-primary"
+          role="status"
+        ></div>
+
+        <div class="mt-3 text-secondary">
+          Loading SDT...
+        </div>
+
+      </div>
+
+
+
+      <!-- ================================= -->
+      <!-- SETUP SCREEN -->
+      <!-- ================================= -->
+
+      <div
+        id="setupScreen"
+        class="d-none"
+      >
+
+
+        <div class="mb-4">
+
+          <h2 class="h3 mb-2">
+            Build Your Challenge
+          </h2>
+
+          <p class="text-secondary mb-0">
+            Define the commitment before you begin.
+            Once the challenge starts, its rules
+            are locked.
+          </p>
+
+        </div>
+
+
+
+        <!-- CHALLENGE SETTINGS -->
+
+        <div class="card shadow-sm mb-4">
+
+          <div class="card-body p-4">
+
+            <h3 class="h5 mb-4">
+              Challenge Settings
+            </h3>
+
+
+            <div class="row g-3">
+
+
+              <div class="col-md-6">
+
+                <label
+                  for="challengeName"
+                  class="form-label"
+                >
+                  Challenge name
+                </label>
+
+                <input
+                  id="challengeName"
+                  type="text"
+                  class="form-control"
+                  maxlength="150"
+                  placeholder="Example: 30 Day Reset"
+                >
+
+              </div>
+
+
+
+              <div class="col-md-6">
+
+                <label
+                  for="challengeStartDate"
+                  class="form-label"
+                >
+                  Start date
+                </label>
+
+                <input
+                  id="challengeStartDate"
+                  type="date"
+                  class="form-control"
+                >
+
+              </div>
+
+
+
+              <div class="col-md-6">
+
+                <label
+                  for="challengeDuration"
+                  class="form-label"
+                >
+                  Challenge duration
+                </label>
+
+                <div class="input-group">
+
+                  <input
+                    id="challengeDuration"
+                    type="number"
+                    class="form-control"
+                    min="1"
+                    max="365"
+                    value="30"
+                  >
+
+                  <span class="input-group-text">
+                    days
+                  </span>
+
+                </div>
+
+              </div>
+
+
+
+              <div class="col-md-6">
+
+                <label
+                  for="challengeStrikes"
+                  class="form-label"
+                >
+                  Strikes allowed per rule
+                </label>
+
+                <input
+                  id="challengeStrikes"
+                  type="number"
+                  class="form-control"
+                  min="0"
+                  max="99"
+                  value="3"
+                >
+
+              </div>
+
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- RULES & TASKS -->
+
+        <div class="card shadow-sm mb-4">
+
+          <div class="card-body p-4">
+
+            <div
+              class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3"
+            >
+
+              <div>
+
+                <h3 class="h5 mb-1">
+                  Rules & Tasks
+                </h3>
+
+                <div class="text-secondary small">
+                  These will become your daily checklist.
+                </div>
+
+              </div>
+
+
+              <button
+                id="addTaskBtn"
+                type="button"
+                class="btn btn-outline-primary"
+              >
+                + Add Rule
+              </button>
+
+            </div>
+
+
+            <div
+              id="setupTasksList"
+              class="vstack gap-2"
+            ></div>
+
+
+            <div
+              id="setupValidation"
+              class="alert alert-danger mt-3 d-none"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- START CHALLENGE -->
+
+        <div class="d-flex justify-content-end">
+
+          <button
+            id="startChallengeBtn"
+            type="button"
+            class="btn btn-primary btn-lg px-5"
+          >
+            Start Challenge
+          </button>
+
+        </div>
+
+
+      </div>
+
+
+
+      <!-- ================================= -->
+      <!-- ACTIVE CHALLENGE -->
+      <!-- ================================= -->
+
+      <div
+        id="dashboardScreen"
+        class="d-none"
+      >
+
+
+        <!-- CHALLENGE HEADER -->
+
+        <div class="challenge-toolbar mb-3">
+
+
+          <div class="challenge-summary">
+
+            <div
+              class="text-secondary small text-uppercase fw-semibold mb-1"
+            >
+              Active Challenge
+            </div>
+
+            <h2
+              id="activeChallengeName"
+              class="h3 mb-1"
+            >
+              —
+            </h2>
+
+            <div
+              id="activeChallengeDates"
+              class="text-secondary"
+            >
+              —
+            </div>
+
+          </div>
+
+
+
+          <div class="challenge-actions">
+
+
+            <div
+              id="activeChallengeMeta"
+              class="text-secondary small"
+            >
+              —
+            </div>
+
+
+            <!-- Desktop actions -->
+
+            <button
+              id="progressReportBtn"
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+            >
+              Progress Report
+            </button>
+
+
+            <button
+              id="endChallengeBtn"
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              data-bs-toggle="modal"
+              data-bs-target="#endChallengeModal"
+            >
+              End Challenge
+            </button>
+
+
+            <!-- Calendar navigation -->
+
+            <div class="calendar-toolbar">
+
+              <button
+                id="prevMonth"
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+              >
+                ‹
+              </button>
+
+              <div
+                id="monthLabel"
+                class="fw-semibold text-nowrap"
+              >
+                —
+              </div>
+
+              <button
+                id="nextMonth"
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+              >
+                ›
+              </button>
+
+              <button
+                id="todayBtn"
+                type="button"
+                class="btn btn-primary btn-sm"
+              >
+                Today
+              </button>
+
+            </div>
+
+
+          </div>
+
+
+        </div>
+
+
+
+        <!-- PROGRESS -->
+
+        <div class="card shadow-sm mb-3">
+
+          <div class="card-body">
+
+            <div
+              class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-2"
+            >
+
+              <div>
+
+                <div class="text-secondary small">
+                  Overall challenge progress
+                </div>
+
+                <div
+                  id="overallText"
+                  class="h5 mb-0"
+                >
+                  —
+                </div>
+
+              </div>
+
+
+              <div
+                id="overallMeta"
+                class="text-secondary small"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <div class="progress sdt-progress">
+
+              <div
+                id="overallBar"
+                class="progress-bar"
+                role="progressbar"
+                style="width:0%"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- CALENDAR -->
+
+        <div class="card shadow-sm mb-3">
+
+          <div class="card-body">
+
+            <div
+              id="calendarGrid"
+              class="calendar-grid"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- STRIKES -->
+
+        <div class="card shadow-sm mb-3">
+
+          <div class="card-body">
+
+            <div
+              class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3"
+            >
+
+              <div>
+
+                <div class="text-secondary small">
+                  Strikes per rule
+                </div>
+
+                <div
+                  id="strikesMeta"
+                  class="h6 mb-0"
+                >
+                  —
+                </div>
+
+              </div>
+
+
+              <div class="text-secondary small">
+                Informational only. No penalties or resets.
+              </div>
+
+            </div>
+
+
+            <div
+              id="strikesList"
+              class="vstack gap-2"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+    </div>
+
+  </main>
+
+</div>
+
+
+
+<!-- ================================= -->
+<!-- MOBILE MENU -->
+<!-- ================================= -->
+
+<div
+  class="offcanvas offcanvas-end mobile-menu"
+  tabindex="-1"
+  id="mobileMenu"
+  aria-labelledby="mobileMenuLabel"
+>
+
+  <div class="offcanvas-header">
+
+    <div>
+
+      <div
+        id="mobileMenuLabel"
+        class="h5 mb-0"
+      >
         SDT
-      </h1>
+      </div>
 
-      <div class="text-secondary">
+      <div class="text-secondary small">
         Self Development Tracker
       </div>
 
     </div>
 
 
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="offcanvas"
+      aria-label="Close"
+    ></button>
 
-    <!-- CHALLENGE HEADER + CONTROLS -->
-
-    <div class="challenge-toolbar mb-3">
+  </div>
 
 
-      <div class="challenge-summary">
+  <div class="offcanvas-body">
 
-        <div
-          class="text-secondary small text-uppercase fw-semibold mb-1"
-        >
-          Active Challenge
-        </div>
 
-        <h2
-          id="activeChallengeName"
-          class="h3 mb-1"
-        >
-          —
-        </h2>
+    <!-- ACCOUNT -->
 
-        <div
-          id="activeChallengeDates"
-          class="text-secondary"
-        >
-          —
-        </div>
+    <div class="mobile-menu-account">
 
+      <div class="text-secondary small mb-1">
+        Signed in as
+      </div>
+
+      <div
+        id="mobileMenuEmail"
+        class="fw-semibold text-break"
+      >
+        —
+      </div>
+
+    </div>
+
+
+
+    <!-- CHALLENGE ACTIONS -->
+
+    <div class="mobile-menu-section">
+
+      <div class="mobile-menu-section-title">
+        Challenge
       </div>
 
 
-      <div class="challenge-actions">
+      <button
+        id="mobileHistoryBtn"
+        type="button"
+        class="mobile-menu-action"
+      >
+        <span>
+          Challenge History
+        </span>
+
+        <span aria-hidden="true">
+          ›
+        </span>
+      </button>
 
 
-        <div
-          id="activeChallengeMeta"
-          class="text-secondary small"
-        >
-          —
-        </div>
-
-
-        <button
-          id="progressReportBtn"
-          type="button"
-          class="btn btn-outline-primary btn-sm"
-        >
+      <button
+        id="mobileProgressReportBtn"
+        type="button"
+        class="mobile-menu-action mobile-active-challenge-action"
+      >
+        <span>
           Progress Report
-        </button>
+        </span>
+
+        <span aria-hidden="true">
+          ›
+        </span>
+      </button>
+
+    </div>
 
 
-        <button
-          id="endChallengeBtn"
-          type="button"
-          class="btn btn-outline-danger btn-sm"
-          data-bs-toggle="modal"
-          data-bs-target="#endChallengeModal"
-        >
+
+    <!-- ACCOUNT / DANGER ACTIONS -->
+
+    <div class="mobile-menu-section mobile-menu-bottom">
+
+
+      <button
+        id="mobileEndChallengeBtn"
+        type="button"
+        class="mobile-menu-action mobile-menu-danger mobile-active-challenge-action"
+      >
+        <span>
           End Challenge
-        </button>
+        </span>
+
+        <span aria-hidden="true">
+          ›
+        </span>
+      </button>
 
 
-        <div class="calendar-toolbar">
+      <button
+        id="mobileLogoutBtn"
+        type="button"
+        class="mobile-menu-action"
+      >
+        <span>
+          Log Out
+        </span>
 
-          <button
-            id="prevMonth"
-            class="btn btn-outline-secondary btn-sm"
-          >
-            ‹
-          </button>
-
-          <div
-            id="monthLabel"
-            class="fw-semibold text-nowrap"
-          >
-            —
-          </div>
-
-          <button
-            id="nextMonth"
-            class="btn btn-outline-secondary btn-sm"
-          >
-            ›
-          </button>
-
-          <button
-            id="todayBtn"
-            class="btn btn-primary btn-sm"
-          >
-            Today
-          </button>
-
-        </div>
-
-
-      </div>
-
-
-    </div>
-
-
-
-    <!-- PROGRESS -->
-
-    <div class="card shadow-sm mb-3">
-
-      <div class="card-body">
-
-
-        <div
-          class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-2"
-        >
-
-          <div>
-
-            <div class="text-secondary small">
-              Overall challenge progress
-            </div>
-
-            <div
-              id="overallText"
-              class="h5 mb-0"
-            >
-              —
-            </div>
-
-          </div>
-
-
-          <div
-            id="overallMeta"
-            class="text-secondary small"
-          >
-            —
-          </div>
-
-        </div>
-
-
-        <div class="progress sdt-progress">
-
-          <div
-            id="overallBar"
-            class="progress-bar"
-            role="progressbar"
-            style="width:0%"
-            aria-valuemin="0"
-            aria-valuemax="100"
-          ></div>
-
-        </div>
-
-
-      </div>
-
-    </div>
-
-
-
-    <!-- CALENDAR -->
-
-    <div class="card shadow-sm mb-3">
-
-      <div class="card-body">
-
-        <div
-          id="calendarGrid"
-          class="calendar-grid"
-        ></div>
-
-      </div>
-
-    </div>
-
-
-
-    <!-- STRIKES -->
-
-    <div class="card shadow-sm mb-3">
-
-      <div class="card-body">
-
-
-        <div
-          class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3"
-        >
-
-          <div>
-
-            <div class="text-secondary small">
-              Strikes per rule
-            </div>
-
-            <div
-              id="strikesMeta"
-              class="h6 mb-0"
-            >
-              —
-            </div>
-
-          </div>
-
-
-          <div class="text-secondary small">
-            Informational only. No penalties or resets.
-          </div>
-
-        </div>
-
-
-        <div
-          id="strikesList"
-          class="vstack gap-2"
-        ></div>
-
-
-      </div>
+        <span aria-hidden="true">
+          ›
+        </span>
+      </button>
 
     </div>
 
 
   </div>
 
+</div>
+
+
+
+<!-- ================================= -->
+<!-- CHALLENGE HISTORY MODAL -->
+<!-- ================================= -->
+
+<div
+  class="modal fade"
+  id="historyModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+
+  <div
+    class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+  >
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <div>
+
+          <h5 class="modal-title mb-1">
+            Challenge History
+          </h5>
+
+          <div
+            id="historyCount"
+            class="text-secondary small"
+          ></div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div
+          id="historyLoading"
+          class="text-center py-5"
+        >
+
+          <div
+            class="spinner-border text-primary"
+            role="status"
+          ></div>
+
+          <div class="mt-3 text-secondary">
+            Loading challenge history...
+          </div>
+
+        </div>
+
+
+        <div
+          id="historyError"
+          class="alert alert-danger d-none"
+        ></div>
+
+
+        <div
+          id="historyEmpty"
+          class="history-empty d-none"
+        >
+
+          <div class="history-empty-icon">
+            ✓
+          </div>
+
+          <h6 class="mb-2">
+            No completed challenges yet
+          </h6>
+
+          <p class="text-secondary mb-0">
+            Challenges you complete or end manually
+            will appear here.
+          </p>
+
+        </div>
+
+
+        <div
+          id="historyList"
+          class="history-list d-none"
+        ></div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
 
 </div>
 
@@ -562,7 +1062,6 @@
   >
 
     <div class="modal-content">
-
 
       <div class="modal-header">
 
@@ -593,14 +1092,12 @@
 
       <div class="modal-body">
 
-
-        <!-- DAILY CHECKLIST INSTRUCTION -->
-
         <div
           class="alert alert-light border text-secondary small mb-3"
         >
           Tick or untick the tasks you completed today
-          and the rules you followed today, then click
+          and the rules you followed today. You can also
+          add an optional note about the day, then click
           <strong>Save</strong>.
         </div>
 
@@ -609,6 +1106,50 @@
           id="tasksList"
           class="vstack gap-2"
         ></div>
+
+
+        <div class="mt-4">
+
+          <label
+            for="dayNote"
+            class="form-label fw-semibold"
+          >
+            Daily note
+
+            <span class="text-secondary fw-normal">
+              (optional)
+            </span>
+
+          </label>
+
+
+          <textarea
+            id="dayNote"
+            class="form-control"
+            rows="4"
+            maxlength="1000"
+            placeholder="Add a note about your day..."
+          ></textarea>
+
+
+          <div
+            class="form-text d-flex justify-content-between gap-3"
+          >
+
+            <span>
+              Add context, reflections, or anything worth remembering.
+            </span>
+
+            <span
+              id="dayNoteCount"
+              class="text-nowrap"
+            >
+              0/1000
+            </span>
+
+          </div>
+
+        </div>
 
       </div>
 
@@ -638,7 +1179,6 @@
 
       </div>
 
-
     </div>
 
   </div>
@@ -663,7 +1203,6 @@
   >
 
     <div class="modal-content">
-
 
       <div class="modal-header">
 
@@ -720,7 +1259,6 @@
 
       </div>
 
-
     </div>
 
   </div>
@@ -729,11 +1267,21 @@
 
 
 
+<!-- ================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================= -->
+
 <script
   src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 ></script>
 
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="/auth.js"></script>
 <script src="/app.js"></script>
+<script src="/auth-ui.js"></script>
 
 
 </body>
