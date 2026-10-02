@@ -830,7 +830,8 @@
           class="alert alert-light border text-secondary small mb-3"
         >
           Tick or untick the tasks you completed today
-          and the rules you followed today, then click
+          and the rules you followed today. You can also
+          add an optional note about the day, then click
           <strong>Save</strong>.
         </div>
 
@@ -839,6 +840,55 @@
           id="tasksList"
           class="vstack gap-2"
         ></div>
+
+
+        <!-- DAILY NOTE -->
+
+        <div class="mt-4">
+
+          <label
+            for="dayNote"
+            class="form-label fw-semibold"
+          >
+            Daily note
+
+            <span
+              class="text-secondary fw-normal"
+            >
+              (optional)
+            </span>
+
+          </label>
+
+
+          <textarea
+            id="dayNote"
+            class="form-control"
+            rows="4"
+            maxlength="1000"
+            placeholder="Add a note about your day..."
+          ></textarea>
+
+
+          <div
+            class="form-text d-flex justify-content-between gap-3"
+          >
+
+            <span>
+              Add context, reflections, or anything worth remembering.
+            </span>
+
+            <span
+              id="dayNoteCount"
+              class="text-nowrap"
+            >
+              0/1000
+            </span>
+
+          </div>
+
+        </div>
+
 
       </div>
 

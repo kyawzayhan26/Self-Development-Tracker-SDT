@@ -268,13 +268,6 @@ async function getReport() {
   }
 
 
-  /*
-   * Initialise the same Supabase Auth client used
-   * by the main SDT application.
-   *
-   * Supabase restores the browser session from
-   * local storage.
-   */
   await window
     .sdtAuth
     .initializeSupabase();
@@ -483,7 +476,7 @@ function renderDailyTable(
 
     row.innerHTML = `
       <td
-        colspan="5"
+        colspan="6"
         class="text-center report-muted py-4"
       >
         ${
@@ -556,6 +549,18 @@ function renderDailyTable(
         : `${day.completionPct}%`;
 
 
+    const note =
+
+      day.note &&
+      day.note.trim()
+
+        ? escapeHtml(
+            day.note
+          )
+
+        : '—';
+
+
     row.innerHTML = `
       <td>
         Day ${day.dayNumber}
@@ -575,6 +580,10 @@ function renderDailyTable(
 
       <td class="text-end">
         ${completion}
+      </td>
+
+      <td>
+        ${note}
       </td>
     `;
 
@@ -804,10 +813,6 @@ function renderReport(
     `${summary.overallChallengeProgressPct}%`;
 
 
-  /*
-   * Challenge progress now means recorded days,
-   * not perfect days.
-   */
   if (
     isFinal
   ) {

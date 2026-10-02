@@ -2,7 +2,7 @@
   "name": "sdt-self-development-tracker",
   "version": "0.1.0",
   "private": true,
-  "description": "SDT - Self Development Tracker (local-only 75-hard-style tracker)",
+  "description": "SDT - Self Development Tracker",
   "main": "src/server.js",
   "scripts": {
     "dev": "node src/server.js",

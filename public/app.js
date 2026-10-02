@@ -14,7 +14,12 @@
 let challenge = null;
 
 let current = new Date();
-current.setHours(0,0,0,0);
+current.setHours(
+  0,
+  0,
+  0,
+  0
+);
 
 let openDateKey = null;
 let openTasks = [];
@@ -31,213 +36,187 @@ const loadingScreen =
     'loadingScreen'
   );
 
-
 const setupScreen =
   document.getElementById(
     'setupScreen'
   );
-
 
 const dashboardScreen =
   document.getElementById(
     'dashboardScreen'
   );
 
-
 const challengeNameInput =
   document.getElementById(
     'challengeName'
   );
-
 
 const challengeStartInput =
   document.getElementById(
     'challengeStartDate'
   );
 
-
 const challengeDurationInput =
   document.getElementById(
     'challengeDuration'
   );
-
 
 const challengeStrikesInput =
   document.getElementById(
     'challengeStrikes'
   );
 
-
 const setupTasksList =
   document.getElementById(
     'setupTasksList'
   );
-
 
 const setupValidation =
   document.getElementById(
     'setupValidation'
   );
 
-
 const addTaskBtn =
   document.getElementById(
     'addTaskBtn'
   );
-
 
 const startChallengeBtn =
   document.getElementById(
     'startChallengeBtn'
   );
 
-
 const activeChallengeName =
   document.getElementById(
     'activeChallengeName'
   );
-
 
 const activeChallengeDates =
   document.getElementById(
     'activeChallengeDates'
   );
 
-
 const activeChallengeMeta =
   document.getElementById(
     'activeChallengeMeta'
   );
-
 
 const progressReportBtn =
   document.getElementById(
     'progressReportBtn'
   );
 
-
 const confirmEndChallengeBtn =
   document.getElementById(
     'confirmEndChallengeBtn'
   );
-
 
 const endChallengeStatus =
   document.getElementById(
     'endChallengeStatus'
   );
 
-
 const endChallengeModalEl =
   document.getElementById(
     'endChallengeModal'
   );
-
 
 const endChallengeModal =
   new bootstrap.Modal(
     endChallengeModalEl
   );
 
-
 const monthLabel =
   document.getElementById(
     'monthLabel'
   );
-
 
 const calendarGrid =
   document.getElementById(
     'calendarGrid'
   );
 
-
 const prevMonthBtn =
   document.getElementById(
     'prevMonth'
   );
-
 
 const nextMonthBtn =
   document.getElementById(
     'nextMonth'
   );
 
-
 const todayBtn =
   document.getElementById(
     'todayBtn'
   );
-
 
 const overallText =
   document.getElementById(
     'overallText'
   );
 
-
 const overallMeta =
   document.getElementById(
     'overallMeta'
   );
-
 
 const overallBar =
   document.getElementById(
     'overallBar'
   );
 
-
 const strikesMeta =
   document.getElementById(
     'strikesMeta'
   );
-
 
 const strikesList =
   document.getElementById(
     'strikesList'
   );
 
-
 const dayModalEl =
   document.getElementById(
     'dayModal'
   );
-
 
 const dayModal =
   new bootstrap.Modal(
     dayModalEl
   );
 
-
 const dayModalDate =
   document.getElementById(
     'dayModalDate'
   );
-
 
 const tasksList =
   document.getElementById(
     'tasksList'
   );
 
+const dayNote =
+  document.getElementById(
+    'dayNote'
+  );
+
+const dayNoteCount =
+  document.getElementById(
+    'dayNoteCount'
+  );
 
 const saveBtn =
   document.getElementById(
     'saveBtn'
   );
 
-
 const saveStatus =
   document.getElementById(
     'saveStatus'
   );
 
-
 const weekdayNames = [
-
   'Mon',
   'Tue',
   'Wed',
@@ -245,112 +224,82 @@ const weekdayNames = [
   'Fri',
   'Sat',
   'Sun'
-
 ];
+
 
 /* =========================================
    API
 ========================================= */
 
-
-/*
- * Build headers for authenticated API calls.
- */
 async function getApiHeaders(
   includeJson = false
-){
-
+) {
   const token =
     await window
       .sdtAuth
       .getAccessToken();
 
-
-  if (!token){
-
+  if (!token) {
     throw new Error(
       'Your session has expired. Please sign in again.'
     );
   }
 
-
   const headers = {
-
     Authorization:
       `Bearer ${token}`
-
   };
 
-
-  if (includeJson){
-
+  if (includeJson) {
     headers['Content-Type'] =
       'application/json';
   }
-
 
   return headers;
 }
 
 
-/*
- * Handle API responses consistently.
- */
 async function readApiResponse(
   response
-){
-
+) {
   let data;
 
-
   try {
-
     data =
       await response.json();
-
   }
   catch {
-
     throw new Error(
       'The server returned an invalid response.'
     );
   }
 
-
   if (
     response.status === 401
-  ){
-
+  ) {
     throw new Error(
       data.error ||
       'Your session has expired. Please sign in again.'
     );
   }
 
-
   if (
     !response.ok ||
     !data.ok
-  ){
-
+  ) {
     throw new Error(
       data.error ||
       'Request failed'
     );
   }
 
-
   return data;
 }
 
 
-async function apiGet(
-  url
-){
-
+async function apiGet(url) {
   const headers =
     await getApiHeaders();
-
 
   const response =
     await fetch(
@@ -359,7 +308,6 @@ async function apiGet(
         headers
       }
     );
-
 
   return readApiResponse(
     response
@@ -370,19 +318,16 @@ async function apiGet(
 async function apiPost(
   url,
   body = {}
-){
-
+) {
   const headers =
     await getApiHeaders(
       true
     );
 
-
   const response =
     await fetch(
       url,
       {
-
         method:
           'POST',
 
@@ -392,10 +337,8 @@ async function apiPost(
           JSON.stringify(
             body
           )
-
       }
     );
-
 
   return readApiResponse(
     response
@@ -406,19 +349,16 @@ async function apiPost(
 async function apiPut(
   url,
   body
-){
-
+) {
   const headers =
     await getApiHeaders(
       true
     );
 
-
   const response =
     await fetch(
       url,
       {
-
         method:
           'PUT',
 
@@ -428,22 +368,20 @@ async function apiPut(
           JSON.stringify(
             body
           )
-
       }
     );
-
 
   return readApiResponse(
     response
   );
 }
 
+
 /* =========================================
    DATE HELPERS
 ========================================= */
 
-function pad2(value){
-
+function pad2(value) {
   return String(value)
     .padStart(
       2,
@@ -452,40 +390,30 @@ function pad2(value){
 }
 
 
-function dateKey(date){
-
+function dateKey(date) {
   return (
-
     `${date.getFullYear()}-` +
-
     `${pad2(
       date.getMonth() + 1
     )}-` +
-
     `${pad2(
       date.getDate()
     )}`
-
   );
 }
 
 
-function monthKey(date){
-
+function monthKey(date) {
   return (
-
     `${date.getFullYear()}-` +
-
     `${pad2(
       date.getMonth() + 1
     )}`
-
   );
 }
 
 
-function parseDate(value){
-
+function parseDate(value) {
   return new Date(
     value +
     'T00:00:00'
@@ -493,17 +421,14 @@ function parseDate(value){
 }
 
 
-function prettyDate(value){
-
+function prettyDate(value) {
   const date =
     parseDate(value);
-
 
   return new Intl
     .DateTimeFormat(
       undefined,
       {
-
         month:
           'short',
 
@@ -512,7 +437,6 @@ function prettyDate(value){
 
         year:
           'numeric'
-
       }
     )
     .format(
@@ -521,16 +445,16 @@ function prettyDate(value){
 }
 
 
-function firstDayMondayIndex(date){
-
+function firstDayMondayIndex(
+  date
+) {
   return (
     date.getDay() + 6
   ) % 7;
 }
 
 
-function challengeEndDate(){
-
+function challengeEndDate() {
   return parseDate(
     challenge.endDate
   );
@@ -539,75 +463,55 @@ function challengeEndDate(){
 
 function isChallengeDate(
   value
-){
-
-  if (!challenge){
-
+) {
+  if (!challenge) {
     return false;
   }
 
-
   const date =
-    parseDate(
-      value
-    );
-
+    parseDate(value);
 
   const start =
     parseDate(
       challenge.startDate
     );
 
-
   const end =
     challengeEndDate();
 
-
   return (
-
     date >= start &&
-
     date <= end
-
   );
 }
 
 
 function challengeDayNumber(
   value
-){
-
+) {
   if (
     !isChallengeDate(
       value
     )
   ) {
-
     return null;
   }
 
-
   const date =
-    parseDate(
-      value
-    );
-
+    parseDate(value);
 
   const start =
     parseDate(
       challenge.startDate
     );
 
-
   return (
-
     Math.round(
       (
         date - start
       ) /
       86400000
     ) + 1
-
   );
 }
 
@@ -618,98 +522,73 @@ function challengeDayNumber(
 
 function finalReportToken(
   completedChallenge
-){
-
+) {
   return (
-
     `${completedChallenge.challengeId}:` +
-
     `${completedChallenge.completedAt || ''}`
-
   );
 }
 
 
-async function checkNaturalFinalReport(){
-
+async function checkNaturalFinalReport() {
   try {
-
     const data =
       await apiGet(
         '/api/challenges/latest-completed'
       );
 
-
     const completedChallenge =
       data.challenge;
-
 
     if (
       !completedChallenge
     ) {
-
       return false;
     }
-
 
     if (
       completedChallenge
         .completionReason !==
       'NATURAL'
     ) {
-
       return false;
     }
-
 
     const token =
       finalReportToken(
         completedChallenge
       );
 
-
     const lastShown =
       localStorage.getItem(
         'sdtLastFinalReportToken'
       );
 
-
     if (
       token ===
       lastShown
     ) {
-
       return false;
     }
-
 
     localStorage.setItem(
       'sdtLastFinalReportToken',
       token
     );
 
-
     window.location.href =
-
       `/report.html?` +
-
       `type=final&` +
-
       `challengeId=${completedChallenge.challengeId}&` +
-
       `autoPrint=1`;
 
-
     return true;
-
   }
   catch (error) {
-
     console.error(
       'Final report check failed:',
       error
     );
-
 
     return false;
   }
@@ -720,11 +599,9 @@ async function checkNaturalFinalReport(){
    SETUP
 ========================================= */
 
-function tomorrowDateKey(){
-
+function tomorrowDateKey() {
   const date =
     new Date();
-
 
   date.setHours(
     0,
@@ -733,11 +610,9 @@ function tomorrowDateKey(){
     0
   );
 
-
   date.setDate(
     date.getDate() + 1
   );
-
 
   return dateKey(
     date
@@ -745,41 +620,32 @@ function tomorrowDateKey(){
 }
 
 
-function initializeSetup(){
-
+function initializeSetup() {
   challengeNameInput.value =
     '';
-
 
   challengeStartInput.value =
     tomorrowDateKey();
 
-
   challengeDurationInput.value =
     30;
 
-
   challengeStrikesInput.value =
     3;
-
 
   setupTasks = [
     ''
   ];
 
-
   clearSetupError();
-
 
   renderSetupTasks();
 }
 
 
-function showSetup(){
-
+function showSetup() {
   challenge =
     null;
-
 
   loadingScreen
     .classList
@@ -787,13 +653,11 @@ function showSetup(){
       'd-none'
     );
 
-
   dashboardScreen
     .classList
     .add(
       'd-none'
     );
-
 
   setupScreen
     .classList
@@ -801,58 +665,49 @@ function showSetup(){
       'd-none'
     );
 
-
   initializeSetup();
 }
 
 
-function addSetupTask(){
-
+function addSetupTask() {
   setupTasks.push(
     ''
   );
 
-
   renderSetupTasks();
-
 
   setTimeout(
     () => {
-
       const inputs =
         setupTasksList
           .querySelectorAll(
             '.setup-task-input'
           );
 
-
       inputs[
         inputs.length - 1
       ]?.focus();
-
     },
     0
   );
 }
 
 
-function removeSetupTask(index){
-
+function removeSetupTask(
+  index
+) {
   setupTasks.splice(
     index,
     1
   );
 
-
   if (
     setupTasks.length === 0
   ) {
-
     setupTasks.push(
       ''
     );
   }
-
 
   renderSetupTasks();
 }
@@ -861,162 +716,126 @@ function removeSetupTask(index){
 function moveSetupTask(
   index,
   direction
-){
-
+) {
   const target =
     index +
     direction;
 
-
   if (
     target < 0 ||
-
     target >=
     setupTasks.length
   ) {
-
     return;
   }
-
 
   const temp =
     setupTasks[index];
 
-
   setupTasks[index] =
     setupTasks[target];
 
-
   setupTasks[target] =
     temp;
-
 
   renderSetupTasks();
 }
 
 
-function renderSetupTasks(){
-
+function renderSetupTasks() {
   setupTasksList.innerHTML =
     '';
-
 
   setupTasks.forEach(
     (
       task,
       index
     ) => {
-
       const row =
         document.createElement(
           'div'
         );
 
-
       row.className =
         'setup-task-row';
-
 
       const number =
         document.createElement(
           'div'
         );
 
-
       number.className =
         'setup-task-number';
 
-
       number.textContent =
         index + 1;
-
 
       const input =
         document.createElement(
           'input'
         );
 
-
       input.type =
         'text';
-
 
       input.maxLength =
         200;
 
-
       input.className =
         'form-control setup-task-input';
-
 
       input.placeholder =
         'Example: Walk 10,000 steps';
 
-
       input.value =
         task;
-
 
       input.addEventListener(
         'input',
         () => {
-
           setupTasks[index] =
             input.value;
-
         }
       );
-
 
       input.addEventListener(
         'keydown',
         event => {
-
           if (
             event.key ===
             'Enter'
           ) {
-
             event.preventDefault();
 
             addSetupTask();
           }
-
         }
       );
-
 
       const actions =
         document.createElement(
           'div'
         );
 
-
       actions.className =
         'setup-task-actions';
-
 
       const up =
         document.createElement(
           'button'
         );
 
-
       up.type =
         'button';
-
 
       up.className =
         'btn btn-outline-secondary btn-sm';
 
-
       up.textContent =
         '↑';
 
-
       up.disabled =
         index === 0;
-
 
       up.addEventListener(
         'click',
@@ -1027,29 +846,23 @@ function renderSetupTasks(){
           )
       );
 
-
       const down =
         document.createElement(
           'button'
         );
 
-
       down.type =
         'button';
-
 
       down.className =
         'btn btn-outline-secondary btn-sm';
 
-
       down.textContent =
         '↓';
-
 
       down.disabled =
         index ===
         setupTasks.length - 1;
-
 
       down.addEventListener(
         'click',
@@ -1060,24 +873,19 @@ function renderSetupTasks(){
           )
       );
 
-
       const remove =
         document.createElement(
           'button'
         );
 
-
       remove.type =
         'button';
-
 
       remove.className =
         'btn btn-outline-danger btn-sm';
 
-
       remove.textContent =
         'Remove';
-
 
       remove.addEventListener(
         'click',
@@ -1087,41 +895,33 @@ function renderSetupTasks(){
           )
       );
 
-
       actions.appendChild(
         up
       );
-
 
       actions.appendChild(
         down
       );
 
-
       actions.appendChild(
         remove
       );
-
 
       row.appendChild(
         number
       );
 
-
       row.appendChild(
         input
       );
-
 
       row.appendChild(
         actions
       );
 
-
       setupTasksList.appendChild(
         row
       );
-
     }
   );
 }
@@ -1129,11 +929,9 @@ function renderSetupTasks(){
 
 function showSetupError(
   message
-){
-
+) {
   setupValidation.textContent =
     message;
-
 
   setupValidation
     .classList
@@ -1143,40 +941,32 @@ function showSetupError(
 }
 
 
-function clearSetupError(){
-
+function clearSetupError() {
   setupValidation
     .classList
     .add(
       'd-none'
     );
 
-
   setupValidation.textContent =
     '';
 }
 
 
-async function startChallenge(){
-
+async function startChallenge() {
   clearSetupError();
-
 
   const tasks =
     setupTasks
-
       .map(
         task =>
           task.trim()
       )
-
       .filter(
         Boolean
       );
 
-
   const payload = {
-
     name:
       challengeNameInput
         .value
@@ -1199,71 +989,54 @@ async function startChallenge(){
       ),
 
     tasks
-
   };
-
 
   if (
     !payload.name
   ) {
-
     return showSetupError(
       'Enter a challenge name.'
     );
   }
 
-
   if (
     !payload.startDate
   ) {
-
     return showSetupError(
       'Choose a start date.'
     );
   }
 
-
   if (
     tasks.length === 0
   ) {
-
     return showSetupError(
       'Add at least one rule or task.'
     );
   }
 
-
   startChallengeBtn.disabled =
     true;
-
 
   startChallengeBtn.textContent =
     'Starting...';
 
-
   try {
-
     await apiPost(
       '/api/challenges/start',
       payload
     );
 
-
     await loadApplication();
-
   }
   catch (error) {
-
     showSetupError(
       error.message
     );
-
   }
   finally {
-
     startChallengeBtn.disabled =
       false;
-
 
     startChallengeBtn.textContent =
       'Start Challenge';
@@ -1275,13 +1048,10 @@ async function startChallenge(){
    REPORT
 ========================================= */
 
-function openProgressReport(){
-
-  if (!challenge){
-
+function openProgressReport() {
+  if (!challenge) {
     return;
   }
-
 
   window.open(
     '/report.html',
@@ -1294,57 +1064,40 @@ function openProgressReport(){
    END CHALLENGE
 ========================================= */
 
-async function endCurrentChallenge(){
-
-  if (!challenge){
-
+async function endCurrentChallenge() {
+  if (!challenge) {
     return;
   }
-
 
   confirmEndChallengeBtn.disabled =
     true;
 
-
   confirmEndChallengeBtn.textContent =
     'Ending...';
-
 
   endChallengeStatus.textContent =
     '';
 
-
   try {
-
     const result =
       await apiPost(
         '/api/challenges/current/end'
       );
 
-
     endChallengeModal.hide();
 
-
     window.location.href =
-
       `/report.html?` +
-
       `type=final&` +
-
       `challengeId=${result.challengeId}&` +
-
       `autoPrint=1`;
-
   }
   catch (error) {
-
     endChallengeStatus.textContent =
       error.message;
 
-
     confirmEndChallengeBtn.disabled =
       false;
-
 
     confirmEndChallengeBtn.textContent =
       'End Challenge';
@@ -1356,14 +1109,12 @@ async function endCurrentChallenge(){
    DASHBOARD
 ========================================= */
 
-function showDashboard(){
-
+function showDashboard() {
   loadingScreen
     .classList
     .add(
       'd-none'
     );
-
 
   setupScreen
     .classList
@@ -1371,41 +1122,30 @@ function showDashboard(){
       'd-none'
     );
 
-
   dashboardScreen
     .classList
     .remove(
       'd-none'
     );
 
-
   activeChallengeName.textContent =
     challenge.name;
 
-
   activeChallengeDates.textContent =
-
     `${prettyDate(
       challenge.startDate
     )} – ` +
-
     `${prettyDate(
       challenge.endDate
     )}`;
 
-
   activeChallengeMeta.textContent =
-
     `${challenge.durationDays} days · ` +
-
     `${challenge.tasks.length} rules · ` +
-
     `${challenge.strikesAllowed} strikes per rule`;
-
 
   const today =
     new Date();
-
 
   today.setHours(
     0,
@@ -1414,54 +1154,40 @@ function showDashboard(){
     0
   );
 
-
   const start =
     parseDate(
       challenge.startDate
     );
-
 
   const end =
     parseDate(
       challenge.endDate
     );
 
-
   let targetMonth;
-
 
   if (
     today < start
   ) {
-
     targetMonth =
       start;
-
   }
   else if (
     today > end
   ) {
-
     targetMonth =
       end;
-
   }
   else {
-
     targetMonth =
       today;
   }
 
-
   current =
     new Date(
-
       targetMonth.getFullYear(),
-
       targetMonth.getMonth(),
-
       1
-
     );
 }
 
@@ -1470,29 +1196,23 @@ function showDashboard(){
    PROGRESS
 ========================================= */
 
-async function loadOverallProgress(){
-
+async function loadOverallProgress() {
   const data =
     await apiGet(
       '/api/progress/overall-progress'
     );
 
-
   overallText.textContent =
     `${data.pct}% complete`;
-
 
   overallMeta.textContent =
     `${data.completedDays}/${data.days} days completed`;
 
-
   overallBar.style.width =
     `${data.pct}%`;
 
-
   overallBar.textContent =
     `${data.pct}%`;
-
 
   overallBar.setAttribute(
     'aria-valuenow',
@@ -1507,132 +1227,101 @@ async function loadOverallProgress(){
    STRIKES
 ========================================= */
 
-async function loadStrikes(){
-
+async function loadStrikes() {
   const data =
     await apiGet(
       '/api/progress/strikes'
     );
 
-
   strikesMeta.textContent =
-
     `${data.strikesAllowed} strikes per rule · ` +
-
     `${data.recordedDays} recorded day(s)`;
-
 
   strikesList.innerHTML =
     '';
 
-
   for (
     const task of data.tasks
   ) {
-
     const row =
       document.createElement(
         'div'
       );
 
-
     row.className =
       'strike-row';
-
 
     const top =
       document.createElement(
         'div'
       );
 
-
     top.className =
       'd-flex justify-content-between align-items-start gap-3';
-
 
     const title =
       document.createElement(
         'div'
       );
 
-
     title.className =
       'strike-title';
 
-
     title.textContent =
       task.name;
-
 
     const badge =
       document.createElement(
         'span'
       );
 
-
     if (
       task.strikesLeft === 0
     ) {
-
       badge.className =
         'badge text-bg-danger';
-
     }
     else if (
       task.strikesLeft === 1
     ) {
-
       badge.className =
         'badge text-bg-warning';
-
     }
     else {
-
       badge.className =
         'badge text-bg-success';
     }
 
-
     badge.textContent =
       `${task.strikesLeft} strikes left`;
-
 
     const meta =
       document.createElement(
         'div'
       );
 
-
     meta.className =
       'strike-meta text-secondary mt-1';
 
-
     meta.textContent =
-
       `Used: ${task.strikesUsed}/${task.strikesAllowed}` +
-
       ` · Missed recorded days: ${task.missedDays}`;
-
 
     top.appendChild(
       title
     );
 
-
     top.appendChild(
       badge
     );
-
 
     row.appendChild(
       top
     );
 
-
     row.appendChild(
       meta
     );
-
 
     strikesList.appendChild(
       row
@@ -1645,21 +1334,17 @@ async function loadStrikes(){
    CALENDAR
 ========================================= */
 
-function setMonthLabel(){
-
+function setMonthLabel() {
   monthLabel.textContent =
-
     new Intl
       .DateTimeFormat(
         undefined,
         {
-
           month:
             'long',
 
           year:
             'numeric'
-
         }
       )
       .format(
@@ -1668,25 +1353,20 @@ function setMonthLabel(){
 }
 
 
-function renderWeekdayHeader(){
-
+function renderWeekdayHeader() {
   for (
     const name of weekdayNames
   ) {
-
     const element =
       document.createElement(
         'div'
       );
 
-
     element.className =
       'weekday-header';
 
-
     element.textContent =
       name;
-
 
     calendarGrid.appendChild(
       element
@@ -1698,14 +1378,10 @@ function renderWeekdayHeader(){
 function completionRing(
   done,
   total
-){
-
+) {
   const pct =
-
     total === 0
-
       ? 0
-
       : Math.round(
           (
             done /
@@ -1713,48 +1389,38 @@ function completionRing(
           ) * 100
         );
 
-
   const ring =
     document.createElement(
       'div'
     );
 
-
   ring.className =
     'ring';
-
 
   ring.dataset.pct =
     String(
       pct
     );
 
-
   ring.textContent =
     `${pct}%`;
-
 
   return ring;
 }
 
 
-async function renderCalendar(){
-
+async function renderCalendar() {
   calendarGrid.innerHTML =
     '';
 
-
   renderWeekdayHeader();
 
-
   setMonthLabel();
-
 
   const data =
     await apiGet(
       `/api/days?month=${monthKey(current)}`
     );
-
 
   const summary =
     new Map(
@@ -1766,217 +1432,163 @@ async function renderCalendar(){
       )
     );
 
-
   const first =
     new Date(
-
       current.getFullYear(),
-
       current.getMonth(),
-
       1
-
     );
-
 
   const offset =
     firstDayMondayIndex(
       first
     );
 
-
   const gridStart =
     new Date(
       first
     );
 
-
   gridStart.setDate(
-
     first.getDate() -
     offset
-
   );
-
 
   for (
     let i = 0;
     i < 42;
     i++
   ) {
-
     const date =
       new Date(
         gridStart
       );
 
-
     date.setDate(
-
       gridStart.getDate() +
       i
-
     );
-
 
     const key =
       dateKey(
         date
       );
 
-
     const currentMonth =
-
       date.getMonth() ===
       current.getMonth();
-
 
     const inside =
       isChallengeDate(
         key
       );
 
-
     const dayData =
       summary.get(
         key
       ) || {
-
         doneCount:
           0,
 
         totalCount:
           challenge.tasks.length
-
       };
-
 
     const cell =
       document.createElement(
         'div'
       );
 
-
     cell.className =
       'day-cell';
-
 
     if (
       !currentMonth
     ) {
-
       cell.classList.add(
         'muted'
       );
     }
 
-
     if (
       !inside
     ) {
-
       cell.classList.add(
         'outside-challenge'
       );
     }
-
 
     const top =
       document.createElement(
         'div'
       );
 
-
     top.className =
       'day-top';
-
 
     const number =
       document.createElement(
         'div'
       );
 
-
     number.className =
       'day-num';
 
-
     number.textContent =
       date.getDate();
-
 
     top.appendChild(
       number
     );
 
-
     if (
       inside
     ) {
-
       top.appendChild(
-
         completionRing(
-
           dayData.doneCount,
-
           dayData.totalCount
-
         )
-
       );
     }
-
 
     cell.appendChild(
       top
     );
-
 
     const subtitle =
       document.createElement(
         'div'
       );
 
-
     subtitle.className =
       'day-sub text-secondary';
-
 
     const dayNumber =
       challengeDayNumber(
         key
       );
 
-
     if (
       dayNumber
     ) {
-
       subtitle.textContent =
-
         `${prettyDate(key)} · ` +
-
         `Day ${dayNumber}/${challenge.durationDays}`;
-
     }
     else {
-
       subtitle.textContent =
         prettyDate(
           key
         );
     }
 
-
     cell.appendChild(
       subtitle
     );
 
-
     const today =
       new Date();
-
 
     today.setHours(
       0,
@@ -1985,24 +1597,19 @@ async function renderCalendar(){
       0
     );
 
-
     if (
       inside &&
-
       key ===
       dateKey(today)
     ) {
-
       cell.classList.add(
         'today-challenge'
       );
     }
 
-
     if (
       inside
     ) {
-
       cell.addEventListener(
         'click',
         () =>
@@ -2011,7 +1618,6 @@ async function renderCalendar(){
           )
       );
     }
-
 
     calendarGrid.appendChild(
       cell
@@ -2026,80 +1632,63 @@ async function renderCalendar(){
 
 function renderTasks(
   tasks
-){
-
+) {
   tasksList.innerHTML =
     '';
-
 
   for (
     const task of tasks
   ) {
-
     const row =
       document.createElement(
         'label'
       );
 
-
     row.className =
       'day-task-row';
-
 
     const checkbox =
       document.createElement(
         'input'
       );
 
-
     checkbox.type =
       'checkbox';
 
-
     checkbox.className =
       'form-check-input m-0';
-
 
     checkbox.checked =
       Boolean(
         task.isDone
       );
 
-
     checkbox.addEventListener(
       'change',
       () => {
-
         task.isDone =
           checkbox.checked;
 
-
         saveStatus.textContent =
           '';
-
       }
     );
-
 
     const name =
       document.createElement(
         'div'
       );
 
-
     name.textContent =
       task.name;
-
 
     row.appendChild(
       checkbox
     );
 
-
     row.appendChild(
       name
     );
-
 
     tasksList.appendChild(
       row
@@ -2108,68 +1697,100 @@ function renderTasks(
 }
 
 
+function updateNoteCounter() {
+  if (
+    !dayNote ||
+    !dayNoteCount
+  ) {
+    return;
+  }
+
+  dayNoteCount.textContent =
+    `${dayNote.value.length}/1000`;
+}
+
+
 async function openDay(
   key
-){
-
+) {
   if (
     !isChallengeDate(
       key
     )
   ) {
-
     return;
   }
-
 
   openDateKey =
     key;
 
-
   saveStatus.textContent =
     '';
 
+  /*
+   * Clear previous note immediately so the
+   * previous day's note is never briefly shown
+   * while another day is loading.
+   */
+  dayNote.value =
+    '';
+
+  updateNoteCounter();
 
   const dayNumber =
     challengeDayNumber(
       key
     );
 
-
   dayModalDate.textContent =
-
     `${prettyDate(key)} · ` +
-
     `Day ${dayNumber}/${challenge.durationDays}`;
 
-
   try {
-
     const data =
       await apiGet(
         `/api/day/${key}`
       );
 
-
     openTasks =
       data.tasks;
-
 
     renderTasks(
       openTasks
     );
 
+    /*
+     * V2 CR-004:
+     * Restore the existing day-level note.
+     */
+    dayNote.value =
+      data.note || '';
+
+    updateNoteCounter();
 
     dayModal.show();
-
   }
   catch (error) {
-
     alert(
       error.message
     );
   }
 }
+
+
+/* =========================================
+   DAILY NOTE
+========================================= */
+
+dayNote.addEventListener(
+  'input',
+  () => {
+    updateNoteCounter();
+
+    saveStatus.textContent =
+      '';
+  }
+);
 
 
 /* =========================================
@@ -2179,35 +1800,26 @@ async function openDay(
 saveBtn.addEventListener(
   'click',
   async () => {
-
     if (
       !openDateKey
     ) {
-
       return;
     }
-
 
     saveBtn.disabled =
       true;
 
-
     saveStatus.textContent =
       'Saving...';
 
-
     try {
-
       await apiPut(
-
         `/api/day/${openDateKey}`,
 
         {
-
           tasks:
             openTasks.map(
               task => ({
-
                 taskId:
                   task.taskId,
 
@@ -2215,18 +1827,21 @@ saveBtn.addEventListener(
                   Boolean(
                     task.isDone
                   )
-
               })
-            )
+            ),
 
+          /*
+           * V2 CR-004:
+           * Save one optional note for the
+           * entire challenge day.
+           */
+          note:
+            dayNote.value.trim()
         }
-
       );
-
 
       saveStatus.textContent =
         'Saved ✓';
-
 
       /*
        * Refresh the dashboard before
@@ -2234,47 +1849,36 @@ saveBtn.addEventListener(
        * information is immediately current.
        */
       await Promise.all([
-
         renderCalendar(),
-
         loadOverallProgress(),
-
         loadStrikes()
-
       ]);
 
-
-      /*
-       * Saving succeeded, so automatically
-       * close the Day Details dialog.
-       */
       dayModal.hide();
 
-
       /*
-       * Clear the temporary open-day state.
+       * Clear temporary open-day state.
        */
       openDateKey =
         null;
 
-
       openTasks =
         [];
 
-    }
-    catch (error) {
-
-      saveStatus.textContent =
+      dayNote.value =
         '';
 
+      updateNoteCounter();
+    }
+    catch (error) {
+      saveStatus.textContent =
+        '';
 
       alert(
         error.message
       );
-
     }
     finally {
-
       saveBtn.disabled =
         false;
     }
@@ -2290,18 +1894,12 @@ prevMonthBtn
   .addEventListener(
     'click',
     async () => {
-
       current =
         new Date(
-
           current.getFullYear(),
-
           current.getMonth() - 1,
-
           1
-
         );
-
 
       await renderCalendar();
     }
@@ -2312,18 +1910,12 @@ nextMonthBtn
   .addEventListener(
     'click',
     async () => {
-
       current =
         new Date(
-
           current.getFullYear(),
-
           current.getMonth() + 1,
-
           1
-
         );
-
 
       await renderCalendar();
     }
@@ -2340,18 +1932,14 @@ todayBtn
   .addEventListener(
     'click',
     async () => {
-
       if (
         !challenge
       ) {
-
         return;
       }
 
-
       const today =
         new Date();
-
 
       today.setHours(
         0,
@@ -2360,19 +1948,16 @@ todayBtn
         0
       );
 
-
       const key =
         dateKey(
           today
         );
-
 
       if (
         !isChallengeDate(
           key
         )
       ) {
-
         alert(
           'Today is outside the current challenge period.'
         );
@@ -2380,21 +1965,14 @@ todayBtn
         return;
       }
 
-
       current =
         new Date(
-
           today.getFullYear(),
-
           today.getMonth(),
-
           1
-
         );
 
-
       await renderCalendar();
-
 
       await openDay(
         key
@@ -2439,7 +2017,6 @@ endChallengeModalEl
   .addEventListener(
     'show.bs.modal',
     () => {
-
       endChallengeStatus.textContent =
         '';
     }
@@ -2450,14 +2027,12 @@ endChallengeModalEl
    APPLICATION BOOT
 ========================================= */
 
-async function loadApplication(){
-
+async function loadApplication() {
   loadingScreen
     .classList
     .remove(
       'd-none'
     );
-
 
   setupScreen
     .classList
@@ -2465,77 +2040,55 @@ async function loadApplication(){
       'd-none'
     );
 
-
   dashboardScreen
     .classList
     .add(
       'd-none'
     );
 
-
   try {
-
     const data =
       await apiGet(
         '/api/challenges/current'
       );
 
-
     challenge =
       data.challenge;
-
 
     if (
       !challenge
     ) {
-
       const redirected =
         await checkNaturalFinalReport();
-
 
       if (
         redirected
       ) {
-
         return;
       }
-
 
       showSetup();
 
       return;
     }
 
-
     showDashboard();
 
-
     await Promise.all([
-
       loadOverallProgress(),
-
       loadStrikes(),
-
       renderCalendar()
-
     ]);
-
   }
   catch (error) {
-
     console.error(
       error
     );
 
-
     loadingScreen.innerHTML =
-
       `<div class="alert alert-danger">` +
-
       `Failed to load SDT: ` +
-
       `${error.message}` +
-
       `</div>`;
   }
 }
