@@ -1,12 +1,15 @@
 {
   "name": "sdt-self-development-tracker",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "SDT - Self Development Tracker",
+  "description": "SDT - Self Development Tracker V2",
   "main": "src/server.js",
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
