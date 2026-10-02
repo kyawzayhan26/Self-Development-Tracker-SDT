@@ -1,5 +1,9 @@
-const path = require('path');
-const express = require('express');
+const path =
+  require('path');
+
+const express =
+  require('express');
+
 
 const tasksRoutes =
   require('./routes/tasks.routes');
@@ -13,31 +17,45 @@ const challengesRoutes =
 const reportsRoutes =
   require('./routes/reports.routes');
 
+
 const {
   errorHandler
-} = require('./middleware/errorHandler');
+} =
+  require('./middleware/errorHandler');
 
 
-const app = express();
+const {
+  requireAuth
+} =
+  require('./middleware/auth');
+
+
+const app =
+  express();
 
 
 /*
- * JSON body parser
+ * ============================================================
+ * REQUEST BODY
+ * ============================================================
  */
+
 app.use(
   express.json()
 );
 
 
 /*
- * Public Supabase configuration
+ * ============================================================
+ * PUBLIC CONFIG
+ * ============================================================
  *
- * These values are safe to expose to the browser:
- * - Supabase project URL
- * - Supabase publishable key
+ * Required before authentication so the browser can initialise
+ * Supabase Auth.
  *
- * Never expose a Supabase secret/service-role key here.
+ * Only browser-safe values are returned.
  */
+
 app.get(
   '/api/config',
   (req, res) => {
@@ -48,30 +66,37 @@ app.get(
     const supabasePublishableKey =
       process.env.SUPABASE_PUBLISHABLE_KEY;
 
+
     if (
       !supabaseUrl ||
       !supabasePublishableKey
     ) {
 
-      return res.status(500).json({
-        error:
-          'Supabase browser configuration is incomplete.'
-      });
-
+      return res
+        .status(500)
+        .json({
+          ok: false,
+          error:
+            'Supabase browser configuration is incomplete.'
+        });
     }
 
+
     res.json({
+      ok: true,
       supabaseUrl,
       supabasePublishableKey
     });
-
   }
 );
 
 
 /*
- * Static frontend
+ * ============================================================
+ * STATIC FRONTEND
+ * ============================================================
  */
+
 app.use(
   express.static(
     path.join(
@@ -84,8 +109,26 @@ app.use(
 
 
 /*
+ * ============================================================
+ * PROTECTED SDT API
+ * ============================================================
+ *
+ * Everything below /api requires a valid Supabase session.
+ *
+ * /api/config is above this middleware and therefore remains
+ * publicly accessible.
+ */
+
+app.use(
+  '/api',
+  requireAuth
+);
+
+
+/*
  * Challenge API
  */
+
 app.use(
   '/api/challenges',
   challengesRoutes
@@ -95,6 +138,7 @@ app.use(
 /*
  * Reports API
  */
+
 app.use(
   '/api/reports',
   reportsRoutes
@@ -104,6 +148,7 @@ app.use(
 /*
  * Task API
  */
+
 app.use(
   '/api/tasks',
   tasksRoutes
@@ -113,6 +158,7 @@ app.use(
 /*
  * Calendar month API
  */
+
 app.use(
   '/api/days',
   daysRoutes
@@ -122,6 +168,7 @@ app.use(
 /*
  * Individual day API
  */
+
 app.use(
   '/api/day',
   daysRoutes
@@ -131,6 +178,7 @@ app.use(
 /*
  * Progress + strikes API
  */
+
 app.use(
   '/api/progress',
   daysRoutes
@@ -138,8 +186,13 @@ app.use(
 
 
 /*
- * Health check
+ * ============================================================
+ * HEALTH CHECK
+ * ============================================================
+ *
+ * Intentionally public.
  */
+
 app.get(
   '/health',
   (req, res) => {
@@ -148,14 +201,16 @@ app.get(
       ok: true,
       app: 'SDT'
     });
-
   }
 );
 
 
 /*
- * Error handler
+ * ============================================================
+ * ERROR HANDLER
+ * ============================================================
  */
+
 app.use(
   errorHandler
 );

@@ -1,20 +1,57 @@
-const express = require('express');
+const express =
+  require('express');
 
-const router = express.Router();
 
-const {
-  getPool,
-  sql
-} = require('../config/db');
+const router =
+  express.Router();
 
+
+/*
+ * ============================================================
+ * DATE HELPERS
+ * ============================================================
+ */
 
 function dateStringToUtc(
   value
-){
+) {
 
   return new Date(
-    value +
-    'T00:00:00Z'
+    `${value}T00:00:00Z`
+  );
+}
+
+
+function formatDate(
+  date
+) {
+
+  return date
+    .toISOString()
+    .slice(0, 10);
+}
+
+
+function calculateEndDate(
+  startDate,
+  durationDays
+) {
+
+  const end =
+    dateStringToUtc(
+      startDate
+    );
+
+
+  end.setUTCDate(
+    end.getUTCDate() +
+    durationDays -
+    1
+  );
+
+
+  return formatDate(
+    end
   );
 }
 
@@ -23,12 +60,13 @@ function inclusiveDays(
   startDate,
   cutoffDate,
   maximumDays
-){
+) {
 
   const start =
     dateStringToUtc(
       startDate
     );
+
 
   const cutoff =
     dateStringToUtc(
@@ -63,76 +101,230 @@ function inclusiveDays(
 }
 
 
-async function getServerDate(
-  pool
-){
+function getTodayDateKey() {
 
-  const result =
-    await pool.request().query(`
-      SELECT
-        CONVERT(
-          VARCHAR(10),
-          GETDATE(),
-          23
-        ) AS today;
-    `);
-
-
-  return result
-    .recordset[0]
-    .today;
+  return new Date()
+    .toISOString()
+    .slice(0, 10);
 }
 
+
+/*
+ * Generate challenge dates from Day 1
+ * through the requested number of days.
+ */
+function generateChallengeDates(
+  startDate,
+  numberOfDays
+) {
+
+  const dates =
+    [];
+
+
+  const current =
+    dateStringToUtc(
+      startDate
+    );
+
+
+  for (
+    let index = 0;
+    index < numberOfDays;
+    index++
+  ) {
+
+    dates.push({
+      dayNumber:
+        index + 1,
+
+      dateKey:
+        formatDate(
+          current
+        )
+    });
+
+
+    current.setUTCDate(
+      current.getUTCDate() + 1
+    );
+  }
+
+
+  return dates;
+}
+
+
+/*
+ * ============================================================
+ * DATA HELPERS
+ * ============================================================
+ */
 
 async function getTasks(
-  pool,
+  supabase,
   challengeId
-){
+) {
 
-  const result =
-    await pool.request()
-
-      .input(
-        'challengeId',
-        sql.Int,
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from('tasks')
+      .select(`
+        task_id,
+        name,
+        sort_order
+      `)
+      .eq(
+        'challenge_id',
         challengeId
       )
-
-      .query(`
-        SELECT
-
-          taskId,
-          name,
-          sortOrder
-
-        FROM dbo.Tasks
-
-        WHERE
-          challengeId =
-            @challengeId
-
-          AND
-          isActive = 1
-
-        ORDER BY
-          sortOrder ASC,
-          taskId ASC;
-      `);
+      .eq(
+        'is_active',
+        true
+      )
+      .order(
+        'sort_order',
+        {
+          ascending: true
+        }
+      );
 
 
-  return result.recordset;
+  if (error) {
+    throw error;
+  }
+
+
+  return data || [];
 }
 
 
+async function getDailyRecords(
+  supabase,
+  challengeId
+) {
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from('daily_records')
+      .select(`
+        daily_record_id,
+        date_key,
+        note,
+        task_status (
+          task_id,
+          is_done
+        )
+      `)
+      .eq(
+        'challenge_id',
+        challengeId
+      )
+      .order(
+        'date_key',
+        {
+          ascending: true
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data || [];
+}
+
+
+/*
+ * ============================================================
+ * CHALLENGE MAPPING
+ * ============================================================
+ */
+
+function mapChallenge(
+  row
+) {
+
+  const completedDate =
+    row.completed_at
+      ? String(
+          row.completed_at
+        ).slice(0, 10)
+      : null;
+
+
+  return {
+
+    challengeId:
+      row.challenge_id,
+
+    name:
+      row.name,
+
+    startDate:
+      row.start_date,
+
+    endDate:
+      calculateEndDate(
+        row.start_date,
+        row.duration_days
+      ),
+
+    durationDays:
+      row.duration_days,
+
+    strikesAllowed:
+      row.strikes_allowed,
+
+    status:
+      String(
+        row.status || ''
+      ).toUpperCase(),
+
+    completionReason:
+      row.completion_reason ||
+      null,
+
+    completedAt:
+      row.completed_at ||
+      null,
+
+    completedDate
+
+  };
+}
+
+
+/*
+ * ============================================================
+ * REPORT BUILDER
+ * ============================================================
+ */
+
 async function buildReport(
-  pool,
+  supabase,
   challenge,
   reportType
-){
+) {
 
   const tasks =
     await getTasks(
-      pool,
+      supabase,
+      challenge.challengeId
+    );
+
+
+  const records =
+    await getDailyRecords(
+      supabase,
       challenge.challengeId
     );
 
@@ -142,17 +334,18 @@ async function buildReport(
 
 
   const today =
-    await getServerDate(
-      pool
-    );
+    getTodayDateKey();
 
 
   let cutoffDate;
 
 
+  /*
+   * Determine how far through the challenge
+   * the report should analyse.
+   */
   if (
-    reportType ===
-    'FINAL'
+    reportType === 'FINAL'
   ) {
 
     if (
@@ -185,246 +378,246 @@ async function buildReport(
       today;
   }
 
+/*
+ * Calculate the calendar-based elapsed day.
+ */
+let elapsedDays =
+  inclusiveDays(
+    challenge.startDate,
+    cutoffDate,
+    challenge.durationDays
+  );
 
-  const elapsedDays =
-    inclusiveDays(
 
+/*
+ * During testing, or if records exist ahead of the current
+ * system date, make sure explicitly recorded challenge days
+ * are still included in the report.
+ *
+ * This keeps the report consistent with the dashboard:
+ * a saved day is a recorded day.
+ */
+if (
+  records.length > 0
+) {
+
+  let furthestRecordedDay =
+    0;
+
+
+  for (
+    const record of records
+  ) {
+
+    const recordDate =
+      dateStringToUtc(
+        record.date_key
+      );
+
+
+    const challengeStart =
+      dateStringToUtc(
+        challenge.startDate
+      );
+
+
+    const difference =
+      Math.floor(
+        (
+          recordDate -
+          challengeStart
+        ) /
+        86400000
+      ) + 1;
+
+
+    if (
+      difference >= 1 &&
+      difference <=
+        challenge.durationDays
+    ) {
+
+      furthestRecordedDay =
+        Math.max(
+          furthestRecordedDay,
+          difference
+        );
+    }
+  }
+
+
+  elapsedDays =
+    Math.max(
+      elapsedDays,
+      furthestRecordedDay
+    );
+}
+
+
+const currentDayNumber =
+  elapsedDays;
+
+  /*
+   * Only analyse daily records that fall inside
+   * the elapsed/reporting period.
+   */
+  const elapsedDateEntries =
+    generateChallengeDates(
       challenge.startDate,
-
-      cutoffDate,
-
-      challenge.durationDays
-
+      elapsedDays
     );
 
 
-  const currentDayNumber =
-    elapsedDays;
+  const elapsedDateSet =
+    new Set(
+      elapsedDateEntries.map(
+        item =>
+          item.dateKey
+      )
+    );
 
 
-  let dailyRows = [];
-
-
-  if (
-    elapsedDays > 0
-  ) {
-
-    const dailyResult =
-      await pool.request()
-
-        .input(
-          'challengeId',
-          sql.Int,
-          challenge.challengeId
+  const relevantRecords =
+    records.filter(
+      record =>
+        elapsedDateSet.has(
+          record.date_key
         )
-
-        .input(
-          'startDate',
-          sql.Date,
-          challenge.startDate
-        )
-
-        .input(
-          'elapsedDays',
-          sql.Int,
-          elapsedDays
-        )
-
-        .query(`
-          ;WITH ChallengeDays AS
-          (
-            SELECT
-
-              1 AS dayNumber,
-
-              @startDate AS dateKey
+    );
 
 
-            UNION ALL
+  const recordMap =
+    new Map(
+      relevantRecords.map(
+        record => [
+          record.date_key,
+          record
+        ]
+      )
+    );
 
 
-            SELECT
+  const activeTaskIds =
+    new Set(
+      tasks.map(
+        task =>
+          task.task_id
+      )
+    );
 
-              dayNumber + 1,
 
-              DATEADD(
-                DAY,
-                1,
-                dateKey
-              )
+  /*
+   * ==========================================================
+   * DAILY PERFORMANCE
+   * ==========================================================
+   */
 
-            FROM ChallengeDays
+  const dailyRows =
+    elapsedDateEntries.map(
+      day => {
 
-            WHERE
-              dayNumber <
-              @elapsedDays
-          ),
-
-          ChallengeTasks AS
-          (
-            SELECT
-              taskId
-
-            FROM dbo.Tasks
-
-            WHERE
-              challengeId =
-                @challengeId
-
-              AND
-              isActive = 1
-          )
-
-          SELECT
-
-            cd.dayNumber,
-
-            CONVERT(
-              VARCHAR(10),
-              cd.dateKey,
-              23
-            ) AS dateKey,
-
-            CASE
-
-              WHEN
-                COUNT(
-                  ds.taskId
-                ) > 0
-
-              THEN
-                CAST(
-                  1 AS BIT
-                )
-
-              ELSE
-                CAST(
-                  0 AS BIT
-                )
-
-            END AS isRecorded,
-
-            SUM(
-              CASE
-
-                WHEN
-                  ds.isDone = 1
-
-                THEN 1
-
-                ELSE 0
-
-              END
-            ) AS completedCount,
-
-            COUNT(
-              ct.taskId
-            ) AS totalTasks
-
-          FROM ChallengeDays cd
-
-          CROSS JOIN
-            ChallengeTasks ct
-
-          LEFT JOIN
-            dbo.DayStatus ds
-
-            ON
-              ds.dateKey =
-                cd.dateKey
-
-              AND
-              ds.taskId =
-                ct.taskId
-
-          GROUP BY
-
-            cd.dayNumber,
-            cd.dateKey
-
-          ORDER BY
-            cd.dayNumber ASC
-
-          OPTION (
-            MAXRECURSION 400
+        const record =
+          recordMap.get(
+            day.dateKey
           );
-        `);
 
 
-    dailyRows =
-      dailyResult.recordset.map(
-        row => {
-
-          const isRecorded =
-            Boolean(
-              row.isRecorded
-            );
+        const isRecorded =
+          Boolean(
+            record
+          );
 
 
-          const completedCount =
-            Number(
-              row.completedCount || 0
-            );
+        const statuses =
+          Array.isArray(
+            record?.task_status
+          )
+            ? record.task_status
+            : [];
 
 
-          const rowTotalTasks =
-            Number(
-              row.totalTasks || 0
-            );
+        const completedTaskIds =
+          new Set(
 
+            statuses
 
-          const completionPct =
-
-            isRecorded &&
-            rowTotalTasks > 0
-
-              ? Math.round(
-                  (
-                    completedCount /
-                    rowTotalTasks
-                  ) * 100
-                )
-
-              : null;
-
-
-          return {
-
-            dayNumber:
-              Number(
-                row.dayNumber
-              ),
-
-            dateKey:
-              row.dateKey,
-
-            isRecorded,
-
-            completedCount,
-
-            totalTasks:
-              rowTotalTasks,
-
-            completionPct,
-
-            isPerfect:
-              Boolean(
-
-                isRecorded &&
-
-                rowTotalTasks > 0 &&
-
-                completedCount ===
-                  rowTotalTasks
-
+              .filter(
+                status =>
+                  status.is_done === true &&
+                  activeTaskIds.has(
+                    status.task_id
+                  )
               )
 
-          };
+              .map(
+                status =>
+                  status.task_id
+              )
 
-        }
-      );
-  }
+          );
 
+
+        const completedCount =
+          completedTaskIds.size;
+
+
+        const completionPct =
+
+          isRecorded &&
+          totalTasks > 0
+
+            ? Math.round(
+                (
+                  completedCount /
+                  totalTasks
+                ) *
+                100
+              )
+
+            : null;
+
+
+        return {
+
+          dayNumber:
+            day.dayNumber,
+
+          dateKey:
+            day.dateKey,
+
+          isRecorded,
+
+          completedCount,
+
+          totalTasks,
+
+          completionPct,
+
+          isPerfect:
+            Boolean(
+              isRecorded &&
+              totalTasks > 0 &&
+              completedCount ===
+                totalTasks
+            ),
+
+          /*
+           * V2 groundwork for Daily Notes.
+           */
+          note:
+            record?.note ||
+            ''
+
+        };
+      }
+    );
+
+
+  /*
+   * ==========================================================
+   * SUMMARY
+   * ==========================================================
+   */
 
   const recordedDailyRows =
     dailyRows.filter(
@@ -485,270 +678,161 @@ async function buildReport(
           (
             totalCompletedInstances /
             totalRecordedInstances
-          ) * 100
+          ) *
+          100
         )
 
       : 0;
 
 
+  /*
+   * IMPORTANT:
+   *
+   * Overall challenge progress represents recorded
+   * challenge days, not perfect days.
+   *
+   * Example:
+   *
+   * 2 recorded days / 30 days = 6.67% -> 7%
+   *
+   * A partially completed recorded day still advances
+   * challenge progress.
+   */
   const overallChallengeProgressPct =
 
     challenge.durationDays > 0
 
-      ? Math.round(
-          (
-            perfectDays /
-            challenge.durationDays
-          ) * 100
+      ? Math.min(
+          100,
+          Math.round(
+            (
+              recordedDays /
+              challenge.durationDays
+            ) *
+            100
+          )
         )
 
       : 0;
 
 
-  let rulePerformance = [];
+  /*
+   * ==========================================================
+   * RULE PERFORMANCE
+   * ==========================================================
+   */
+
+  const rulePerformance =
+    tasks.map(
+      task => {
+
+        let completedDays =
+          0;
+
+        let missedDays =
+          0;
 
 
-  if (
-    tasks.length > 0
-  ) {
+        for (
+          const row of recordedDailyRows
+        ) {
 
-    const ruleResult =
-      await pool.request()
-
-        .input(
-          'challengeId',
-          sql.Int,
-          challenge.challengeId
-        )
-
-        .input(
-          'startDate',
-          sql.Date,
-          challenge.startDate
-        )
-
-        .input(
-          'elapsedDays',
-          sql.Int,
-          elapsedDays
-        )
-
-        .query(`
-          DECLARE @lastElapsedDate DATE;
-
-
-          IF @elapsedDays > 0
-          BEGIN
-
-            SET @lastElapsedDate =
-              DATEADD(
-                DAY,
-                @elapsedDays - 1,
-                @startDate
-              );
-
-          END
-          ELSE
-          BEGIN
-
-            SET @lastElapsedDate =
-              DATEADD(
-                DAY,
-                -1,
-                @startDate
-              );
-
-          END;
-
-
-          ;WITH RecordedDays AS
-          (
-            SELECT DISTINCT
-
-              ds.dateKey
-
-            FROM dbo.DayStatus ds
-
-            INNER JOIN
-              dbo.Tasks sourceTask
-
-              ON
-                sourceTask.taskId =
-                  ds.taskId
-
-            WHERE
-
-              sourceTask.challengeId =
-                @challengeId
-
-              AND
-              ds.dateKey
-                BETWEEN
-                  @startDate
-                  AND
-                  @lastElapsedDate
-          )
-
-          SELECT
-
-            t.taskId,
-            t.name,
-            t.sortOrder,
-
-            COUNT(
-              rd.dateKey
-            ) AS recordedDays,
-
-            SUM(
-              CASE
-
-                WHEN
-                  ds.isDone = 1
-
-                THEN 1
-
-                ELSE 0
-
-              END
-            ) AS completedDays,
-
-            SUM(
-              CASE
-
-                WHEN
-                  rd.dateKey IS NOT NULL
-
-                  AND
-                  (
-                    ds.isDone = 0
-                    OR
-                    ds.isDone IS NULL
-                  )
-
-                THEN 1
-
-                ELSE 0
-
-              END
-            ) AS missedDays
-
-          FROM dbo.Tasks t
-
-          LEFT JOIN
-            RecordedDays rd
-
-            ON
-              1 = 1
-
-          LEFT JOIN
-            dbo.DayStatus ds
-
-            ON
-              ds.taskId =
-                t.taskId
-
-              AND
-              ds.dateKey =
-                rd.dateKey
-
-          WHERE
-
-            t.challengeId =
-              @challengeId
-
-            AND
-            t.isActive = 1
-
-          GROUP BY
-
-            t.taskId,
-            t.name,
-            t.sortOrder
-
-          ORDER BY
-
-            t.sortOrder ASC,
-            t.taskId ASC;
-        `);
-
-
-    rulePerformance =
-      ruleResult.recordset.map(
-        row => {
-
-          const ruleRecordedDays =
-            Number(
-              row.recordedDays || 0
+          const record =
+            recordMap.get(
+              row.dateKey
             );
 
 
-          const completedDays =
-            Number(
-              row.completedDays || 0
+          const statuses =
+            Array.isArray(
+              record?.task_status
+            )
+              ? record.task_status
+              : [];
+
+
+          const status =
+            statuses.find(
+              item =>
+                item.task_id ===
+                task.task_id
             );
 
 
-          const missedDays =
-            Number(
-              row.missedDays || 0
-            );
+          if (
+            status &&
+            status.is_done === true
+          ) {
+
+            completedDays++;
+
+          } else {
+
+            missedDays++;
+          }
+        }
 
 
-          const completionPct =
+        const completionPct =
 
-            ruleRecordedDays > 0
+          recordedDays > 0
 
-              ? Math.round(
-                  (
-                    completedDays /
-                    ruleRecordedDays
-                  ) * 100
-                )
-
-              : null;
-
-
-          return {
-
-            taskId:
-              row.taskId,
-
-            name:
-              row.name,
-
-            completedDays,
-
-            missedDays,
-
-            recordedDays:
-              ruleRecordedDays,
-
-            completionPct,
-
-            strikesAllowed:
-              challenge.strikesAllowed,
-
-            strikesUsed:
-              missedDays,
-
-            strikesLeft:
-              Math.max(
-                0,
-                challenge.strikesAllowed -
-                missedDays
+            ? Math.round(
+                (
+                  completedDays /
+                  recordedDays
+                ) *
+                100
               )
 
-          };
+            : null;
 
-        }
-      );
-  }
 
+        return {
+
+          taskId:
+            task.task_id,
+
+          name:
+            task.name,
+
+          completedDays,
+
+          missedDays,
+
+          recordedDays,
+
+          completionPct,
+
+          strikesAllowed:
+            challenge.strikesAllowed,
+
+          strikesUsed:
+            missedDays,
+
+          strikesLeft:
+            Math.max(
+              0,
+              challenge.strikesAllowed -
+              missedDays
+            )
+
+        };
+      }
+    );
+
+
+  /*
+   * ==========================================================
+   * STRONGEST / WEAKEST RULE
+   * ==========================================================
+   */
 
   const measurableRules =
     rulePerformance.filter(
       rule =>
-        rule.completionPct !== null
+        rule.completionPct !==
+        null
     );
 
 
@@ -773,13 +857,13 @@ async function buildReport(
 
           if (
             strongest === null ||
-
             rule.completionPct >
-            strongest.completionPct
+              strongest.completionPct
           ) {
 
             return rule;
           }
+
 
           return strongest;
 
@@ -797,13 +881,13 @@ async function buildReport(
 
           if (
             weakest === null ||
-
             rule.completionPct <
-            weakest.completionPct
+              weakest.completionPct
           ) {
 
             return rule;
           }
+
 
           return weakest;
 
@@ -824,6 +908,12 @@ async function buildReport(
       0
     );
 
+
+  /*
+   * ==========================================================
+   * RESPONSE
+   * ==========================================================
+   */
 
   return {
 
@@ -922,87 +1012,95 @@ async function buildReport(
 
 
 /*
- * CURRENT PROGRESS REPORT
+ * ============================================================
+ * GET /api/reports/current
+ * ============================================================
  */
+
 router.get(
   '/current',
-  async (req, res, next) => {
+
+  async (
+    req,
+    res,
+    next
+  ) => {
 
     try {
 
-      const pool =
-        await getPool();
+      const supabase =
+        req.supabase;
+
+      const userId =
+        req.user.id;
 
 
-      const result =
-        await pool.request().query(`
-          SELECT TOP 1
-
-            challengeId,
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from('challenges')
+          .select(`
+            challenge_id,
             name,
-
-            CONVERT(
-              VARCHAR(10),
-              startDate,
-              23
-            ) AS startDate,
-
-            CONVERT(
-              VARCHAR(10),
-              DATEADD(
-                DAY,
-                durationDays - 1,
-                startDate
-              ),
-              23
-            ) AS endDate,
-
-            durationDays,
-            strikesAllowed,
+            start_date,
+            duration_days,
+            strikes_allowed,
             status,
-            completedAt,
-            completionReason,
+            completed_at,
+            completion_reason
+          `)
+          .eq(
+            'user_id',
+            userId
+          )
+          .eq(
+            'status',
+            'active'
+          )
+          .order(
+            'created_at',
+            {
+              ascending: false
+            }
+          )
+          .limit(1);
 
-            CONVERT(
-              VARCHAR(10),
-              completedAt,
-              23
-            ) AS completedDate
 
-          FROM dbo.Challenges
-
-          WHERE
-            status = N'ACTIVE'
-
-          ORDER BY
-            challengeId DESC;
-        `);
+      if (error) {
+        throw error;
+      }
 
 
       if (
-        result.recordset.length === 0
+        !data ||
+        data.length === 0
       ) {
 
-        const err =
+        const error =
           new Error(
             'No active challenge found.'
           );
 
-        err.statusCode = 404;
+        error.statusCode =
+          404;
 
-        throw err;
+        throw error;
       }
+
+
+      const challenge =
+        mapChallenge(
+          data[0]
+        );
 
 
       const report =
         await buildReport(
-
-          pool,
-
-          result.recordset[0],
-
+          supabase,
+          challenge,
           'PROGRESS'
-
         );
 
 
@@ -1011,123 +1109,128 @@ router.get(
       );
 
     }
-    catch (e) {
+    catch (error) {
 
-      next(e);
+      next(error);
     }
   }
 );
 
 
 /*
- * FINAL REPORT FOR A COMPLETED CHALLENGE
- *
- * GET:
- * /api/reports/challenge/123/final
+ * ============================================================
+ * GET /api/reports/challenge/:challengeId/final
+ * ============================================================
  */
+
 router.get(
   '/challenge/:challengeId/final',
-  async (req, res, next) => {
+
+  async (
+    req,
+    res,
+    next
+  ) => {
 
     try {
 
+      /*
+       * V2 challenge IDs are UUIDs rather than
+       * V1 integer IDs.
+       */
       const challengeId =
-        Number(
-          req.params.challengeId
-        );
+        String(
+          req.params.challengeId ||
+          ''
+        ).trim();
+
+
+      const uuidPattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 
       if (
-        !Number.isInteger(
+        !uuidPattern.test(
           challengeId
-        ) ||
-
-        challengeId < 1
+        )
       ) {
 
-        const err =
+        const error =
           new Error(
             'Invalid challenge ID.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
 
 
-      const pool =
-        await getPool();
+      const supabase =
+        req.supabase;
+
+      const userId =
+        req.user.id;
 
 
-      const result =
-        await pool.request()
-
-          .input(
-            'challengeId',
-            sql.Int,
+      /*
+       * Explicit user_id filter plus RLS means a user
+       * cannot retrieve another user's completed report.
+       */
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from('challenges')
+          .select(`
+            challenge_id,
+            name,
+            start_date,
+            duration_days,
+            strikes_allowed,
+            status,
+            completed_at,
+            completion_reason
+          `)
+          .eq(
+            'challenge_id',
             challengeId
           )
+          .eq(
+            'user_id',
+            userId
+          )
+          .limit(1);
 
-          .query(`
-            SELECT
 
-              challengeId,
-              name,
-
-              CONVERT(
-                VARCHAR(10),
-                startDate,
-                23
-              ) AS startDate,
-
-              CONVERT(
-                VARCHAR(10),
-                DATEADD(
-                  DAY,
-                  durationDays - 1,
-                  startDate
-                ),
-                23
-              ) AS endDate,
-
-              durationDays,
-              strikesAllowed,
-              status,
-              completedAt,
-              completionReason,
-
-              CONVERT(
-                VARCHAR(10),
-                completedAt,
-                23
-              ) AS completedDate
-
-            FROM dbo.Challenges
-
-            WHERE
-              challengeId =
-                @challengeId;
-          `);
+      if (error) {
+        throw error;
+      }
 
 
       if (
-        result.recordset.length === 0
+        !data ||
+        data.length === 0
       ) {
 
-        const err =
+        const error =
           new Error(
             'Challenge not found.'
           );
 
-        err.statusCode = 404;
+        error.statusCode =
+          404;
 
-        throw err;
+        throw error;
       }
 
 
       const challenge =
-        result.recordset[0];
+        mapChallenge(
+          data[0]
+        );
 
 
       if (
@@ -1135,26 +1238,23 @@ router.get(
         'COMPLETED'
       ) {
 
-        const err =
+        const error =
           new Error(
             'Final report is only available for completed challenges.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
 
 
       const report =
         await buildReport(
-
-          pool,
-
+          supabase,
           challenge,
-
           'FINAL'
-
         );
 
 
@@ -1163,12 +1263,13 @@ router.get(
       );
 
     }
-    catch (e) {
+    catch (error) {
 
-      next(e);
+      next(error);
     }
   }
 );
 
 
-module.exports = router;
+module.exports =
+  router;

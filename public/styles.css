@@ -405,3 +405,23 @@ body{
 
   border-radius:10px;
 }
+
+/* =========================================
+   V2 AUTHENTICATION
+========================================= */
+
+#userAccount:not(.d-none){
+  display:flex;
+}
+
+#authScreen .card{
+  border-radius:16px;
+}
+
+#authScreen .form-control{
+  border-radius:10px;
+}
+
+#authScreen .btn-lg{
+  border-radius:10px;
+}

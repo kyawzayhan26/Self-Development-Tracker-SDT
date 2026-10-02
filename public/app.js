@@ -248,22 +248,90 @@ const weekdayNames = [
 
 ];
 
-
 /* =========================================
    API
 ========================================= */
 
-async function apiGet(url){
 
-  const response =
-    await fetch(url);
+/*
+ * Build headers for authenticated API calls.
+ */
+async function getApiHeaders(
+  includeJson = false
+){
+
+  const token =
+    await window
+      .sdtAuth
+      .getAccessToken();
 
 
-  const data =
-    await response.json();
+  if (!token){
+
+    throw new Error(
+      'Your session has expired. Please sign in again.'
+    );
+  }
 
 
-  if (!data.ok){
+  const headers = {
+
+    Authorization:
+      `Bearer ${token}`
+
+  };
+
+
+  if (includeJson){
+
+    headers['Content-Type'] =
+      'application/json';
+  }
+
+
+  return headers;
+}
+
+
+/*
+ * Handle API responses consistently.
+ */
+async function readApiResponse(
+  response
+){
+
+  let data;
+
+
+  try {
+
+    data =
+      await response.json();
+
+  }
+  catch {
+
+    throw new Error(
+      'The server returned an invalid response.'
+    );
+  }
+
+
+  if (
+    response.status === 401
+  ){
+
+    throw new Error(
+      data.error ||
+      'Your session has expired. Please sign in again.'
+    );
+  }
+
+
+  if (
+    !response.ok ||
+    !data.ok
+  ){
 
     throw new Error(
       data.error ||
@@ -276,10 +344,39 @@ async function apiGet(url){
 }
 
 
+async function apiGet(
+  url
+){
+
+  const headers =
+    await getApiHeaders();
+
+
+  const response =
+    await fetch(
+      url,
+      {
+        headers
+      }
+    );
+
+
+  return readApiResponse(
+    response
+  );
+}
+
+
 async function apiPost(
   url,
   body = {}
 ){
+
+  const headers =
+    await getApiHeaders(
+      true
+    );
+
 
   const response =
     await fetch(
@@ -289,10 +386,7 @@ async function apiPost(
         method:
           'POST',
 
-        headers:{
-          'Content-Type':
-            'application/json'
-        },
+        headers,
 
         body:
           JSON.stringify(
@@ -303,20 +397,9 @@ async function apiPost(
     );
 
 
-  const data =
-    await response.json();
-
-
-  if (!data.ok){
-
-    throw new Error(
-      data.error ||
-      'Request failed'
-    );
-  }
-
-
-  return data;
+  return readApiResponse(
+    response
+  );
 }
 
 
@@ -324,6 +407,12 @@ async function apiPut(
   url,
   body
 ){
+
+  const headers =
+    await getApiHeaders(
+      true
+    );
+
 
   const response =
     await fetch(
@@ -333,10 +422,7 @@ async function apiPut(
         method:
           'PUT',
 
-        headers:{
-          'Content-Type':
-            'application/json'
-        },
+        headers,
 
         body:
           JSON.stringify(
@@ -347,22 +433,10 @@ async function apiPut(
     );
 
 
-  const data =
-    await response.json();
-
-
-  if (!data.ok){
-
-    throw new Error(
-      data.error ||
-      'Save failed'
-    );
-  }
-
-
-  return data;
+  return readApiResponse(
+    response
+  );
 }
-
 
 /* =========================================
    DATE HELPERS
@@ -2467,4 +2541,8 @@ async function loadApplication(){
 }
 
 
-loadApplication();
+/*
+ * Authentication controls when SDT starts.
+ */
+window.loadSDTApplication =
+  loadApplication;

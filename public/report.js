@@ -172,7 +172,15 @@ const autoPrint =
   ) === '1';
 
 
-function parseDate(value){
+/*
+ * ============================================================
+ * DATE HELPERS
+ * ============================================================
+ */
+
+function parseDate(
+  value
+) {
 
   return new Date(
     value +
@@ -181,13 +189,14 @@ function parseDate(value){
 }
 
 
-function prettyDate(value){
+function prettyDate(
+  value
+) {
 
   return new Intl
     .DateTimeFormat(
       undefined,
       {
-
         month:
           'short',
 
@@ -196,37 +205,46 @@ function prettyDate(value){
 
         year:
           'numeric'
-
       }
     )
     .format(
-      parseDate(value)
+      parseDate(
+        value
+      )
     );
 }
 
 
-function prettyDateTime(value){
+function prettyDateTime(
+  value
+) {
 
   return new Intl
     .DateTimeFormat(
       undefined,
       {
-
         dateStyle:
           'medium',
 
         timeStyle:
           'short'
-
       }
     )
     .format(
-      new Date(value)
+      new Date(
+        value
+      )
     );
 }
 
 
-async function getReport(){
+/*
+ * ============================================================
+ * AUTHENTICATED REPORT API
+ * ============================================================
+ */
+
+async function getReport() {
 
   let endpoint =
     '/api/reports/current';
@@ -237,7 +255,7 @@ async function getReport(){
     'final'
   ) {
 
-    if (!challengeId){
+    if (!challengeId) {
 
       throw new Error(
         'Missing challenge ID for final report.'
@@ -250,17 +268,75 @@ async function getReport(){
   }
 
 
+  /*
+   * Initialise the same Supabase Auth client used
+   * by the main SDT application.
+   *
+   * Supabase restores the browser session from
+   * local storage.
+   */
+  await window
+    .sdtAuth
+    .initializeSupabase();
+
+
+  const token =
+    await window
+      .sdtAuth
+      .getAccessToken();
+
+
+  if (!token) {
+
+    throw new Error(
+      'Your session has expired. Return to SDT and sign in again.'
+    );
+  }
+
+
   const response =
     await fetch(
-      endpoint
+      endpoint,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${token}`
+        }
+      }
     );
 
 
-  const data =
-    await response.json();
+  let data;
 
 
-  if (!data.ok){
+  try {
+
+    data =
+      await response.json();
+
+  }
+  catch {
+
+    throw new Error(
+      'The server returned an invalid report response.'
+    );
+  }
+
+
+  if (
+    response.status === 401
+  ) {
+
+    throw new Error(
+      'Your session has expired. Return to SDT and sign in again.'
+    );
+  }
+
+
+  if (
+    !response.ok ||
+    !data.ok
+  ) {
 
     throw new Error(
       data.error ||
@@ -273,9 +349,19 @@ async function getReport(){
 }
 
 
-function escapeHtml(value){
+/*
+ * ============================================================
+ * HTML SAFETY
+ * ============================================================
+ */
 
-  return String(value)
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value
+  )
 
     .replaceAll(
       '&',
@@ -304,9 +390,15 @@ function escapeHtml(value){
 }
 
 
+/*
+ * ============================================================
+ * RULE TABLE
+ * ============================================================
+ */
+
 function renderRuleTable(
   rules
-){
+) {
 
   ruleTableBody.innerHTML =
     '';
@@ -364,10 +456,16 @@ function renderRuleTable(
 }
 
 
+/*
+ * ============================================================
+ * DAILY TABLE
+ * ============================================================
+ */
+
 function renderDailyTable(
   days,
   isFinal
-){
+) {
 
   dailyTableBody.innerHTML =
     '';
@@ -488,13 +586,19 @@ function renderDailyTable(
 }
 
 
+/*
+ * ============================================================
+ * HIGHLIGHTS
+ * ============================================================
+ */
+
 function renderHighlight(
   elementName,
   elementMeta,
   rule
-){
+) {
 
-  if (!rule){
+  if (!rule) {
 
     elementName.textContent =
       'Not enough data';
@@ -520,9 +624,15 @@ function renderHighlight(
 }
 
 
+/*
+ * ============================================================
+ * FINAL REPORT TOKEN
+ * ============================================================
+ */
+
 function finalReportToken(
   challenge
-){
+) {
 
   return (
 
@@ -534,9 +644,15 @@ function finalReportToken(
 }
 
 
+/*
+ * ============================================================
+ * RENDER REPORT
+ * ============================================================
+ */
+
 function renderReport(
   data
-){
+) {
 
   const challenge =
     data.challenge;
@@ -560,10 +676,6 @@ function renderReport(
       : `${challenge.name} - SDT Progress Report`;
 
 
-  /*
-   * Existing report.html has this element
-   * as the second div inside the report header.
-   */
   const reportTypeElement =
     document.querySelector(
       '.report-type'
@@ -631,8 +743,7 @@ function renderReport(
       detailText +=
         ' · Ended manually';
 
-    }
-    else {
+    } else {
 
       detailText +=
         ' · Completed naturally';
@@ -658,12 +769,10 @@ function renderReport(
 
 
   metricCurrentDay.textContent =
-
     `${summary.currentDayNumber}/${challenge.durationDays}`;
 
 
   metricRecordedDays.textContent =
-
     `${summary.recordedDays}/${summary.elapsedDays}`;
 
 
@@ -695,68 +804,47 @@ function renderReport(
     `${summary.overallChallengeProgressPct}%`;
 
 
+  /*
+   * Challenge progress now means recorded days,
+   * not perfect days.
+   */
   if (
     isFinal
   ) {
 
-    if (
-      challenge.completionReason ===
-      'MANUAL' &&
+    reportProgressText.textContent =
 
-      summary.elapsedDays <
-      challenge.durationDays
-    ) {
+      `${summary.overallChallengeProgressPct}% of the planned challenge was recorded ` +
 
-      reportProgressText.textContent =
+      `(${summary.recordedDays}/${challenge.durationDays} days). ` +
 
-        `${summary.overallChallengeProgressPct}% of the planned challenge was completed as perfect days ` +
+      `${summary.perfectDays} recorded day(s) were perfect.`;
 
-        `(${summary.perfectDays}/${challenge.durationDays}). ` +
-
-        `The challenge was manually ended after ${summary.elapsedDays} of ${challenge.durationDays} planned day(s).`;
-
-    }
-    else {
-
-      reportProgressText.textContent =
-
-        `${summary.overallChallengeProgressPct}% of the full challenge was completed as perfect days ` +
-
-        `(${summary.perfectDays}/${challenge.durationDays}).`;
-    }
-
-  }
-  else {
+  } else {
 
     reportProgressText.textContent =
 
-      `${summary.overallChallengeProgressPct}% of the full challenge completed as perfect days ` +
+      `${summary.overallChallengeProgressPct}% of the full challenge recorded ` +
 
-      `(${summary.perfectDays}/${challenge.durationDays}). ` +
+      `(${summary.recordedDays}/${challenge.durationDays} days). ` +
+
+      `${summary.perfectDays} perfect day(s). ` +
 
       `${summary.remainingDays} planned day(s) remain.`;
   }
 
 
   renderHighlight(
-
     strongestRuleName,
-
     strongestRuleMeta,
-
     data.strongestRule
-
   );
 
 
   renderHighlight(
-
     weakestRuleName,
-
     weakestRuleMeta,
-
     data.weakestRule
-
   );
 
 
@@ -771,28 +859,27 @@ function renderReport(
   );
 
 
-  /*
-   * Remember that this final report
-   * has already been surfaced.
-   */
   if (
     isFinal
   ) {
 
     localStorage.setItem(
-
       'sdtLastFinalReportToken',
-
       finalReportToken(
         challenge
       )
-
     );
   }
 }
 
 
-async function loadReport(){
+/*
+ * ============================================================
+ * LOAD REPORT
+ * ============================================================
+ */
+
+async function loadReport() {
 
   try {
 
@@ -819,10 +906,6 @@ async function loadReport(){
       );
 
 
-    /*
-     * Manual end or automatic natural
-     * completion can request automatic print.
-     */
     if (
       autoPrint &&
       data.reportType ===
@@ -841,6 +924,12 @@ async function loadReport(){
 
   }
   catch (error) {
+
+    console.error(
+      'Report loading failed:',
+      error
+    );
+
 
     reportLoading
       .classList
@@ -862,13 +951,18 @@ async function loadReport(){
 }
 
 
+/*
+ * ============================================================
+ * EVENTS
+ * ============================================================
+ */
+
 printBtn
   .addEventListener(
     'click',
     () => {
 
       window.print();
-
     }
   );
 
@@ -880,9 +974,14 @@ backBtn
 
       window.location.href =
         '/';
-
     }
   );
 
+
+/*
+ * ============================================================
+ * START
+ * ============================================================
+ */
 
 loadReport();

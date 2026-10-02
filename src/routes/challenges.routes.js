@@ -1,121 +1,381 @@
-const express = require('express');
+const express =
+  require('express');
 
-const router = express.Router();
 
-const {
-  getPool,
-  sql
-} = require('../config/db');
+const router =
+  express.Router();
 
 
 /*
- * Automatically complete challenges whose
- * planned final day has passed.
- *
- * Example:
- *
- * Challenge ends Aug 30.
- * It remains ACTIVE throughout Aug 30.
- *
- * On Aug 31 it becomes COMPLETED/NATURAL.
+ * ============================================================
+ * HELPERS
+ * ============================================================
  */
-async function completeExpiredChallenges(pool){
 
-  await pool.request().query(`
-    UPDATE dbo.Challenges
 
-    SET
-      status = N'COMPLETED',
+/*
+ * Convert a YYYY-MM-DD string into a UTC Date.
+ */
+function parseDate(
+  value
+) {
 
-      completedAt =
-        COALESCE(
-          completedAt,
-          SYSDATETIME()
-        ),
-
-      completionReason =
-        COALESCE(
-          completionReason,
-          N'NATURAL'
-        )
-
-    WHERE
-      status = N'ACTIVE'
-
-      AND DATEADD(
-            DAY,
-            durationDays - 1,
-            startDate
-          )
-          <
-          CONVERT(
-            DATE,
-            GETDATE()
-          );
-  `);
+  return new Date(
+    `${value}T00:00:00Z`
+  );
 }
 
 
 /*
- * GET /api/challenges/current
+ * Convert a Date into YYYY-MM-DD.
  */
-router.get(
-  '/current',
-  async (req, res, next) => {
+function formatDate(
+  date
+) {
 
-    try {
+  return date
+    .toISOString()
+    .slice(
+      0,
+      10
+    );
+}
 
-      const pool =
-        await getPool();
+
+/*
+ * Calculate the final date of a challenge.
+ *
+ * Day 1 = start date.
+ *
+ * Example:
+ * Start: 2026-10-01
+ * Duration: 30
+ * End: 2026-10-30
+ */
+function calculateEndDate(
+  startDate,
+  durationDays
+) {
+
+  const date =
+    parseDate(
+      startDate
+    );
 
 
-      await completeExpiredChallenges(
-        pool
+  date.setUTCDate(
+    date.getUTCDate() +
+    durationDays -
+    1
+  );
+
+
+  return formatDate(
+    date
+  );
+}
+
+
+/*
+ * Today's UTC date as YYYY-MM-DD.
+ */
+function todayDateKey() {
+
+  return new Date()
+    .toISOString()
+    .slice(
+      0,
+      10
+    );
+}
+
+
+/*
+ * ============================================================
+ * NATURAL COMPLETION
+ * ============================================================
+ *
+ * Complete the authenticated user's active challenge when its
+ * final day has already passed.
+ *
+ * RLS additionally ensures the user cannot update another
+ * user's challenge.
+ * ============================================================
+ */
+
+async function completeExpiredChallenge(
+  supabase,
+  userId
+) {
+
+  const {
+    data: activeChallenges,
+    error
+  } =
+    await supabase
+      .from('challenges')
+      .select(`
+        challenge_id,
+        start_date,
+        duration_days
+      `)
+      .eq(
+        'user_id',
+        userId
+      )
+      .eq(
+        'status',
+        'active'
+      )
+      .limit(1);
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  if (
+    !activeChallenges ||
+    activeChallenges.length === 0
+  ) {
+
+    return;
+  }
+
+
+  const challenge =
+    activeChallenges[0];
+
+
+  const endDate =
+    calculateEndDate(
+      challenge.start_date,
+      challenge.duration_days
+    );
+
+
+  const today =
+    todayDateKey();
+
+
+  /*
+   * Challenge remains active throughout its final day.
+   * It becomes completed the following day.
+   */
+  if (
+    endDate >= today
+  ) {
+
+    return;
+  }
+
+
+  const {
+    error: updateError
+  } =
+    await supabase
+      .from('challenges')
+      .update({
+        status:
+          'completed',
+
+        completed_at:
+          new Date().toISOString(),
+
+        completion_reason:
+          'NATURAL'
+      })
+      .eq(
+        'challenge_id',
+        challenge.challenge_id
+      )
+      .eq(
+        'user_id',
+        userId
+      )
+      .eq(
+        'status',
+        'active'
       );
 
 
-      const challengeResult =
-        await pool.request().query(`
-          SELECT TOP 1
+  if (updateError) {
+    throw updateError;
+  }
+}
 
-            challengeId,
+
+/*
+ * ============================================================
+ * RESPONSE MAPPING
+ * ============================================================
+ *
+ * The existing frontend uses camelCase.
+ *
+ * Supabase/PostgreSQL uses snake_case.
+ *
+ * Keeping the old response shape means we can migrate the
+ * backend without unnecessarily rewriting the frontend.
+ * ============================================================
+ */
+
+function mapTask(
+  task
+) {
+
+  return {
+
+    taskId:
+      task.task_id,
+
+    name:
+      task.name,
+
+    sortOrder:
+      task.sort_order
+
+  };
+}
+
+
+function mapChallenge(
+  challenge
+) {
+
+  if (!challenge) {
+    return null;
+  }
+
+
+  return {
+
+    challengeId:
+      challenge.challenge_id,
+
+    name:
+      challenge.name,
+
+    startDate:
+      challenge.start_date,
+
+    endDate:
+      calculateEndDate(
+        challenge.start_date,
+        challenge.duration_days
+      ),
+
+    durationDays:
+      challenge.duration_days,
+
+    strikesAllowed:
+      challenge.strikes_allowed,
+
+    status:
+      String(
+        challenge.status || ''
+      ).toUpperCase(),
+
+    completedAt:
+      challenge.completed_at,
+
+    completionReason:
+      challenge.completion_reason,
+
+    createdAt:
+      challenge.created_at,
+
+    tasks:
+      Array.isArray(
+        challenge.tasks
+      )
+        ? challenge.tasks.map(
+            mapTask
+          )
+        : []
+
+  };
+}
+
+
+/*
+ * ============================================================
+ * GET /api/challenges/current
+ * ============================================================
+ */
+
+router.get(
+  '/current',
+
+  async (
+    req,
+    res,
+    next
+  ) => {
+
+    try {
+
+      const supabase =
+        req.supabase;
+
+      const userId =
+        req.user.id;
+
+
+      await completeExpiredChallenge(
+        supabase,
+        userId
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from('challenges')
+          .select(`
+            challenge_id,
             name,
-
-            CONVERT(
-              VARCHAR(10),
-              startDate,
-              23
-            ) AS startDate,
-
-            CONVERT(
-              VARCHAR(10),
-              DATEADD(
-                DAY,
-                durationDays - 1,
-                startDate
-              ),
-              23
-            ) AS endDate,
-
-            durationDays,
-            strikesAllowed,
+            start_date,
+            duration_days,
+            strikes_allowed,
             status,
-            completedAt,
-            completionReason,
-            createdAt
+            completed_at,
+            completion_reason,
+            created_at,
+            tasks (
+              task_id,
+              name,
+              sort_order,
+              is_active
+            )
+          `)
+          .eq(
+            'user_id',
+            userId
+          )
+          .eq(
+            'status',
+            'active'
+          )
+          .order(
+            'created_at',
+            {
+              ascending: false
+            }
+          )
+          .limit(1);
 
-          FROM dbo.Challenges
 
-          WHERE
-            status = N'ACTIVE'
-
-          ORDER BY
-            challengeId DESC;
-        `);
+      if (error) {
+        throw error;
+      }
 
 
       if (
-        challengeResult.recordset.length === 0
+        !data ||
+        data.length === 0
       ) {
 
         return res.json({
@@ -130,120 +390,32 @@ router.get(
 
 
       const challenge =
-        challengeResult.recordset[0];
+        data[0];
 
 
-      const tasksResult =
-        await pool.request()
-
-          .input(
-            'challengeId',
-            sql.Int,
-            challenge.challengeId
-          )
-
-          .query(`
-            SELECT
-
-              taskId,
-              name,
-              sortOrder
-
-            FROM dbo.Tasks
-
-            WHERE
-              challengeId =
-                @challengeId
-
-              AND
-              isActive = 1
-
-            ORDER BY
-              sortOrder ASC,
-              taskId ASC;
-          `);
-
-
+      /*
+       * Only expose active tasks.
+       */
       challenge.tasks =
-        tasksResult.recordset;
+        Array.isArray(
+          challenge.tasks
+        )
+          ? challenge.tasks
+              .filter(
+                task =>
+                  task.is_active
+              )
+              .sort(
+                (a, b) =>
 
-
-      res.json({
-
-        ok: true,
-
-        challenge
-
-      });
-
-    }
-    catch (e) {
-
-      next(e);
-    }
-  }
-);
-
-
-/*
- * GET /api/challenges/latest-completed
- *
- * Used when SDT opens after a challenge
- * naturally finishes.
- */
-router.get(
-  '/latest-completed',
-  async (req, res, next) => {
-
-    try {
-
-      const pool =
-        await getPool();
-
-
-      await completeExpiredChallenges(
-        pool
-      );
-
-
-      const result =
-        await pool.request().query(`
-          SELECT TOP 1
-
-            challengeId,
-            name,
-
-            CONVERT(
-              VARCHAR(10),
-              startDate,
-              23
-            ) AS startDate,
-
-            CONVERT(
-              VARCHAR(10),
-              DATEADD(
-                DAY,
-                durationDays - 1,
-                startDate
-              ),
-              23
-            ) AS endDate,
-
-            durationDays,
-            status,
-            completionReason,
-            completedAt
-
-          FROM dbo.Challenges
-
-          WHERE
-            status = N'COMPLETED'
-
-          ORDER BY
-
-            completedAt DESC,
-            challengeId DESC;
-        `);
+                  (
+                    a.sort_order || 0
+                  ) -
+                  (
+                    b.sort_order || 0
+                  )
+              )
+          : [];
 
 
       res.json({
@@ -251,68 +423,163 @@ router.get(
         ok: true,
 
         challenge:
-          result.recordset[0] ||
-          null
+          mapChallenge(
+            challenge
+          )
 
       });
 
     }
-    catch (e) {
+    catch (error) {
 
-      next(e);
+      next(error);
     }
   }
 );
 
 
 /*
- * POST /api/challenges/start
+ * ============================================================
+ * GET /api/challenges/latest-completed
+ * ============================================================
  */
-router.post(
-  '/start',
-  express.json(),
-  async (req, res, next) => {
+
+router.get(
+  '/latest-completed',
+
+  async (
+    req,
+    res,
+    next
+  ) => {
 
     try {
 
+      const supabase =
+        req.supabase;
+
+      const userId =
+        req.user.id;
+
+
+      await completeExpiredChallenge(
+        supabase,
+        userId
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from('challenges')
+          .select(`
+            challenge_id,
+            name,
+            start_date,
+            duration_days,
+            strikes_allowed,
+            status,
+            completed_at,
+            completion_reason,
+            created_at
+          `)
+          .eq(
+            'user_id',
+            userId
+          )
+          .eq(
+            'status',
+            'completed'
+          )
+          .order(
+            'completed_at',
+            {
+              ascending: false
+            }
+          )
+          .limit(1);
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      res.json({
+
+        ok: true,
+
+        challenge:
+          data &&
+          data.length > 0
+
+            ? mapChallenge(
+                data[0]
+              )
+
+            : null
+
+      });
+
+    }
+    catch (error) {
+
+      next(error);
+    }
+  }
+);
+
+
+/*
+ * ============================================================
+ * POST /api/challenges/start
+ * ============================================================
+ */
+
+router.post(
+  '/start',
+
+  async (
+    req,
+    res,
+    next
+  ) => {
+
+    try {
+
+      const supabase =
+        req.supabase;
+
+      const userId =
+        req.user.id;
+
+
+      /*
+       * --------------------------------------------------------
+       * Validate challenge name
+       * --------------------------------------------------------
+       */
+
       const name =
         String(
-          req.body?.name || ''
+          req.body?.name ||
+          ''
         ).trim();
-
-
-      const startDate =
-        String(
-          req.body?.startDate || ''
-        ).trim();
-
-
-      const durationDays =
-        Number(
-          req.body?.durationDays
-        );
-
-
-      const strikesAllowed =
-        Number(
-          req.body?.strikesAllowed
-        );
-
-
-      const incomingTasks =
-        req.body?.tasks;
 
 
       if (!name) {
 
-        const err =
+        const error =
           new Error(
             'Challenge name is required.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
 
 
@@ -320,91 +587,140 @@ router.post(
         name.length > 150
       ) {
 
-        const err =
+        const error =
           new Error(
             'Challenge name is too long.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
+
+
+      /*
+       * --------------------------------------------------------
+       * Validate start date
+       * --------------------------------------------------------
+       */
+
+      const startDate =
+        String(
+          req.body?.startDate ||
+          ''
+        ).trim();
 
 
       if (
         !/^\d{4}-\d{2}-\d{2}$/
-          .test(startDate)
+          .test(
+            startDate
+          )
       ) {
 
-        const err =
+        const error =
           new Error(
             'Start date must use YYYY-MM-DD.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
+
+
+      /*
+       * --------------------------------------------------------
+       * Validate duration
+       * --------------------------------------------------------
+       */
+
+      const durationDays =
+        Number(
+          req.body?.durationDays
+        );
 
 
       if (
         !Number.isInteger(
           durationDays
         ) ||
-
         durationDays < 1 ||
-
         durationDays > 365
       ) {
 
-        const err =
+        const error =
           new Error(
             'Challenge duration must be between 1 and 365 days.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
+
+
+      /*
+       * --------------------------------------------------------
+       * Validate strikes
+       * --------------------------------------------------------
+       */
+
+      const strikesAllowed =
+        Number(
+          req.body?.strikesAllowed
+        );
 
 
       if (
         !Number.isInteger(
           strikesAllowed
         ) ||
-
         strikesAllowed < 0 ||
-
         strikesAllowed > 99
       ) {
 
-        const err =
+        const error =
           new Error(
             'Strikes allowed must be between 0 and 99.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
+
+
+      /*
+       * --------------------------------------------------------
+       * Validate tasks
+       * --------------------------------------------------------
+       */
+
+      const incomingTasks =
+        req.body?.tasks;
 
 
       if (
         !Array.isArray(
           incomingTasks
         ) ||
-
         incomingTasks.length === 0
       ) {
 
-        const err =
+        const error =
           new Error(
             'Add at least one rule or task.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
 
 
@@ -412,51 +728,58 @@ router.post(
         incomingTasks.length > 100
       ) {
 
-        const err =
+        const error =
           new Error(
             'Maximum 100 tasks allowed.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
 
 
       const tasks =
         incomingTasks
 
-          .map(task => {
+          .map(
+            task => {
 
-            if (
-              typeof task ===
-              'string'
-            ) {
+              if (
+                typeof task ===
+                'string'
+              ) {
 
-              return task.trim();
+                return task.trim();
+              }
+
+
+              return String(
+                task?.name ||
+                ''
+              ).trim();
             }
+          )
 
-            return String(
-              task?.name || ''
-            ).trim();
-
-          })
-
-          .filter(Boolean);
+          .filter(
+            Boolean
+          );
 
 
       if (
         tasks.length === 0
       ) {
 
-        const err =
+        const error =
           new Error(
             'Add at least one valid task.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
 
 
@@ -468,19 +791,20 @@ router.post(
           task.length > 200
         ) {
 
-          const err =
+          const error =
             new Error(
               'Each task must be 200 characters or fewer.'
             );
 
-          err.statusCode = 400;
+          error.statusCode =
+            400;
 
-          throw err;
+          throw error;
         }
       }
 
 
-      const normalized =
+      const normalizedTasks =
         tasks.map(
           task =>
             task.toLowerCase()
@@ -489,291 +813,355 @@ router.post(
 
       if (
         new Set(
-          normalized
+          normalizedTasks
         ).size !==
-        normalized.length
+        normalizedTasks.length
       ) {
 
-        const err =
+        const error =
           new Error(
             'Duplicate tasks are not allowed.'
           );
 
-        err.statusCode = 400;
+        error.statusCode =
+          400;
 
-        throw err;
+        throw error;
       }
 
 
-      const pool =
-        await getPool();
-
-
-      await completeExpiredChallenges(
-        pool
+      /*
+       * Complete an expired active challenge first.
+       */
+      await completeExpiredChallenge(
+        supabase,
+        userId
       );
 
 
-      const existing =
-        await pool.request().query(`
-          SELECT TOP 1
-            challengeId
+      /*
+       * Check whether THIS USER already has an active
+       * challenge.
+       *
+       * The database unique partial index also enforces this.
+       */
+      const {
+        data: existing,
+        error: existingError
+      } =
+        await supabase
+          .from('challenges')
+          .select(
+            'challenge_id'
+          )
+          .eq(
+            'user_id',
+            userId
+          )
+          .eq(
+            'status',
+            'active'
+          )
+          .limit(1);
 
-          FROM dbo.Challenges
 
-          WHERE
-            status = N'ACTIVE';
-        `);
+      if (existingError) {
+        throw existingError;
+      }
 
 
       if (
-        existing.recordset.length > 0
+        existing &&
+        existing.length > 0
       ) {
 
-        const err =
+        const error =
           new Error(
             'An active challenge already exists.'
           );
 
-        err.statusCode = 409;
+        error.statusCode =
+          409;
 
-        throw err;
+        throw error;
       }
 
 
-      const tx =
-        new sql.Transaction(
-          pool
-        );
+      /*
+       * --------------------------------------------------------
+       * Create challenge
+       * --------------------------------------------------------
+       */
+
+      const {
+        data: challenge,
+        error: challengeError
+      } =
+        await supabase
+          .from('challenges')
+          .insert({
+            user_id:
+              userId,
+
+            name,
+
+            start_date:
+              startDate,
+
+            duration_days:
+              durationDays,
+
+            strikes_allowed:
+              strikesAllowed,
+
+            status:
+              'active',
+
+            completed_at:
+              null,
+
+            completion_reason:
+              null
+          })
+          .select(
+            'challenge_id'
+          )
+          .single();
 
 
-      await tx.begin();
+      if (challengeError) {
 
-
-      try {
-
-        const challengeInsert =
-          await new sql.Request(tx)
-
-            .input(
-              'name',
-              sql.NVarChar(150),
-              name
-            )
-
-            .input(
-              'startDate',
-              sql.Date,
-              startDate
-            )
-
-            .input(
-              'durationDays',
-              sql.Int,
-              durationDays
-            )
-
-            .input(
-              'strikesAllowed',
-              sql.Int,
-              strikesAllowed
-            )
-
-            .query(`
-              INSERT INTO dbo.Challenges
-              (
-                name,
-                startDate,
-                durationDays,
-                strikesAllowed,
-                status,
-                completedAt,
-                completionReason
-              )
-
-              OUTPUT
-                INSERTED.challengeId
-
-              VALUES
-              (
-                @name,
-                @startDate,
-                @durationDays,
-                @strikesAllowed,
-                N'ACTIVE',
-                NULL,
-                NULL
-              );
-            `);
-
-
-        const challengeId =
-          challengeInsert
-            .recordset[0]
-            .challengeId;
-
-
-        for (
-          let i = 0;
-          i < tasks.length;
-          i++
+        /*
+         * PostgreSQL unique violation.
+         *
+         * This may happen if two requests attempt to create
+         * an active challenge at almost the same time.
+         */
+        if (
+          challengeError.code ===
+          '23505'
         ) {
 
-          await new sql.Request(tx)
+          const error =
+            new Error(
+              'An active challenge already exists.'
+            );
 
-            .input(
-              'challengeId',
-              sql.Int,
-              challengeId
-            )
+          error.statusCode =
+            409;
 
-            .input(
-              'name',
-              sql.NVarChar(200),
-              tasks[i]
-            )
-
-            .input(
-              'sortOrder',
-              sql.Int,
-              i + 1
-            )
-
-            .query(`
-              INSERT INTO dbo.Tasks
-              (
-                challengeId,
-                name,
-                isActive,
-                sortOrder
-              )
-
-              VALUES
-              (
-                @challengeId,
-                @name,
-                1,
-                @sortOrder
-              );
-            `);
+          throw error;
         }
 
 
-        await tx.commit();
+        throw challengeError;
+      }
 
 
-        res.status(201).json({
+      /*
+       * --------------------------------------------------------
+       * Create challenge tasks
+       * --------------------------------------------------------
+       */
+
+      const taskRows =
+        tasks.map(
+          (
+            task,
+            index
+          ) => ({
+
+            challenge_id:
+              challenge.challenge_id,
+
+            name:
+              task,
+
+            is_active:
+              true,
+
+            sort_order:
+              index + 1
+
+          })
+        );
+
+
+      const {
+        error: taskError
+      } =
+        await supabase
+          .from('tasks')
+          .insert(
+            taskRows
+          );
+
+
+      if (taskError) {
+
+        /*
+         * If task creation fails, remove the newly-created
+         * challenge so the user is not left with an incomplete
+         * challenge.
+         *
+         * RLS still applies to this delete.
+         */
+        await supabase
+          .from('challenges')
+          .delete()
+          .eq(
+            'challenge_id',
+            challenge.challenge_id
+          )
+          .eq(
+            'user_id',
+            userId
+          );
+
+
+        throw taskError;
+      }
+
+
+      res
+        .status(201)
+        .json({
 
           ok: true,
 
-          challengeId
+          challengeId:
+            challenge.challenge_id
 
         });
 
-      }
-      catch (inner) {
-
-        await tx.rollback();
-
-        throw inner;
-      }
-
     }
-    catch (e) {
+    catch (error) {
 
-      next(e);
+      next(error);
     }
   }
 );
 
 
 /*
+ * ============================================================
  * POST /api/challenges/current/end
- *
- * Manual end.
- *
- * Nothing is deleted.
+ * ============================================================
  */
+
 router.post(
   '/current/end',
-  async (req, res, next) => {
+
+  async (
+    req,
+    res,
+    next
+  ) => {
 
     try {
 
-      const pool =
-        await getPool();
+      const supabase =
+        req.supabase;
+
+      const userId =
+        req.user.id;
 
 
-      const currentResult =
-        await pool.request().query(`
-          SELECT TOP 1
-
-            challengeId,
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from('challenges')
+          .select(`
+            challenge_id,
             name
+          `)
+          .eq(
+            'user_id',
+            userId
+          )
+          .eq(
+            'status',
+            'active'
+          )
+          .limit(1);
 
-          FROM dbo.Challenges
 
-          WHERE
-            status = N'ACTIVE'
-
-          ORDER BY
-            challengeId DESC;
-        `);
+      if (error) {
+        throw error;
+      }
 
 
       if (
-        currentResult.recordset.length === 0
+        !data ||
+        data.length === 0
       ) {
 
-        const err =
+        const error =
           new Error(
             'There is no active challenge to end.'
           );
 
-        err.statusCode = 404;
+        error.statusCode =
+          404;
 
-        throw err;
+        throw error;
       }
 
 
-      const currentChallenge =
-        currentResult.recordset[0];
+      const challenge =
+        data[0];
 
 
-      const updateResult =
-        await pool.request()
+      const completedAt =
+        new Date()
+          .toISOString();
 
-          .input(
-            'challengeId',
-            sql.Int,
-            currentChallenge.challengeId
+
+      const {
+        data: updated,
+        error: updateError
+      } =
+        await supabase
+          .from('challenges')
+          .update({
+
+            status:
+              'completed',
+
+            completed_at:
+              completedAt,
+
+            completion_reason:
+              'MANUAL'
+
+          })
+          .eq(
+            'challenge_id',
+            challenge.challenge_id
           )
+          .eq(
+            'user_id',
+            userId
+          )
+          .eq(
+            'status',
+            'active'
+          )
+          .select(`
+            challenge_id,
+            name,
+            status,
+            completion_reason,
+            completed_at
+          `)
+          .single();
 
-          .query(`
-            UPDATE dbo.Challenges
 
-            SET
-
-              status =
-                N'COMPLETED',
-
-              completedAt =
-                SYSDATETIME(),
-
-              completionReason =
-                N'MANUAL'
-
-            OUTPUT
-              INSERTED.completedAt
-
-            WHERE
-              challengeId =
-                @challengeId
-
-              AND
-              status =
-                N'ACTIVE';
-          `);
+      if (updateError) {
+        throw updateError;
+      }
 
 
       res.json({
@@ -781,32 +1169,32 @@ router.post(
         ok: true,
 
         challengeId:
-          currentChallenge.challengeId,
+          updated.challenge_id,
 
         name:
-          currentChallenge.name,
+          updated.name,
 
         status:
-          'COMPLETED',
+          String(
+            updated.status
+          ).toUpperCase(),
 
         completionReason:
-          'MANUAL',
+          updated.completion_reason,
 
         completedAt:
-          updateResult
-            .recordset[0]
-            ?.completedAt ||
-          null
+          updated.completed_at
 
       });
 
     }
-    catch (e) {
+    catch (error) {
 
-      next(e);
+      next(error);
     }
   }
 );
 
 
-module.exports = router;
+module.exports =
+  router;
